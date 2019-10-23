@@ -1,5 +1,5 @@
 //===========================================================================
-// Title:  Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment 
+// Title:  Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment
 // Author: G. Guidi, E. Younis
 // Date:   29 April 2019
 //===========================================================================
@@ -52,10 +52,10 @@ XavierPhase1(XavierState& state)
 			twoF += state.get_gap_cost();
 
 			DPmatrix[i][j] = std::max(oneF, twoF);
-		
+
 			// Heuristic to keep track of the max in phase1
 			if(DPmatrix[i][j] > DPmax)
-				DPmax = DPmatrix[i][j];			
+				DPmax = DPmatrix[i][j];
 		}
 	}
 
@@ -139,13 +139,13 @@ XavierPhase2(XavierState& state)
 		if (state.get_curr_score() < scoreThreshold)
 		{
 			state.xDropCond = true;
-			
+
 			setBeginPositionH(state.seed, 0);
 			setBeginPositionV(state.seed, 0);
 
 			setEndPositionH(state.seed, state.hoffset);
 			setEndPositionV(state.seed, state.voffset);
-			
+
 			return; // GG: it's a void function and the values are saved in XavierState object
 		}
 
@@ -297,7 +297,7 @@ XavierXDrop
 
 		XavierState result (_seed, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
 
-		if (targetPrefix.length() >= VECTORWIDTH || queryPrefix.length() >= VECTORWIDTH) 
+		if (targetPrefix.length() >= VECTORWIDTH || queryPrefix.length() >= VECTORWIDTH)
 			XavierOneDirection (result);
 
 		setBeginPositionH(seed, getEndPositionH(seed) - getEndPositionH(result.seed));
@@ -314,7 +314,7 @@ XavierXDrop
 
 		XavierState result (_seed, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
-		if (targetSuffix.length() >= VECTORWIDTH || querySuffix.length() >= VECTORWIDTH) 
+		if (targetSuffix.length() >= VECTORWIDTH || querySuffix.length() >= VECTORWIDTH)
 			XavierOneDirection (result);
 
 		setEndPositionH (seed, getBeginPositionH(seed) + getEndPositionH(result.seed));
@@ -335,7 +335,7 @@ XavierXDrop
 
 		XavierState result1(_seed1, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
 
-		if (targetPrefix.length() < VECTORWIDTH || queryPrefix.length() < VECTORWIDTH) 
+		if (targetPrefix.length() < VECTORWIDTH || queryPrefix.length() < VECTORWIDTH)
 		{
 			setBeginPositionH (seed, getEndPositionH(seed) - targetPrefix.length());
 			setBeginPositionV (seed, getEndPositionV(seed) - queryPrefix.length());
@@ -353,7 +353,7 @@ XavierXDrop
 
 		XavierState result2(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
-		if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH) 
+		if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH)
 		{
 			setBeginPositionH (seed, getEndPositionH(seed) + targetSuffix.length());
 			setBeginPositionV (seed, getEndPositionV(seed) + querySuffix.length());
@@ -361,7 +361,7 @@ XavierXDrop
 		else
 		{
 			XavierOneDirection (result2);
-			
+
 			setEndPositionH (seed, getEndPositionH(seed) + getEndPositionH(result2.seed));
 			setEndPositionV (seed, getEndPositionV(seed) + getEndPositionV(result2.seed));
 		}

@@ -4,8 +4,6 @@
 // Date:   8 March 2019
 //===========================================================================
 
-#ifndef __NVCC__
-
 #ifndef SCORE_H
 #define SCORE_H
 
@@ -27,7 +25,7 @@ struct ScoringSchemeX
 		}
 
 		// affine gap penalty
-		ScoringSchemeX(short match, short mismatch, short gap_extend, short gap_open) 
+		ScoringSchemeX(short match, short mismatch, short gap_extend, short gap_open)
 				: match_score(match), mismatch_score(mismatch),
 					gap_extend_score(gap_extend), gap_open_score(gap_open) {
 		}
@@ -103,4 +101,3 @@ score(ScoringSchemeX const & me, char valH, char valV) {
 }
 
 #endif
-#endif // __NVCC__

@@ -4,17 +4,11 @@
 // Date:   8 March 2019
 //===========================================================================
 
-#ifndef __NVCC__
-
 #ifndef UTILS_H
 #define UTILS_H
 
-#include<algorithm> 
-#include<cassert>
-
-//===========================================================================
-// UTILS
-//===========================================================================
+#include <algorithm>
+#include <cassert>
 
 struct SeedX
 {
@@ -171,5 +165,3 @@ setEndDiagonal(SeedX &myseed,int const value){
 }
 
 #endif
-
-#endif // __NVCC__
