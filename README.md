@@ -1,9 +1,8 @@
-# Xavier
-Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment 
-
-## Introduction
+![](xavier.png)
 
 ## Usage
+
+TBD
 
 ## Copyright Notice
 
