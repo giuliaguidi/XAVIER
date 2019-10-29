@@ -1,7 +1,7 @@
 ![](xavier.png)
 
 <p align="justify">
-Xavier computes high-performancex-drop adaptive banded pairwise alignment exploiting  instruction level parallelism via Single-Instruction-Multiple-Data(SIMD) operations. Our implementation uses a narrow  bandwidth that apprecia-bly improves performance reducing the search space for the optimal  alignment. The adaptive mechanism enables Xavier to find the optimal alignment between related sequences even when the error rate is as high as 50%.
+Xavier computes high-performance x-drop adaptive banded pairwise alignment exploiting  instruction level parallelism via Single-Instruction-Multiple-Data(SIMD) operations. Our implementation uses a narrow bandwidth that appreciably improves performance reducing the search space for the optimal alignment. The adaptive mechanism enables Xavier to find the optimal alignment between related sequences even when the error rate is as high as 50%.
 </p>
 
 ## Usage
