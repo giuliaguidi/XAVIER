@@ -53,97 +53,115 @@
 #ifndef _XAVIER_TYPES_SCORE_H_
 #define _XAVIER_TYPES_SCORE_H_
 
-struct ScoringSchemeX
+namespace xaiver
 {
+	class ScoringScheme
+	{
+	public:
+
+		// Constructors
+
+		ScoringScheme()
+		{
+			match_score      =  1
+			mismatch_score   = -1
+			gap_extend_score = -1
+			gap_open_score   = -1
+		}
+
+		ScoringScheme( short _match, short _mismatch, short _gap )
+		{
+			match_score      =  _match
+			mismatch_score   = _mismatch
+			gap_extend_score = _gap
+			gap_open_score   = _gap
+		}
+
+		ScoringScheme( short _match, short _mismatch,
+		               short _gap_extend, short _gap_open )
+		{
+			match_score      =  _match
+			mismatch_score   = _mismatch
+			gap_extend_score = _gap_extend
+			gap_open_score   = _gap_open
+		}
+
+		// Get Functions
+
+		inline short getMatchScore() const
+		{
+			return match_score;
+		}
+
+		inline short getMismatchScore() const
+		{
+			return mismatch_score;
+		}
+
+		inline short getGapExtendScore() const
+		{
+			return gap_extend_score;
+		}
+
+		inline short getGapOpenScore() const
+		{
+			return gap_open_score;
+		}
+
+		inline short getGapScore() const
+		{
+			if ( gap_extend_score != gap_open_score )
+				; // TODO: ERROR
+
+			return gap_extend_score;
+		}
+
+		// Set Functions
+
+		inline void setMatchScore( short const value )
+		{
+			match_score = value;
+		}
+
+		inline void setMismatchScore( short const value )
+		{
+			mismatch_score = value;
+		}
+
+		inline void setGapExtendScore( short const value )
+		{
+			gap_extend_score = value;
+		}
+
+		inline void setGapOpenScore( short const value )
+		{
+			gap_open_score = value;
+		}
+
+		inline void setGapScore( short const value ) const
+		{
+			gap_extend_score = value;
+			gap_open_score   = value;
+		}
+
+		// Member Function
+
+		inline short score( char valH, char valV )
+		{
+			if ( valH == valV )
+				return getMatchScore();
+
+			return getMismatchScore();
+		}
+
+	private:
+
+		// Fields
+
 		short match_score;      // match
 		short mismatch_score;   // substitution
 		short gap_extend_score; // gap extension (indels)
 		short gap_open_score;   // gap opening (indels)
-
-		ScoringSchemeX()
-				: match_score(1), mismatch_score(-1), gap_extend_score(-1), gap_open_score(-1) {
-		}
-
-		// liner gap penalty
-		ScoringSchemeX(short match, short mismatch, short gap)
-				: match_score(match), mismatch_score(mismatch),
-					gap_extend_score(gap), gap_open_score(gap) {
-		}
-
-		// affine gap penalty
-		ScoringSchemeX(short match, short mismatch, short gap_extend, short gap_open)
-				: match_score(match), mismatch_score(mismatch),
-					gap_extend_score(gap_extend), gap_open_score(gap_open) {
-		}
-};
-
-// return match score
-inline short
-scoreMatch(ScoringSchemeX const& me) {
-	return me.match_score;
-}
-
-// individually set match score
-inline void
-setScoreMatch(ScoringSchemeX & me, short const& value) {
-	me.match_score = value;
-}
-
-// return mismatch score
-inline short
-scoreMismatch(ScoringSchemeX const& me) {
-	return me.mismatch_score;
-}
-
-// individually set mismatch score
-inline void
-setScoreMismatch(ScoringSchemeX & me, short const& value) {
-	me.mismatch_score = value;
-}
-
-// return gap extension score
-inline short
-scoreGapExtend(ScoringSchemeX const& me) {
-	return me.gap_extend_score;
-}
-
-// individually set gap extension score
-inline void
-setScoreGapExtend(ScoringSchemeX & me, short const& value) {
-	me.gap_extend_score = value;
-}
-
-// return gap opening score
-inline short
-scoreGapOpen(ScoringSchemeX const& me) {
-	return me.gap_open_score;
-}
-
-//returns the gap_open_score NB: valid only for linear gap
-inline short
-scoreGap(ScoringSchemeX const & me){
-	return me.gap_extend_score;
-}
-
-// individually set gap opening score
-inline void
-setScoreGapOpen(ScoringSchemeX & me, short const& value) {
-	me.gap_open_score = value;
-}
-
-// set gap opening and gap extend scores
-inline void
-setScoreGap(ScoringSchemeX & me, short const& value) {
-	me.gap_extend_score = value;
-	me.gap_open_score = value;
-}
-
-inline short
-score(ScoringSchemeX const & me, char valH, char valV) {
-    if (valH == valV)
-        return scoreMatch(me);
-    else
-        return scoreMismatch(me);
-}
+	};
 
 #endif

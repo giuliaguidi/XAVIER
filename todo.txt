@@ -3,6 +3,7 @@
 		- [ ] Write descriptive comments in the header files
 	- [x] Add clean headers to all files (license, authors, name, ifdef/ifndefs, ...)
 	- [x] Change seed from c-style to c++-style (struct -> class and member funcs)
+	- [x] Change score from c-style to c++-style (struct -> class and member funcs)
 
 - [ ] Core code
 	- [ ] Give the phases more descriptive names

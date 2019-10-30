@@ -245,7 +245,7 @@ namespace xaiver
 		int beginDiagonal;
 		int endDiagonal;
 		int score;
-	}
+	};
 }
 
 #endif
