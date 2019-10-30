@@ -56,158 +56,196 @@
 #include <algorithm>
 #include <cassert>
 
-struct SeedX
+namespace xaiver
 {
-	int beginPositionH;
-	int beginPositionV;
-	int endPositionH;
-	int endPositionV;
-	int SeedXength;
-	int lowerDiagonal;
-	int upperDiagonal;
-	int beginDiagonal;
-	int endDiagonal;
-	int score;
-
-	SeedX(): beginPositionH(0), beginPositionV(0), endPositionH(0), endPositionV(0), lowerDiagonal(0), upperDiagonal(0), score(0)
-	{}
-
-	SeedX(int beginPositionH, int beginPositionV, int SeedXength):
-		beginPositionH(beginPositionH), beginPositionV(beginPositionV), endPositionH(beginPositionH + SeedXength),
-		endPositionV(beginPositionV + SeedXength), lowerDiagonal((beginPositionH - beginPositionV)),
-		upperDiagonal((beginPositionH - beginPositionV)), beginDiagonal(beginPositionH - beginPositionV),
-		endDiagonal(endPositionH - endPositionV), score(0)
+	class Seed
 	{
-		assert(upperDiagonal >= lowerDiagonal);
+	public:
+
+		// Constructors
+
+		Seed()
+		{
+			beginPositionH  = 0;
+			beginPositionV  = 0;
+			endPositionH    = 0;
+			endPositionV    = 0;
+			SeedLength      = 0;
+			lowerDiagonal   = 0;
+			upperDiagonal   = 0;
+			beginDiagonal   = 0;
+			endDiagonal     = 0;
+			score           = 0;
+		}
+
+		Seed( int _beginPositionH, int _beginPositionV, int _SeedLength )
+		{
+			beginPositionH  = _beginPositionH;
+			beginPositionV  = _beginPositionV;
+			endPositionH    = _beginPositionH + _SeedLength;
+			endPositionV    = _beginPositionV + _SeedLength;
+			SeedLength      = _SeedLength;
+			lowerDiagonal   = _beginPositionH - _beginPositionV;
+			upperDiagonal   = _beginPositionH - _beginPositionV;
+			beginDiagonal   = _beginPositionH - _beginPositionV;
+			endDiagonal     = _endPositionH - _endPositionV;
+			score           = 0;
+
+			assert(upperDiagonal >= lowerDiagonal); // Isn't this always true?
+		}
+
+		Seed( int _beginPositionH, int _beginPositionV, int _endPositionH, int _endPositionV )
+		{
+			beginPositionH  = _beginPositionH;
+			beginPositionV  = _beginPositionV;
+			endPositionH    = _endPositionH;
+			endPositionV    = _endPositionV;
+			SeedLength      = std::min( ( _beginPositionH - _beginPositionV ),
+			                            ( _endPositionH - _endPositionV ) ); // Is this correct?
+			lowerDiagonal   = std::min( ( _beginPositionH - _beginPositionV ),
+			                            ( _endPositionH - _endPositionV ) );
+			upperDiagonal   = std::min( ( _beginPositionH - _beginPositionV ),
+			                            ( _endPositionH - _endPositionV ) );
+			beginDiagonal   = _beginPositionH - _beginPositionV;
+			endDiagonal     = _endPositionH - _endPositionV;
+			score           = 0;
+
+			assert(upperDiagonal >= lowerDiagonal); // Isn't this always true?
+		}
+
+		Seed( Seed const& other )
+		{
+			beginPositionH  = other.beginPositionH;
+			beginPositionV  = other.beginPositionV;
+			endPositionH    = other.endPositionH;
+			endPositionV    = other.endPositionV;
+			SeedLength      = other.SeedLength;
+			lowerDiagonal   = other.lowerDiagonal;
+			upperDiagonal   = other.upperDiagonal;
+			beginDiagonal   = other.beginDiagonal;
+			endDiagonal     = other.endDiagonal;
+			score           = other.score;
+		}
+
+		// Get Functions
+
+		inline int getAlignScore() const
+		{
+			return score;
+		}
+
+		inline int getBeginPositionH() const
+		{
+			return beginPositionH;
+		}
+
+		inline int getBeginPositionV() const
+		{
+			return beginPositionV;
+		}
+
+		inline int getEndPositionH() const
+		{
+			return endPositionH;
+		}
+
+		inline int getEndPositionV() const
+		{
+			return endPositionV;
+		}
+
+		inline int getSeedXLength() const
+		{
+			return SeedXength;
+		}
+
+		inline int getLowerDiagonal() const
+		{
+			return lowerDiagonal;
+		}
+
+		inline int getUpperDiagonal() const
+		{
+			return upperDiagonal;
+		}
+
+		inline int getBeginDiagonal() const
+		{
+			return beginDiagonal;
+		}
+
+		inline int getEndDiagonal() const
+		{
+			return endDiagonal;
+		}
+
+		// Set Functions
+
+		inline void setAlignScore( int const value )
+		{
+			score = value;
+		}
+
+		inline void setBeginPositionH( int const value )
+		{
+			beginPositionH = value;
+		}
+
+		inline void setBeginPositionV( int const value )
+		{
+			beginPositionV = value;
+		}
+
+		inline void setEndPositionH( int const value )
+		{
+			endPositionH = value;
+		}
+
+		inline void setEndPositionV( int const value )
+		{
+			endPositionV = value;
+		}
+
+		inline void setSeedXLength( int const value )
+		{
+			SeedXength = value;
+		}
+
+		inline void setLowerDiagonal( int const value )
+		{
+			lowerDiagonal = value;
+		}
+
+		inline void setUpperDiagonal( int const value )
+		{
+			upperDiagonal = value;
+		}
+
+		inline void setBeginDiagonal( int const value )
+		{
+			beginDiagonal = value;
+		}
+
+		inline void setEndDiagonal( int const value )
+		{
+			endDiagonal = value;
+		}
+
+	private:
+
+		// Fields
+
+		int beginPositionH;
+		int beginPositionV;
+		int endPositionH;
+		int endPositionV;
+		int SeedLength;
+		int lowerDiagonal;
+		int upperDiagonal;
+		int beginDiagonal;
+		int endDiagonal;
+		int score;
 	}
-
-	SeedX(int beginPositionH, int beginPositionV, int endPositionH, int endPositionV):
-		beginPositionH(beginPositionH),
-		beginPositionV(beginPositionV),
-		endPositionH(endPositionH),
-		endPositionV(endPositionV),
-		lowerDiagonal(std::min((beginPositionH - beginPositionV), (endPositionH - endPositionV))),
-		upperDiagonal(std::max((beginPositionH - beginPositionV), (endPositionH - endPositionV))),
-		beginDiagonal((beginPositionH - beginPositionV)),
-		endDiagonal((endPositionH - endPositionV)),
-		score(0)
-	{
-		assert(upperDiagonal >= lowerDiagonal);
-	}
-
-	SeedX(SeedX const& other):
-		beginPositionH(other.beginPositionH),
-		beginPositionV(other.beginPositionV),
-		endPositionH(other.endPositionH),
-		endPositionV(other.endPositionV),
-		lowerDiagonal(other.lowerDiagonal),
-		upperDiagonal(other.upperDiagonal),
-		beginDiagonal(other.beginDiagonal),
-		endDiagonal(other.endDiagonal),
-		score(0)
-	{
-		assert(upperDiagonal >= lowerDiagonal);
-	}
-};
-
-inline int
-getAlignScore(SeedX const &myseed){
-	return myseed.score;
-}
-
-inline int
-getBeginPositionH(SeedX const &myseed){
-	return myseed.beginPositionH;
-}
-
-inline int
-getBeginPositionV(SeedX const &myseed){
-	return myseed.beginPositionV;
-}
-
-inline int
-getEndPositionH(SeedX const &myseed){
-	return myseed.endPositionH;
-}
-
-inline int
-getEndPositionV(SeedX const &myseed){
-	return myseed.endPositionV;
-}
-
-inline int
-getSeedXLength(SeedX const &myseed){
-	return myseed.SeedXength;
-}
-
-inline int
-getLowerDiagonal(SeedX const &myseed){
-	return myseed.lowerDiagonal;
-}
-
-inline int
-getUpperDiagonal(SeedX const &myseed){
-	return myseed.upperDiagonal;
-}
-
-inline int
-getBeginDiagonal(SeedX const &myseed){
-	return myseed.beginDiagonal;
-}
-
-inline int
-getEndDiagonal(SeedX const &myseed){
-	return myseed.endDiagonal;
-}
-
-inline void
-setAlignScore(SeedX &myseed,int const value){
-	myseed.score = value;
-}
-
-inline void
-setBeginPositionH(SeedX &myseed,int const value){
-	myseed.beginPositionH = value;
-}
-
-inline void
-setBeginPositionV(SeedX &myseed,int const value){
-	myseed.beginPositionV = value;
-}
-
-inline void
-setEndPositionH(SeedX &myseed,int const value){
-	myseed.endPositionH = value;
-}
-
-inline void
-setEndPositionV(SeedX &myseed,int const value){
-	myseed.endPositionV = value;
-}
-
-inline void
-setSeedXLength(SeedX &myseed,int const value){
-	myseed.SeedXength = value;
-}
-
-inline void
-setLowerDiagonal(SeedX &myseed,int const value){
-	myseed.lowerDiagonal = value;
-}
-
-inline void
-setUpperDiagonal(SeedX &myseed,int const value){
-	myseed.upperDiagonal = value;
-}
-
-inline void
-setBeginDiagonal(SeedX &myseed,int const value){
-	myseed.beginDiagonal = value;
-}
-
-inline void
-setEndDiagonal(SeedX &myseed,int const value){
-	myseed.endDiagonal = value;
 }
 
 #endif
