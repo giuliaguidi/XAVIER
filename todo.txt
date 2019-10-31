@@ -11,3 +11,5 @@
 	- [ ] Give the phases more descriptive names
 	- [ ] Use namespaces
 	- [ ] Add tracing to the state
+
+- [ ] Correctness
