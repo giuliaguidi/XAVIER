@@ -50,18 +50,26 @@
  */
 
 
-#ifndef _XAVIER_TYPES_RECORD_H_
-#define _XAVIER_TYPES_RECORD_H_
+#ifndef _XAVIER_TYPES_TRACE_ENTRY_H_
+#define _XAVIER_TYPES_TRACE_ENTRY_H_
 
-class XavierRecord
+namespace xavier
 {
-	vectorUnionType antiDiag1;
-	vectorUnionType antiDiag2;
-	vectorUnionType antiDiag3;
 
-	vectorUnionType vqueryh;
-	vectorUnionType vqueryv;
-	int64_t scoreOffset;
+	class TraceEntry
+	{
+	public:
+		TraceEntry
+	private:
+		vectorUnionType antiDiag1;
+		vectorUnionType antiDiag2;
+		vectorUnionType antiDiag3;
+
+		vectorUnionType vqueryh;
+		vectorUnionType vqueryv;
+		int64_t scoreOffset;
+	};
+
 }
 
 #endif

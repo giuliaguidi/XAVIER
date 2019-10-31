@@ -53,15 +53,6 @@
 #ifndef _XAVIER_XAVIER_H_
 #define _XAVIER_XAVIER_H_
 
-//===========================================================================
-// Title:  Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment
-// Author: G. Guidi, E. Younis
-// Date:   29 April 2019
-//===========================================================================
-
-#ifndef XAVIER_H
-#define XAVIER_H
-
 #include<vector>
 #include<iostream>
 #include<omp.h>
@@ -427,5 +418,5 @@ XavierXDrop
 		return std::make_pair(result1.get_best_score(), result1.get_curr_score());
 	}
 }
-#endif
+
 #endif

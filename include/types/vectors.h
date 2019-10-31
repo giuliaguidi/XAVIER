@@ -53,29 +53,61 @@
 #ifndef _XAVIER_TYPES_VECTORS_H_
 #define _XAVIER_TYPES_VECTORS_H_
 
-#ifdef  __AVX2__
-	typedef int8_t elementType;
-	typedef __m256i vectorType;
-
-	#define VECTORWIDTH  (32)
-	#define LOGICALWIDTH (VECTORWIDTH - 1)
-
-#elif __SSE4_2__
-	typedef int8_t elementType;
-	typedef __m128i vectorType;
-
-	#define VECTORWIDTH  (16)
-	#define LOGICALWIDTH (VECTORWIDTH - 1)
-#endif
-
-/**
- *
- */
-typedef union
+namespace xavier
 {
-	vectorType  	simd;
-	elementType 	elem[VECTORWIDTH];
 
-} XavierVector;
+	#ifdef  __AVX2__
+		typedef int8_t elementType;
+		typedef __m256i vectorType;
+
+		#define VECTORWIDTH  (32)
+		#define LOGICALWIDTH (VECTORWIDTH - 1)
+
+	#elif __SSE4_2__
+		typedef int8_t elementType;
+		typedef __m128i vectorType;
+
+		#define VECTORWIDTH  (16)
+		#define LOGICALWIDTH (VECTORWIDTH - 1)
+	#endif
+
+	// typedef union
+	// {
+	// 	vectorType  simd;
+	// 	elementType elem[VECTORWIDTH];
+
+	// } XavierVector;
+
+	class VectorRegister
+	{
+	public:
+
+		// Constructors
+
+		VectorRegister()
+		{
+			internal.simd = setOp( 0 );
+		}
+
+		VectorRegister( elementType elem )
+		{
+			internal.simd = setOp( elem );
+		}
+
+		VectorRegister( vectorType vec )
+		{
+			internal.simd = vec;
+		}
+
+	private:
+
+		union
+		{
+			vectorType simd;
+			elementType elem[VECTORWIDTH];
+		} internal;
+	}
+
+}
 
 #endif
