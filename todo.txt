@@ -4,7 +4,10 @@
 	- [x] Add clean headers to all files (license, authors, name, ifdef/ifndefs, ...)
 	- [x] Change seed from c-style to c++-style (struct -> class and member funcs)
 	- [x] Change score from c-style to c++-style (struct -> class and member funcs)
+	- [ ] Maybe reformat vectoruniontype to become a class
+		- [ ] We could move the ops into the vector class
 
 - [ ] Core code
 	- [ ] Give the phases more descriptive names
 	- [ ] Use namespaces
+	- [ ] Add tracing to the state

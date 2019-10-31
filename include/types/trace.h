@@ -53,11 +53,17 @@
 #ifndef _XAVIER_TYPES_TRACE_H_
 #define _XAVIER_TYPES_TRACE_H_
 
-class XavierTrace
+namespace xavier
 {
-public:
-private:
-	std::vector<XavierRecord> record_trace;
+
+	class Trace
+	{
+	public:
+
+	private:
+		std::vector<TraceEntry> trace;
+	};
+
 }
 
 #endif
