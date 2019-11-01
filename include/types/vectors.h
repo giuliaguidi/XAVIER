@@ -53,6 +53,8 @@
 #ifndef _XAVIER_TYPES_VECTORS_H_
 #define _XAVIER_TYPES_VECTORS_H_
 
+#include <iostream>
+
 namespace xavier
 {
 
@@ -77,6 +79,57 @@ namespace xavier
 	// 	elementType elem[VECTORWIDTH];
 
 	// } XavierVector;
+// inline vectorUnionType
+// shiftLeft (const vectorType& _a) { // this work for avx2
+
+// 	vectorUnionType a;
+// 	a.simd = _a;
+
+// 	vectorUnionType b;
+// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
+// 	b.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(2, 0, 0, 1)), a.simd, 1);
+// 	b.elem[VECTORWIDTH - 1] = NINF;
+
+// 	return b;
+// }
+
+// inline vectorUnionType
+// shiftRight (const vectorType& _a) { // this work for avx2
+// 	vectorUnionType a;
+// 	a.simd = _a;
+
+// 	vectorUnionType b;
+// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
+// 	b.simd = _mm256_alignr_epi8(a.simd, _mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
+// 	b.elem[0] = NINF;
+// 	return b;
+// }
+
+// #elif __SSE4_2__
+
+// inline vectorUnionType
+// shiftLeft(const vectorType& _a) { // this work for avx2
+// 	vectorUnionType a;
+// 	a.simd = _a;
+
+// 	vectorUnionType b;
+// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
+// 	b.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(2, 0, 0, 1)), a.simd, 2);
+// 	b.elem[VECTORWIDTH - 1] = NINF;
+// 	return b;
+// }
+
+// inline vectorUnionType
+// shiftRight(const vectorType& _a) { // this work for avx2
+// 	vectorUnionType a;
+// 	a.simd = _a;
+
+// 	vectorUnionType b;
+// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
+// 	b.simd = _mm256_alignr_epi8(a.simd, _mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
+// 	b.elem[0] = NINF;
+// 	return b;
+// }
 
 	class VectorRegister
 	{
@@ -99,12 +152,23 @@ namespace xavier
 			internal.simd = vec;
 		}
 
+		// Operators
+
+		friend std::ostream& operator<<( std::ostream& os,
+		                                 const VectorRegister& reg )
+		{
+			os << "{";
+			for( int i = 0; i < VECTORWIDTH - 1; ++i )
+				os << internal.elems[ i ] << ", ";
+			os << internal.elems[ VECTORWIDTH - 1 ] << std::endl;
+		}
+
 	private:
 
 		union
 		{
 			vectorType simd;
-			elementType elem[VECTORWIDTH];
+			elementType elems[VECTORWIDTH];
 		} internal;
 	}
 
