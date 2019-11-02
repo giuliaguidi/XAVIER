@@ -81,25 +81,63 @@ namespace xaiver
 		               short _gap_extend, short _gap_open);
 
 		/**
-		 * Get functions
+		 * getMatchScore() returns match score
 		 */ 
 		inline short getMatchScore() const;
+
+		/**
+		 * getMismatchScore() returns mismatch penalty
+		 */ 
 		inline short getMismatchScore() const;
+
+		/**
+		 * getGapExtendScore() returns gap extension penalty
+		 * gap extension penalty == gap opening
+		 */ 
 		inline short getGapExtendScore() const;
+
+		/**
+		 * getGapOpenScore() returns gap opening penalty
+		 * gap extension penalty == gap opening
+		 */ 
 		inline short getGapOpenScore() const;
+
+		/**
+		 * getGapScore() returns gap penalty
+		 * gap extension penalty == gap opening
+		 */ 	
 		inline short getGapScore() const;
 
 		/**
-		 * Set functons
+		 * setMatchScore() sets match score (>0)
 		 */ 
 		inline void setMatchScore(short const value);
+
+		/**
+		 * setMismatchScore() sets mismatch score (<0)
+		 */ 
 		inline void setMismatchScore(short const value);
+
+		/**
+		 * setGapExtendScore() sets gap extension penalty (<0)
+		 * gap extension penalty == gap opening
+		 */ 
 		inline void setGapExtendScore(short const value);
+
+		/**
+		 * setGapOpenScore() sets gap opening penalty (<0)
+		 * gap extension penalty == gap opening
+		 */ 
 		inline void setGapOpenScore(short const value); 
+
+		/**
+		 * setGapScore() sets gap penalty (<0)
+		 * gap extension penalty == gap opening
+		 */ 
 		inline void setGapScore(short const value);
 
 		/**
-		 * Return score between two characters
+		 * Return score between two characters (either a match or a mismatch)
 		 */ 
 		inline short score(char valH, char valV);
 	};
