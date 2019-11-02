@@ -1,9 +1,7 @@
 /**
  * File: score.h
- *
- * Author: G. Guidi, E. Younis, A. Zeni
- *
- * Description: Xavier Score Type.
+ * Author: G. Guidi, E. Younis
+ * Description: Xavier Score Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -49,119 +47,62 @@
  * in binary and source code form.
  */
 
-
-#ifndef _XAVIER_TYPES_SCORE_H_
-#define _XAVIER_TYPES_SCORE_H_
+#ifndef XAVIER_TYPES_SCORE_H
+#define XAVIER_TYPES_SCORE_H
 
 namespace xaiver
 {
 	class ScoringScheme
 	{
-	public:
-
-		// Constructors
-
-		ScoringScheme()
-		{
-			match_score      =  1
-			mismatch_score   = -1
-			gap_extend_score = -1
-			gap_open_score   = -1
-		}
-
-		ScoringScheme( short _match, short _mismatch, short _gap )
-		{
-			match_score      =  _match
-			mismatch_score   = _mismatch
-			gap_extend_score = _gap
-			gap_open_score   = _gap
-		}
-
-		ScoringScheme( short _match, short _mismatch,
-		               short _gap_extend, short _gap_open )
-		{
-			match_score      =  _match
-			mismatch_score   = _mismatch
-			gap_extend_score = _gap_extend
-			gap_open_score   = _gap_open
-		}
-
-		// Get Functions
-
-		inline short getMatchScore() const
-		{
-			return match_score;
-		}
-
-		inline short getMismatchScore() const
-		{
-			return mismatch_score;
-		}
-
-		inline short getGapExtendScore() const
-		{
-			return gap_extend_score;
-		}
-
-		inline short getGapOpenScore() const
-		{
-			return gap_open_score;
-		}
-
-		inline short getGapScore() const
-		{
-			if ( gap_extend_score != gap_open_score )
-				; // TODO: ERROR
-
-			return gap_extend_score;
-		}
-
-		// Set Functions
-
-		inline void setMatchScore( short const value )
-		{
-			match_score = value;
-		}
-
-		inline void setMismatchScore( short const value )
-		{
-			mismatch_score = value;
-		}
-
-		inline void setGapExtendScore( short const value )
-		{
-			gap_extend_score = value;
-		}
-
-		inline void setGapOpenScore( short const value )
-		{
-			gap_open_score = value;
-		}
-
-		inline void setGapScore( short const value ) const
-		{
-			gap_extend_score = value;
-			gap_open_score   = value;
-		}
-
-		// Member Function
-
-		inline short score( char valH, char valV )
-		{
-			if ( valH == valV )
-				return getMatchScore();
-
-			return getMismatchScore();
-		}
-
 	private:
+		/**
+		 * Fields according to https://www.drive5.com/usearch/manual/cigar.html
+		 */
+		short m_score;  // match
+		short x_score;  // mismatch
+		short ge_score; // gap extension 
+		short go_score; // gap opening 
+		
+	public:
+		/**
+		 * Declare default constructor
+		 */ 
+  		ScoringScheme();
 
-		// Fields
+		/**
+		 * Declare linear gap constructor
+		 */  
+		ScoringScheme(short _match, short _mismatch, short _gap);
 
-		short match_score;      // match
-		short mismatch_score;   // substitution
-		short gap_extend_score; // gap extension (indels)
-		short gap_open_score;   // gap opening (indels)
+		/**
+		 * Declare affine gap constructor
+		 */  
+		ScoringScheme(short _match, short _mismatch,
+		               short _gap_extend, short _gap_open);
+
+		/**
+		 * Get functions
+		 */ 
+		inline short getMatchScore() const;
+		inline short getMismatchScore() const;
+		inline short getGapExtendScore() const;
+		inline short getGapOpenScore() const;
+		inline short getGapScore() const;
+
+		/**
+		 * Set functons
+		 */ 
+		inline void setMatchScore(short const value);
+		inline void setMismatchScore(short const value);
+		inline void setGapExtendScore(short const value);
+		inline void setGapOpenScore(short const value); 
+		inline void setGapScore(short const value);
+
+		/**
+		 * Return score between two characters
+		 */ 
+		inline short score(char valH, char valV);
 	};
+}
 
-#endif
+#endif /* XAVIER_TYPES_SCORE_H */
