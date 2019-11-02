@@ -74,6 +74,11 @@ namespace xaiver
 		ScoringScheme(short _match, short _mismatch, short _gap);
 
 		/**
+		 * Declare copy constructor
+		 */  
+		ScoringScheme(ScoringScheme& _copy);
+
+		/**
 		 * getMatchScore() returns match score
 		 */ 
 		inline short getMatchScore() const;

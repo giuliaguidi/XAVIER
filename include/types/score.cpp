@@ -17,6 +17,11 @@ namespace xaiver
         m_score(_match), 
         x_score(_mismatch),
 		g_score(_gap) { }
+    
+    ScoringScheme::ScoringScheme(ScoringScheme& _copy) :
+        m_score(_copy.m_score),
+        x_score(_copy.x_score),
+		g_score(_copy.g_score) {}
 
     inline short ScoringScheme::getMatchScore() const
 	{
