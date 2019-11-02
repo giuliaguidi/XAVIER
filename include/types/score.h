@@ -60,8 +60,7 @@ namespace xaiver
 		 */
 		short m_score;  // match
 		short x_score;  // mismatch
-		short ge_score; // gap extension 
-		short go_score; // gap opening 
+		short g_score;  // gap
 		
 	public:
 		/**
@@ -75,12 +74,6 @@ namespace xaiver
 		ScoringScheme(short _match, short _mismatch, short _gap);
 
 		/**
-		 * Declare affine gap constructor
-		 */  
-		ScoringScheme(short _match, short _mismatch,
-		               short _gap_extend, short _gap_open);
-
-		/**
 		 * getMatchScore() returns match score
 		 */ 
 		inline short getMatchScore() const;
@@ -91,20 +84,7 @@ namespace xaiver
 		inline short getMismatchScore() const;
 
 		/**
-		 * getGapExtendScore() returns gap extension penalty
-		 * gap extension penalty == gap opening
-		 */ 
-		inline short getGapExtendScore() const;
-
-		/**
-		 * getGapOpenScore() returns gap opening penalty
-		 * gap extension penalty == gap opening
-		 */ 
-		inline short getGapOpenScore() const;
-
-		/**
 		 * getGapScore() returns gap penalty
-		 * gap extension penalty == gap opening
 		 */ 	
 		inline short getGapScore() const;
 
@@ -119,20 +99,7 @@ namespace xaiver
 		inline void setMismatchScore(short const value);
 
 		/**
-		 * setGapExtendScore() sets gap extension penalty (<0)
-		 * gap extension penalty == gap opening
-		 */ 
-		inline void setGapExtendScore(short const value);
-
-		/**
-		 * setGapOpenScore() sets gap opening penalty (<0)
-		 * gap extension penalty == gap opening
-		 */ 
-		inline void setGapOpenScore(short const value); 
-
-		/**
 		 * setGapScore() sets gap penalty (<0)
-		 * gap extension penalty == gap opening
 		 */ 
 		inline void setGapScore(short const value);
 
