@@ -5,6 +5,7 @@
  */
 
 #include "score.h"
+#include <assert.h>
 
 namespace xaiver
 {
@@ -12,11 +13,6 @@ namespace xaiver
         m_score(1), 
         x_score(-1),
 		g_score(-1) { }
-
-	ScoringScheme::ScoringScheme(short _match, short _mismatch, short _gap) :
-        m_score(_match), 
-        x_score(_mismatch),
-		g_score(_gap) { }
     
     ScoringScheme::ScoringScheme(ScoringScheme& _copy) :
         m_score(_copy.m_score),
@@ -40,22 +36,19 @@ namespace xaiver
 
 	inline void ScoringScheme::setMatchScore(short const value)
 	{
-        // if (value <= 0)
-		// GG: ADD ERROR
+        assert(value > 0);
 		m_score = value;
 	}
 
 	inline void ScoringScheme::setMismatchScore(short const value)
 	{
-        // if (value >= 0)
-		// GG: ADD ERROR
+        assert(value < 0);
 		x_score = value;
 	}
 
 	inline void ScoringScheme::setGapScore(short const value)
 	{
-        // if (value >= 0)
-		// GG: ADD ERROR
+        assert(value < 0);
 		g_score = value;
 	}
 
