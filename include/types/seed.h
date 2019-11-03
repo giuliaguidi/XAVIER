@@ -1,9 +1,7 @@
 /**
  * File: seed.h
- *
- * Author: G. Guidi, E. Younis, A. Zeni
- *
- * Description: Xavier Seed Type.
+ * Author: G. Guidi, E. Younis
+ * Description: Xavier Seed Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -49,203 +47,110 @@
  * in binary and source code form.
  */
 
-
-#ifndef _XAVIER_TYPES_SEED_H_
-#define _XAVIER_TYPES_SEED_H_
-
-#include <algorithm>
-#include <cassert>
+#ifndef XAVIER_TYPES_SEED_H
+#define XAVIER_TYPES_SEED_H
 
 namespace xaiver
 {
 	class Seed
 	{
+	private:
+		/**
+		 * Fields
+		 */ 
+		int begH;
+		int begV;
+		int endH;
+		int endV;
+		int score;
+		int length;
+
 	public:
 
-		// Constructors
+		/**
+		 * Default constructor 
+		 */ 
+		Seed();
 
-		Seed()
-		{
-			beginPositionH  = 0;
-			beginPositionV  = 0;
-			endPositionH    = 0;
-			endPositionV    = 0;
-			SeedLength      = 0;
-			lowerDiagonal   = 0;
-			upperDiagonal   = 0;
-			beginDiagonal   = 0;
-			endDiagonal     = 0;
-			score           = 0;
-		}
+		/**
+		 * Constructor from seed
+		 */ 
+		Seed(int _begH, int _begV, int _length);
 
-		Seed( int _beginPositionH, int _beginPositionV, int _SeedLength )
-		{
-			beginPositionH  = _beginPositionH;
-			beginPositionV  = _beginPositionV;
-			endPositionH    = _beginPositionH + _SeedLength;
-			endPositionV    = _beginPositionV + _SeedLength;
-			SeedLength      = _SeedLength;
-			lowerDiagonal   = _beginPositionH - _beginPositionV;
-			upperDiagonal   = _beginPositionH - _beginPositionV;
-			beginDiagonal   = _beginPositionH - _beginPositionV;
-			endDiagonal     = _endPositionH - _endPositionV;
-			score           = 0;
+		/**
+		 * Constructor from location
+		 */ 
+		Seed(int _begH, int _begV, int _endH, int _endV);
 
-			assert(upperDiagonal >= lowerDiagonal); // Isn't this always true?
-		}
+		/**
+		 * Copy constructor
+		 */ 
+		Seed(Seed const& other);
 
-		Seed( int _beginPositionH, int _beginPositionV, int _endPositionH, int _endPositionV )
-		{
-			beginPositionH  = _beginPositionH;
-			beginPositionV  = _beginPositionV;
-			endPositionH    = _endPositionH;
-			endPositionV    = _endPositionV;
-			SeedLength      = std::min( ( _beginPositionH - _beginPositionV ),
-			                            ( _endPositionH - _endPositionV ) ); // Is this correct?
-			lowerDiagonal   = std::min( ( _beginPositionH - _beginPositionV ),
-			                            ( _endPositionH - _endPositionV ) );
-			upperDiagonal   = std::min( ( _beginPositionH - _beginPositionV ),
-			                            ( _endPositionH - _endPositionV ) );
-			beginDiagonal   = _beginPositionH - _beginPositionV;
-			endDiagonal     = _endPositionH - _endPositionV;
-			score           = 0;
+		/**
+		 * getAlignScore() returns alignment score
+		 */ 
+		inline int getAlignScore() const;
 
-			assert(upperDiagonal >= lowerDiagonal); // Isn't this always true?
-		}
+		/**
+		 * getBegH() returns beginning of alignment on sequenceH
+		 */ 
+		inline int getBegH() const;
 
-		Seed( Seed const& other )
-		{
-			beginPositionH  = other.beginPositionH;
-			beginPositionV  = other.beginPositionV;
-			endPositionH    = other.endPositionH;
-			endPositionV    = other.endPositionV;
-			SeedLength      = other.SeedLength;
-			lowerDiagonal   = other.lowerDiagonal;
-			upperDiagonal   = other.upperDiagonal;
-			beginDiagonal   = other.beginDiagonal;
-			endDiagonal     = other.endDiagonal;
-			score           = other.score;
-		}
+		/**
+		 * getBegV() returns beginning of alignment on sequenceV
+		 */ 
+		inline int getBegV() const;
 
-		// Get Functions
+		/**
+		 * getEndH() returns ending of alignment on sequenceH
+		 */ 
+		inline int getEndH() const;
 
-		inline int getAlignScore() const
-		{
-			return score;
-		}
+		/**
+		 * getEndV() returns ending of alignment on sequenceV
+		 */ 
+		inline int getEndV() const;
 
-		inline int getBeginPositionH() const
-		{
-			return beginPositionH;
-		}
+		/**
+		 * getAlignLength() returns length of the alignment
+		 */ 
+		inline int getAlignLength() const;
 
-		inline int getBeginPositionV() const
-		{
-			return beginPositionV;
-		}
+		/**
+		 * setAlignScore() sets alignment score
+		 */ 
+		inline void setAlignScore(int const value);
 
-		inline int getEndPositionH() const
-		{
-			return endPositionH;
-		}
+		/**
+		 * setBegH() sets beginning of alignment on sequenceH
+		 * begH <= endH
+		 */ 
+		inline void setBegH(int const value);
 
-		inline int getEndPositionV() const
-		{
-			return endPositionV;
-		}
+		/**
+		 * setBegV() sets beginning of alignment on sequenceV
+		 * begV <= endV
+		 */ 
+		inline void setBegV(int const value);
 
-		inline int getSeedXLength() const
-		{
-			return SeedXength;
-		}
+		/**
+		 * setendH() sets ending of alignment on sequenceH
+		 * begH <= endH
+		 */ 
+		inline void setEndH(int const value);
 
-		inline int getLowerDiagonal() const
-		{
-			return lowerDiagonal;
-		}
+		/**
+		 * setendV() sets ending of alignment on sequenceV
+		 * begV <= endV
+		 */ 
+		inline void setEndV(int const value);
 
-		inline int getUpperDiagonal() const
-		{
-			return upperDiagonal;
-		}
-
-		inline int getBeginDiagonal() const
-		{
-			return beginDiagonal;
-		}
-
-		inline int getEndDiagonal() const
-		{
-			return endDiagonal;
-		}
-
-		// Set Functions
-
-		inline void setAlignScore( int const value )
-		{
-			score = value;
-		}
-
-		inline void setBeginPositionH( int const value )
-		{
-			beginPositionH = value;
-		}
-
-		inline void setBeginPositionV( int const value )
-		{
-			beginPositionV = value;
-		}
-
-		inline void setEndPositionH( int const value )
-		{
-			endPositionH = value;
-		}
-
-		inline void setEndPositionV( int const value )
-		{
-			endPositionV = value;
-		}
-
-		inline void setSeedXLength( int const value )
-		{
-			SeedXength = value;
-		}
-
-		inline void setLowerDiagonal( int const value )
-		{
-			lowerDiagonal = value;
-		}
-
-		inline void setUpperDiagonal( int const value )
-		{
-			upperDiagonal = value;
-		}
-
-		inline void setBeginDiagonal( int const value )
-		{
-			beginDiagonal = value;
-		}
-
-		inline void setEndDiagonal( int const value )
-		{
-			endDiagonal = value;
-		}
-
-	private:
-
-		// Fields
-
-		int beginPositionH;
-		int beginPositionV;
-		int endPositionH;
-		int endPositionV;
-		int SeedLength;
-		int lowerDiagonal;
-		int upperDiagonal;
-		int beginDiagonal;
-		int endDiagonal;
-		int score;
+		/**
+		 * setBegV() sets alignment length (>=0)
+		 */ 
+		inline void setAlignLength(int const value);
 	};
 }
 
-#endif
+#endif /* XAVIER_TYPES_SEED_H */
