@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace xaiver
+namespace xavier
 {
 	Seed::Seed() :
         begH(0),  

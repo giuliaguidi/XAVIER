@@ -48,10 +48,14 @@
  * distribute, and sublicense such enhancements or derivative works thereof,
  * in binary and source code form.
  */
-
+#ifndef __AVX2__
+#define __AVX2__
+#endif
 
 #ifndef _XAVIER_OPS_H_
 #define _XAVIER_OPS_H_
+
+#include <x86intrin.h>
 
 /**
  * For the different vector extensions we define a addop, ...,
@@ -65,7 +69,6 @@
 	#define setOp   	_mm256_set1_epi8  	// set1 operation
 	#define blendvOp	_mm256_blendv_epi8  // blending operation
 	#define cmpeqOp 	_mm256_cmpeq_epi8 	// compare equality operation
-
 #elif __SSE4_2__
 	#define addOp    	_mm_adds_epi16 	// saturated arithmetic
 	#define subOp    	_mm_subs_epi16  // saturated arithmetic

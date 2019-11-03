@@ -5,126 +5,236 @@
  */
 
 #include <string>
+#include "state.h"
 #include "seed.h"
 #include "score.h"
-#include "state.h"
+#include "vectors.h"
+#include "../constants.h"
+#include "../ops.h"
 
 namespace xavier
 {
-	State::State(Seed& _seed, std::string const& hseq, std::string const& vseq,
-				ScoringScheme& scoringScheme, int const &_scoreDropOff) :
-		seed(_seed),
+	State State::initState(Seed& _seed, std::string const& hseq, std::string const& vseq,
+				ScoringScheme& scoringScheme, int const &_scoreDropOff) 
+	{
+		State state;
+		state.seed = _seed;
 
-		hlength = hseq.length() + 1;
-		vlength = vseq.length() + 1;
+		state.hlength = hseq.length() + 1;
+		state.vlength = vseq.length() + 1;
 
-		if (hlength < VECTORWIDTH || vlength < VECTORWIDTH)
+		if (state.hlength < VECTORWIDTH || state.vlength < VECTORWIDTH)
 		{
-			setEndH(seed, hlength);
-			setEndV(seed, vlength);
+			state.seed.setEndH(state.hlength);
+			state.seed.setEndV(state.vlength);
 		}
 
-		queryh = new int8_t[hlength + VECTORWIDTH];
-		queryv = new int8_t[vlength + VECTORWIDTH];
+		state.queryh = new int8_t[state.hlength + VECTORWIDTH];
+		state.queryv = new int8_t[state.vlength + VECTORWIDTH];
 
-		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
-		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
+		std::copy(hseq.begin(), hseq.begin() + hlength, state.queryh);
+		std::copy(vseq.begin(), vseq.begin() + vlength, state.queryv);
 
-		std::fill(queryh + hlength, queryh + hlength + VECTORWIDTH, NINF);
-		std::fill(queryv + vlength, queryv + vlength + VECTORWIDTH, NINF);
+		std::fill(state.queryh + state.hlength, state.queryh + state.hlength + VECTORWIDTH, NINF);
+		std::fill(state.queryv + state.vlength, state.queryv + state.vlength + VECTORWIDTH, NINF);
 
-		matchCost    = scoreMatch(scoringScheme   );
-		mismatchCost = scoreMismatch(scoringScheme);
-		gapCost      = scoreGap(scoringScheme     );
+		state.matchScore    = scoreMatch(scoringScheme   );
+		state.mismatchScore = scoreMismatch(scoringScheme);
+		state.gapScore      = scoreGap(scoringScheme     );
 
-		vmatchCost    = setOp (matchCost   );
-		vmismatchCost = setOp (mismatchCost);
-		vgapCost      = setOp (gapCost     );
-		vzeros        = _mm256_setzero_si256();
+		state.vmatchScore    = setOp (state.matchScore   );
+		state.vmismatchScore = setOp (state.mismatchScore);
+		state.vgapScore      = setOp (state.gapScore     );
+		state.vzeros         = _mm256_setzero_si256();
 
-		hoffset = LOGICALWIDTH;
-		voffset = LOGICALWIDTH;
+		state.hoffset = LOGICALWIDTH;
+		state.voffset = LOGICALWIDTH;
 
-		bestScore    = 0;
-		currScore    = 0;
-		scoreOffset  = 0;
-		scoreDropOff = _scoreDropOff;
-		xDropCond   = false;
+		state.bestScore    = 0;
+		state.currScore    = 0;
+		state.scoreOffset  = 0;
+		state.scoreDropOff = _scoreDropOff;
+		state.xDropCond    = false;	
+
+		return state;	
 	}
 
-	~State()
+	State::~State()
 	{
 		delete [] queryh;
 		delete [] queryv;
 	}
 
-	// i think this can be smaller than 64bit
-	int64_t get_score_offset  ( void ) { return scoreOffset;  } // move to record
-	int64_t get_best_score    ( void ) { return bestScore;    } // move to record
-	int64_t get_curr_score    ( void ) { return currScore;    } // move to record
-	int64_t get_score_dropoff ( void ) { return scoreDropOff; }
+	int State::getScoreOffset () 
+	{ 
+		return scoreOffset;  
+	} 
 
-	void set_score_offset ( int64_t _scoreOffset ) { scoreOffset = _scoreOffset; } // move to record
-	void set_best_score   ( int64_t _bestScore   ) { bestScore   = _bestScore;   } // move to record
-	void set_curr_score   ( int64_t _currScore   ) { currScore   = _currScore;   } // move to record
+	int State::getBestScore () 
+	{ 
+		return bestScore;    
+	}
 
-	int8_t get_match_cost    ( void ) { return matchCost;    }
-	int8_t get_mismatch_cost ( void ) { return mismatchCost; }
-	int8_t get_gap_cost      ( void ) { return gapCost;      }
+	int State::getCurrScore () 
+	{ 
+		return currScore;    
+	} 
 
-	vectorType get_vqueryh ( void ) { return vqueryh.simd; } // move to record
-	vectorType get_vqueryv ( void ) { return vqueryv.simd; } // move to record
+	int State::getScoreDropoff () 
+	{ 
+		return scoreDropOff; 
+	}
 
-	vectorType get_antiDiag1 ( void ) { return antiDiag1.simd; } // move to record
-	vectorType get_antiDiag2 ( void ) { return antiDiag2.simd; } // move to record
-	vectorType get_antiDiag3 ( void ) { return antiDiag3.simd; }
+	void State::setScoreOffset (int _scoreOffset) 
+	{ 
+		scoreOffset = _scoreOffset; 
+	}
 
-	vectorType get_vmatchCost    ( void ) { return vmatchCost;    }
-	vectorType get_vmismatchCost ( void ) { return vmismatchCost; }
-	vectorType get_vgapCost      ( void ) { return vgapCost;      }
-	vectorType get_vzeros        ( void ) { return vzeros;        }
+	void State::setBestScore (int _bestScore) 
+	{ 
+		bestScore = _bestScore;   
+	} 
 
-	void update_vqueryh ( uint8_t idx, int8_t value ) { vqueryh.elem[idx] = value; }
-	void update_vqueryv ( uint8_t idx, int8_t value ) { vqueryv.elem[idx] = value; }
+	void State::setCurrScore (int _currScore) 
+	{ 
+		currScore = _currScore;   
+	} 
 
-	void update_antiDiag1 ( uint8_t idx, int8_t value ) { antiDiag1.elem[idx] = value; }
-	void update_antiDiag2 ( uint8_t idx, int8_t value ) { antiDiag2.elem[idx] = value; }
-	void update_antiDiag3 ( uint8_t idx, int8_t value ) { antiDiag3.elem[idx] = value; }
+	int8_t State::getMatchScore () 
+	{ 
+		return matchScore;    
+	}
+	int8_t State::getMismatchScore () 
+	{ 
+		return mismatchScore; 
+	}
+	int8_t State::getGapScore () 
+	{ 
+		return gapScore;      
+	}
 
-	void broadcast_antiDiag1 ( int8_t value ) { antiDiag1.simd = setOp( value ); }
-	void broadcast_antiDiag2 ( int8_t value ) { antiDiag2.simd = setOp( value ); }
-	void broadcast_antiDiag3 ( int8_t value ) { antiDiag3.simd = setOp( value ); }
+	vectorType State::getQueryH () 
+	{ 
+		return vqueryh.simd; 
+	}
 
-	void set_antiDiag1 ( vectorType vector ) { antiDiag1.simd = vector; }
-	void set_antiDiag2 ( vectorType vector ) { antiDiag2.simd = vector; }
-	void set_antiDiag3 ( vectorType vector ) { antiDiag3.simd = vector; }
+	vectorType State::getQueryV () 
+	{ 
+		return vqueryv.simd; 
+	}
 
-	void moveRight (void)
+	vectorType State::getAntiDiag1 () 
+	{ 
+		return antiDiag1.simd; 
+	} 
+
+	vectorType State::getAntiDiag2 () 
+	{ 
+		return antiDiag2.simd; 
+	}
+	
+	vectorType State::getAntiDiag3 () 
+	{ 
+		return antiDiag3.simd; 
+	}
+
+	vectorType State::getVmatchScore () 
+	{ 
+		return vmatchScore;   
+	}
+
+	vectorType State::getVmismatchScore () 
+	{ 
+		return vmismatchScore;
+	}
+
+	vectorType State::getVgapScore () 
+	{ 
+		return vgapScore;     
+	}
+
+	vectorType State::getVzeros () 
+	{ 
+		return vzeros;        
+	}
+
+	void State::updateQueryH (uint8_t idx, int8_t value) 
+	{ 
+		vqueryh.elem[idx] = value; 
+	}
+
+	void State::updateQueryV (uint8_t idx, int8_t value) 
+	{ 
+		vqueryv.elem[idx] = value; 
+	}
+
+	void State::updateAntiDiag1 (uint8_t idx, int8_t value) 
+	{	
+		antiDiag1.elem[idx] = value; 
+	}
+
+	void State::updateAntiDiag2 (uint8_t idx, int8_t value) 
+	{	
+		antiDiag2.elem[idx] = value; 
+	}
+
+	void State::updateAntiDiag3 (uint8_t idx, int8_t value) 
+	{	
+		antiDiag3.elem[idx] = value; 
+	}
+
+	void State::broadcastAntiDiag1 (int8_t value) 
+	{ 
+		antiDiag1.simd = setOp (value); 
+	}
+
+	void State::broadcastAntiDiag2 (int8_t value) 
+	{ 
+		antiDiag2.simd = setOp (value); 
+	}
+
+	void State::broadcastAntiDiag3 (int8_t value) 
+	{ 
+		antiDiag3.simd = setOp (value); 
+	}
+
+	void State::setAntiDiag1 (vectorType vector) 
+	{ 
+		antiDiag1.simd = vector; 
+	}
+
+	void State::setAntiDiag2 (vectorType vector) 
+	{ 
+		antiDiag2.simd = vector; 
+	}
+	
+	void State::setAntiDiag3 (vectorType vector) 
+	{ 
+		antiDiag3.simd = vector; 
+	}
+
+	void moveRight ()
 	{
-		// (a) shift to the left on query horizontal
-		vqueryh = shiftLeft( vqueryh.simd );
+		/* (a) shift to the left on query horizontal */ 
+		vqueryh = shiftLeft (vqueryh.simd);
 		vqueryh.elem[LOGICALWIDTH - 1] = queryh[hoffset++];
 
-		// (b) shift left on updated vector 1
-		// this places the right-aligned vector 2 as a left-aligned vector 1
+		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1.simd = antiDiag2.simd;
-		antiDiag1 = shiftLeft(antiDiag1.simd);
+		antiDiag1 	   = shiftLeft (antiDiag1.simd);
 		antiDiag2.simd = antiDiag3.simd;
 	}
 
 	void moveDown (void)
 	{
-		// (a) shift to the right on query vertical
-		vqueryv = shiftRight(vqueryv.simd);
-		// ==50054==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60600062b0e0 at pc
-		// 0x0001019b50f1 bp 0x70000678ba30 sp 0x70000678ba28 READ of size 1 at 0x60600062b0e0 thread T6
+		/* (a) shift to the right on query vertical */
+		vqueryv = shiftRight (vqueryv.simd);
 		vqueryv.elem[0] = queryv[voffset++];
 
-		// (b) shift to the right on updated vector 2
-		// this places the left-aligned vector 3 as a right-aligned vector 2
+		/* (b) shift to the right on updated vector 2: this places the left-aligned vector 3 as a right-aligned vector 2 */
 		antiDiag1.simd = antiDiag2.simd;
 		antiDiag2.simd = antiDiag3.simd;
-		antiDiag2 = shiftRight( antiDiag2.simd );
+		antiDiag2      = shiftRight (antiDiag2.simd);
 	}
 
 	void operator+=(State& state1, const State& state2)

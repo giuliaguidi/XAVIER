@@ -53,6 +53,7 @@
 #include <string>
 #include "seed.h"
 #include "score.h"
+#include "vectors.h"
 
 namespace xavier
 {
@@ -84,19 +85,19 @@ namespace xavier
 		int8_t gapScore;
 
 		/* Constant scoring vectors */
-		vectorType vmatchCost;
-		vectorType vmismatchCost;
-		vectorType vgapCost;
+		vectorType vmatchScore;
+		vectorType vmismatchScore;
+		vectorType vgapScore;
 		vectorType vzeros;
 
 		/* Computation vectors */
-		vectorUnionType antiDiag1;
-		vectorUnionType antiDiag2;
-		vectorUnionType antiDiag3;
+		VectorRegister antiDiag1;
+		VectorRegister antiDiag2;
+		VectorRegister antiDiag3;
 
 		/* Sequence vectors */
-		vectorUnionType vqueryh;
-		vectorUnionType vqueryv;
+		VectorRegister vqueryh;
+		VectorRegister vqueryv;
 
 		/* xDrop variables */
 		long int bestScore;
@@ -106,13 +107,15 @@ namespace xavier
 		bool xDropCond;
 
 		/**
-		 * Constructor
+		 * Create a new State object
+		 * There's no default constructor
+		 * User should use this function to initialize a new State object
 		 */ 
-		State(Seed& _seed, std::string const& hseq, std::string const& vseq,
+		State initState(Seed& _seed, std::string const& hseq, std::string const& vseq,
 				ScoringScheme& scoringScheme, int const &_scoreDropOff);
 
 		/**
-		 * Distructor
+		 * Destructor
 		 */ 
 		~State();
 
@@ -129,17 +132,17 @@ namespace xavier
 		int8_t getMismatchScore ();
 		int8_t getGapScore      ();
 
-		vectorType get_vqueryh ();
-		vectorType get_vqueryv ();
+		vectorType getQueryH ();
+		vectorType getQueryV ();
 
-		vectorType get_antiDiag1 ();
-		vectorType get_antiDiag2 ();
-		vectorType get_antiDiag3 ();
+		vectorType getAntiDiag1 ();
+		vectorType getAntiDiag2 ();
+		vectorType getAntiDiag3 ();
 
-		vectorType get_vmatchCost    ();
-		vectorType get_vmismatchCost ();
-		vectorType get_vgapCost      ();
-		vectorType get_vzeros        ();
+		vectorType getVmatchScore    ();
+		vectorType getVmismatchScore ();
+		vectorType getVgapScore      ();
+		vectorType getVzeros        ();
 
 		void updateQueryH (uint8_t idx, int8_t value);
 		void updateQueryV (uint8_t idx, int8_t value);
@@ -165,4 +168,5 @@ namespace xavier
 	*/
 	void operator+=(State& state1, const State& state2);
 }
+
 #endif /* XAVIER_TYPES_STATE_H */

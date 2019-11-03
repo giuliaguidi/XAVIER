@@ -50,7 +50,7 @@
 #ifndef XAVIER_TYPES_SEED_H
 #define XAVIER_TYPES_SEED_H
 
-namespace xaiver
+namespace xavier
 {
 	class Seed
 	{
@@ -66,7 +66,6 @@ namespace xaiver
 		int length;
 
 	public:
-
 		/**
 		 * Default constructor 
 		 */ 

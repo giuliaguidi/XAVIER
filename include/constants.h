@@ -53,7 +53,6 @@
 #ifndef _XAVIER_CONSTANTS_H_
 #define _XAVIER_CONSTANTS_H_
 
-
 #define NINF  	(std::numeric_limits<int8_t>::min())
 #define goRIGHT (0)
 #define goDOWN  (1)

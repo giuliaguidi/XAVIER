@@ -49,15 +49,18 @@
  * in binary and source code form.
  */
 
+#ifndef __AVX2__
+#define __AVX2__
+#endif
 
 #ifndef _XAVIER_TYPES_VECTORS_H_
 #define _XAVIER_TYPES_VECTORS_H_
 
 #include <iostream>
+#include <x86intrin.h>
 
 namespace xavier
 {
-
 	#ifdef  __AVX2__
 		typedef int8_t elementType;
 		typedef __m256i vectorType;
@@ -164,7 +167,6 @@ namespace xavier
 		}
 
 	private:
-
 		union
 		{
 			vectorType simd;
