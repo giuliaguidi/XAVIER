@@ -74,32 +74,32 @@ namespace xaiver
 		ScoringScheme(ScoringScheme& _copy);
 
 		/**
-		 * getMatchScore() returns match score
+		 * Return match score
 		 */ 
 		inline short getMatchScore() const;
 
 		/**
-		 * getMismatchScore() returns mismatch penalty
+		 * Return mismatch penalty
 		 */ 
 		inline short getMismatchScore() const;
 
 		/**
-		 * getGapScore() returns gap penalty
+		 * Return gap penalty
 		 */ 	
 		inline short getGapScore() const;
 
 		/**
-		 * setMatchScore() sets match score (>0)
+		 * Return match score (>0)
 		 */ 
 		inline void setMatchScore(short const value);
 
 		/**
-		 * setMismatchScore() sets mismatch score (<0)
+		 * Return mismatch score (<0)
 		 */ 
 		inline void setMismatchScore(short const value);
 
 		/**
-		 * setGapScore() sets gap penalty (<0)
+		 * Return gap penalty (<0)
 		 */ 
 		inline void setGapScore(short const value);
 

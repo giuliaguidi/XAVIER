@@ -32,7 +32,6 @@ namespace xaiver
         endH(_endH),  
         endV(_endV),  
         score(0), 
-        // GG: the mean length might be better
         length(std::min((_begH - _begV), (_endH - _endV))) { }
 
 	Seed::Seed(Seed const& other) :

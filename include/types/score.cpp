@@ -1,11 +1,11 @@
 /**
  * File: score.cpp
  * Author: G. Guidi, E. Younis
- * Description: Xavier Score Type.
+ * Description: Xavier Score Type Source.
  */
 
 #include "score.h"
-#include <assert.h>
+#include <cassert>
 
 namespace xaiver
 {
