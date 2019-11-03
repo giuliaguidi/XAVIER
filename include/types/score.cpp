@@ -7,7 +7,7 @@
 #include "score.h"
 #include <cassert>
 
-namespace xaiver
+namespace xavier
 {
 	ScoringScheme::ScoringScheme() : 
         m_score(1), 

@@ -50,7 +50,7 @@
 #ifndef XAVIER_TYPES_SCORE_H
 #define XAVIER_TYPES_SCORE_H
 
-namespace xaiver
+namespace xavier
 {
 	class ScoringScheme
 	{
