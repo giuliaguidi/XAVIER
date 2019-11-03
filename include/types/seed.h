@@ -88,68 +88,71 @@ namespace xaiver
 		Seed(Seed const& other);
 
 		/**
-		 * getAlignScore() returns alignment score
+		 * Return alignment score
 		 */ 
 		inline int getAlignScore() const;
 
 		/**
-		 * getBegH() returns beginning of alignment on sequenceH
+		 * Return beginning of alignment on sequenceH
 		 */ 
 		inline int getBegH() const;
 
 		/**
-		 * getBegV() returns beginning of alignment on sequenceV
+		 * Return beginning of alignment on sequenceV
 		 */ 
 		inline int getBegV() const;
 
 		/**
-		 * getEndH() returns ending of alignment on sequenceH
+		 * Return ending of alignment on sequenceH
 		 */ 
 		inline int getEndH() const;
 
 		/**
-		 * getEndV() returns ending of alignment on sequenceV
+		 * Return ending of alignment on sequenceV
 		 */ 
 		inline int getEndV() const;
 
 		/**
-		 * getAlignLength() returns length of the alignment
+		 * Return length of the alignment
 		 */ 
 		inline int getAlignLength() const;
 
 		/**
-		 * setAlignScore() sets alignment score
+		 * Set alignment score
 		 */ 
 		inline void setAlignScore(int const value);
 
 		/**
-		 * setBegH() sets beginning of alignment on sequenceH
-		 * begH <= endH
+		 * Set beginning of alignment on sequenceH
 		 */ 
 		inline void setBegH(int const value);
 
 		/**
-		 * setBegV() sets beginning of alignment on sequenceV
-		 * begV <= endV
+		 * Set beginning of alignment on sequenceV
 		 */ 
 		inline void setBegV(int const value);
 
 		/**
-		 * setendH() sets ending of alignment on sequenceH
-		 * begH <= endH
+		 * Set ending of alignment on sequenceH
 		 */ 
 		inline void setEndH(int const value);
 
 		/**
-		 * setendV() sets ending of alignment on sequenceV
-		 * begV <= endV
+		 * Set ending of alignment on sequenceV
 		 */ 
 		inline void setEndV(int const value);
 
 		/**
-		 * setBegV() sets alignment length (>=0)
+		 * Set alignment length, cannot be < 0
 		 */ 
 		inline void setAlignLength(int const value);
+
+		/**
+		 * Check seed correctness
+		 * begH <= endH
+		 * begV <= endV
+		 */ 
+		inline bool checkConsistency();
 	};
 }
 
