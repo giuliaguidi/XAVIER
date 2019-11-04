@@ -38,9 +38,9 @@ namespace xavier
 		std::fill(state.queryh + state.hlength, state.queryh + state.hlength + VECTORWIDTH, NINF);
 		std::fill(state.queryv + state.vlength, state.queryv + state.vlength + VECTORWIDTH, NINF);
 
-		state.matchScore    = scoreMatch(scoringScheme   );
-		state.mismatchScore = scoreMismatch(scoringScheme);
-		state.gapScore      = scoreGap(scoringScheme     );
+		state.matchScore    = scoringScheme.getMatchScore();
+		state.mismatchScore = scoringScheme.getMismatchScore();
+		state.gapScore      = scoringScheme.getGapScore();
 
 		state.vmatchScore    = setOp (state.matchScore   );
 		state.vmismatchScore = setOp (state.mismatchScore);
@@ -160,27 +160,27 @@ namespace xavier
 
 	void State::updateQueryH (uint8_t idx, int8_t value) 
 	{ 
-		vqueryh.elem[idx] = value; 
+		vqueryh.elems[idx] = value; 
 	}
 
 	void State::updateQueryV (uint8_t idx, int8_t value) 
 	{ 
-		vqueryv.elem[idx] = value; 
+		vqueryv.elems[idx] = value; 
 	}
 
 	void State::updateAntiDiag1 (uint8_t idx, int8_t value) 
 	{	
-		antiDiag1.elem[idx] = value; 
+		antiDiag1.elems[idx] = value; 
 	}
 
 	void State::updateAntiDiag2 (uint8_t idx, int8_t value) 
 	{	
-		antiDiag2.elem[idx] = value; 
+		antiDiag2.elems[idx] = value; 
 	}
 
 	void State::updateAntiDiag3 (uint8_t idx, int8_t value) 
 	{	
-		antiDiag3.elem[idx] = value; 
+		antiDiag3.elems[idx] = value; 
 	}
 
 	void State::broadcastAntiDiag1 (int8_t value) 
@@ -217,7 +217,7 @@ namespace xavier
 	{
 		/* (a) shift to the left on query horizontal */ 
 		vqueryh = shiftLeft (vqueryh.simd);
-		vqueryh.elem[LOGICALWIDTH - 1] = queryh[hoffset++];
+		vqueryh.elems[LOGICALWIDTH - 1] = queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1.simd = antiDiag2.simd;
@@ -229,7 +229,7 @@ namespace xavier
 	{
 		/* (a) shift to the right on query vertical */
 		vqueryv = shiftRight (vqueryv.simd);
-		vqueryv.elem[0] = queryv[voffset++];
+		vqueryv.elems[0] = queryv[voffset++];
 
 		/* (b) shift to the right on updated vector 2: this places the left-aligned vector 3 as a right-aligned vector 2 */
 		antiDiag1.simd = antiDiag2.simd;

@@ -1,9 +1,7 @@
 /**
  * File: vectors.h
- *
  * Author: G. Guidi, E. Younis
- *
- * Description: Xavier Vectors Type.
+ * Description: Xavier Vectors Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -53,8 +51,8 @@
 #define __AVX2__
 #endif
 
-#ifndef _XAVIER_TYPES_VECTORS_H_
-#define _XAVIER_TYPES_VECTORS_H_
+#ifndef XAVIER_TYPES_VECTORS_H
+#define XAVIER_TYPES_VECTORS_H
 
 #include <iostream>
 #include <x86intrin.h>
@@ -76,104 +74,62 @@ namespace xavier
 		#define LOGICALWIDTH (VECTORWIDTH - 1)
 	#endif
 
-	// typedef union
-	// {
-	// 	vectorType  simd;
-	// 	elementType elem[VECTORWIDTH];
-
-	// } XavierVector;
-// inline vectorUnionType
-// shiftLeft (const vectorType& _a) { // this work for avx2
-
-// 	vectorUnionType a;
-// 	a.simd = _a;
-
-// 	vectorUnionType b;
-// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
-// 	b.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(2, 0, 0, 1)), a.simd, 1);
-// 	b.elem[VECTORWIDTH - 1] = NINF;
-
-// 	return b;
-// }
-
-// inline vectorUnionType
-// shiftRight (const vectorType& _a) { // this work for avx2
-// 	vectorUnionType a;
-// 	a.simd = _a;
-
-// 	vectorUnionType b;
-// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
-// 	b.simd = _mm256_alignr_epi8(a.simd, _mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
-// 	b.elem[0] = NINF;
-// 	return b;
-// }
-
-// #elif __SSE4_2__
-
-// inline vectorUnionType
-// shiftLeft(const vectorType& _a) { // this work for avx2
-// 	vectorUnionType a;
-// 	a.simd = _a;
-
-// 	vectorUnionType b;
-// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
-// 	b.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(2, 0, 0, 1)), a.simd, 2);
-// 	b.elem[VECTORWIDTH - 1] = NINF;
-// 	return b;
-// }
-
-// inline vectorUnionType
-// shiftRight(const vectorType& _a) { // this work for avx2
-// 	vectorUnionType a;
-// 	a.simd = _a;
-
-// 	vectorUnionType b;
-// 	// https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
-// 	b.simd = _mm256_alignr_epi8(a.simd, _mm256_permute2x128_si256(a.simd, a.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
-// 	b.elem[0] = NINF;
-// 	return b;
-// }
-
 	class VectorRegister
 	{
 	public:
 
-		// Constructors
+		/**
+		 * Fields
+		 */ 
+		union
+		{
+			vectorType  simd;
+			elementType elems[VECTORWIDTH];
+		} internal;
 
+		/**
+		 * Constructors
+		 */ 
 		VectorRegister()
 		{
-			internal.simd = setOp( 0 );
+			internal.simd = setOp(0);
 		}
 
-		VectorRegister( elementType elem )
+		VectorRegister(elementType elem)
 		{
-			internal.simd = setOp( elem );
+			internal.simd = setOp(elem);
 		}
 
-		VectorRegister( vectorType vec )
+		VectorRegister(vectorType vec)
 		{
 			internal.simd = vec;
 		}
 
-		// Operators
+		/**
+		 * Insert @value in position @pos of VectorRegister
+		 */ 
+		void insert(elementType value, unsigned int pos);
 
-		friend std::ostream& operator<<( std::ostream& os,
-		                                 const VectorRegister& reg )
-		{
-			os << "{";
-			for( int i = 0; i < VECTORWIDTH - 1; ++i )
-				os << internal.elems[ i ] << ", ";
-			os << internal.elems[ VECTORWIDTH - 1 ] << std::endl;
-		}
+		/**
+		 * Return value in position @pos of VectorRegister
+		 */ 
+		elementType take(unsigned int pos);
 
-	private:
-		union
-		{
-			vectorType simd;
-			elementType elems[VECTORWIDTH];
-		} internal;
-	}
+		/**
+		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
+		 */ 
+		inline VectorRegister lshift ();
 
+		/**
+		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
+		 */ 
+		inline VectorRegister rshift ();
+
+		/**
+		 * Operators
+		 */ 
+		friend std::ostream& operator<<(std::ostream& os, const VectorRegister& vec);
+	};
 }
 
-#endif
+#endif /* XAVIER_TYPES_VECTORS_H */
