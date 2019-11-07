@@ -223,7 +223,19 @@ namespace xavier {
         }
     }
 
-	void onedirection (State& state);
+	void onedirection (State& state) {
+        /* Initial values load using dynamic programming */
+        beg (state);
+        if(state.xDropCond) return;
+
+        /* Core vectorized computation */
+        mid (state);
+        if(state.xDropCond) return;
+]
+        /* Reaching end of sequences */
+        end (state);
+        if(state.xDropCond) return;
+    }
 
 	std::pair<int, int> xavier (Seed& seed, Direction direction, std::string const& target,
 		std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff);
@@ -233,25 +245,6 @@ namespace xavier {
 // //======================================================================================
 // // X-DROP ADAPTIVE BANDED ALIGNMENT
 // //======================================================================================
-
-// void
-// XavierOneDirection (XavierState& state) {
-
-// 	// PHASE 1 (initial values load using dynamic programming)
-// 	XavierPhase1(state);
-// 	if(state.xDropCond)  return;
-
-// 	// PHASE 2 (core vectorized computation)
-// 	XavierPhase2(state);
-// 	if(state.xDropCond) return;
-
-// 	// PHASE 3 (align on one edge)
-// 	// GG: Phase3 removed to read to code easily (can be recovered from simd/ folder or older commits)
-
-// 	// PHASE 4 (reaching end of sequences)
-// 	XavierPhase4(state);
-// 	if(state.xDropCond) return;
-// }
 
 // std::pair<int, int>
 // XavierXDrop
