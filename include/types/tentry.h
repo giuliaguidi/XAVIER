@@ -1,9 +1,7 @@
 /**
- * File: record.h
- *
+ * File: tentry.h
  * Author: G. Guidi, E. Younis
- *
- * Description: Xavier Record Type.
+ * Description: Xavier Trance Entry Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -49,27 +47,27 @@
  * in binary and source code form.
  */
 
+#ifndef XAVIER_TYPES_TENTRY_H
+#define XAVIER_TYPES_TENTRY_H
 
-#ifndef _XAVIER_TYPES_TRACE_ENTRY_H_
-#define _XAVIER_TYPES_TRACE_ENTRY_H_
+#include "vectors.h"
 
 namespace xavier
 {
-
 	class TraceEntry
 	{
-	public:
-		TraceEntry
 	private:
-		vectorUnionType antiDiag1;
-		vectorUnionType antiDiag2;
-		vectorUnionType antiDiag3;
+		VectorRegister antiDiag1;
+		VectorRegister antiDiag2;
+		VectorRegister antiDiag3;
 
-		vectorUnionType vqueryh;
-		vectorUnionType vqueryv;
-		int64_t scoreOffset;
+		VectorRegister vqueryh;
+		VectorRegister vqueryv;
+		int scoreOffset;
+
+	public:
+		// TODO
 	};
-
 }
 
-#endif
+#endif /* XAVIER_TYPES_TENTRY_H */

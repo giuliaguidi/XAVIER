@@ -1,9 +1,7 @@
 /**
  * File: trace.h
- *
  * Author: G. Guidi, E. Younis
- *
- * Description: Xavier Trace Type.
+ * Description: Xavier Trace Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -49,21 +47,21 @@
  * in binary and source code form.
  */
 
+#ifndef XAVIER_TYPES_TRACE_H
+#define XAVIER_TYPES_TRACE_H
 
-#ifndef _XAVIER_TYPES_TRACE_H_
-#define _XAVIER_TYPES_TRACE_H_
+#include "tentry.h"
+#include <vector>
 
 namespace xavier
 {
-
 	class Trace
 	{
 	public:
-
+		// TODO
 	private:
 		std::vector<TraceEntry> trace;
 	};
-
 }
 
-#endif
+#endif /* XAVIER_TYPES_TRACE_H */

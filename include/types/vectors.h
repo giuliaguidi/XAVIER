@@ -56,6 +56,7 @@
 
 #include <iostream>
 #include <x86intrin.h>
+#include "../ops.h"
 
 namespace xavier
 {
