@@ -97,7 +97,73 @@ namespace xavier {
         // antiDiag2 going right, first computation of antiDiag3 is going down
     }
 
-	void mid (State& state);
+	void mid (State& state)
+    {
+    	while(state.hoffset < state.hlength 
+           && state.voffset < state.vlength)
+        {
+    		// NOTE: -1 for a match and 0 for a mismatch
+    		vectorType match = cmpeqOp (state.getQueryH(), state.getQueryV());
+    		match = blendvOp (state.getVmismatchScore(), state.getVmatchScore(), match);
+
+    		vectorType antiDiag1F = addOp(match, state.getAntiDiag1());
+
+            VectorRegister ref = state.getAntiDiag2();
+    		VectorRegister antiDiag2S = ref.lshift();
+
+    		vectorType antiDiag2M = maxOp (antiDiag2S.internal.simd, state.getAntiDiag2());
+    		vectorType antiDiag2F = addOp (antiDiag2M, state.getVgapScore());
+
+    		// Compute antiDiag3 and left-aligne
+    		state.setAntiDiag3 (maxOp (antiDiag1F, antiDiag2F));
+    		state.updateAntiDiag3 (LOGICALWIDTH, NINF);
+
+    		// TODO: x-drop termination, we don't need to check x-drop every time
+    		// TODO: create custom max element function that returns both position and value
+    		int8_t antiDiagBest = *std::max_element (state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VECTORWIDTH);
+    		state.setCurrScore (antiDiagBest + state.getScoreOffset());
+
+    		int scoreThreshold = state.getBestScore() - state.getScoreDropoff();
+    		if (state.getCurrScore() < scoreThreshold) {
+    			state.xDropCond = true;
+
+    			state.seed.setBegH(0);
+    			state.seed.setBegV(0);
+
+    			state.seed.setEndH (state.hoffset);
+    			state.seed.setEndV (state.voffset);
+                
+                // GG: void function; values are saved in State object
+    			return;
+    		}
+
+    		if (antiDiagBest > CUTOFF)
+    		{
+    			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + LOGICALWIDTH);
+    			state.setAntiDiag2 (subOp (state.getAntiDiag2(), setOp (min)));
+    			state.setAntiDiag3 (subOp (state.getAntiDiag3(), setOp (min)));
+    			state.setScoreOffset (state.getScoreOffset() + min);
+    		}
+
+    		// Update best
+    		if (state.getCurrScore() > state.getBestScore())
+    			state.setBestScore(state.getCurrScore());
+
+    		// TODO: optimize this
+    		int maxpos, max = 0;
+    		for (int i = 0; i < VECTORWIDTH; ++i)
+    			if (state.antiDiag3.take(i) > max) {
+    				maxpos = i;
+    				max = state.antiDiag3.take(i);
+    			}
+
+    		state.seed.setEndH (state.hoffset);
+    		state.seed.setEndV (state.voffset);
+
+    		if (maxpos > MIDDLE) state.moveRight();
+    		else state.moveDown();
+    	}
+    }
 
 	void end (State& state);
 
@@ -107,86 +173,6 @@ namespace xavier {
 		std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff);
 
 } /* namespace xavier */
-
-// void
-// XavierPhase2(XavierState& state)
-// {
-// 	msg("Phase2");
-// 	while(state.hoffset < state.hlength && state.voffset < state.vlength)
-// 	{
-// 		// antiDiag1F (final)
-// 		// NOTE: -1 for a match and 0 for a mismatch
-// 		vectorType match = cmpeqOp(state.get_vqueryh(), state.get_vqueryv());
-// 		match = blendvOp(state.get_vmismatchCost(), state.get_vmatchCost(), match);
-// 		vectorType antiDiag1F = addOp(match, state.get_antiDiag1());
-
-// 		// antiDiag2S (shift)
-// 		vectorUnionType antiDiag2S = shiftLeft(state.get_antiDiag2());
-
-// 		// antiDiag2M (pairwise max)
-// 		vectorType antiDiag2M = maxOp(antiDiag2S.simd, state.get_antiDiag2());
-
-// 		// antiDiag2F (final)
-// 		vectorType antiDiag2F = addOp(antiDiag2M, state.get_vgapCost());
-
-// 		// Compute antiDiag3
-// 		state.set_antiDiag3(maxOp(antiDiag1F, antiDiag2F));
-
-// 		// we need to have always antiDiag3 left-aligned
-// 		state.update_antiDiag3(LOGICALWIDTH, NINF);
-
-// 		// TODO: x-drop termination
-// 		// Note: Don't need to check x-drop every time
-// 		// Create custom max_element that also returns position to save computation
-// 		int8_t antiDiagBest = *std::max_element(state.antiDiag3.elem, state.antiDiag3.elem + VECTORWIDTH);
-// 		state.set_curr_score(antiDiagBest + state.get_score_offset());
-
-// 		int64_t scoreThreshold = state.get_best_score() - state.get_score_dropoff();
-// 		if (state.get_curr_score() < scoreThreshold)
-// 		{
-// 			state.xDropCond = true;
-
-// 			setBeginPositionH(state.seed, 0);
-// 			setBeginPositionV(state.seed, 0);
-
-// 			setEndPositionH(state.seed, state.hoffset);
-// 			setEndPositionV(state.seed, state.voffset);
-
-// 			return; // GG: it's a void function and the values are saved in XavierState object
-// 		}
-
-// 		if (antiDiagBest > CUTOFF)
-// 		{
-// 			int8_t min = *std::min_element(state.antiDiag3.elem, state.antiDiag3.elem + LOGICALWIDTH);
-// 			state.set_antiDiag2(subOp(state.get_antiDiag2(), setOp(min)));
-// 			state.set_antiDiag3(subOp(state.get_antiDiag3(), setOp(min)));
-// 			state.set_score_offset(state.get_score_offset() + min);
-// 		}
-
-// 		// Update best
-// 		if (state.get_curr_score() > state.get_best_score())
-// 			state.set_best_score(state.get_curr_score());
-
-// 		// TODO: optimize this
-// 		int maxpos, max = 0;
-// 		for (int i = 0; i < VECTORWIDTH; ++i)
-// 		{
-// 			if (state.antiDiag3.elem[i] > max)
-// 			{
-// 				maxpos = i;
-// 				max = state.antiDiag3.elem[i];
-// 			}
-// 		}
-
-// 		setEndPositionH(state.seed, state.hoffset);
-// 		setEndPositionV(state.seed, state.voffset);
-
-// 		if (maxpos > MIDDLE)
-// 			state.moveRight();
-// 		else
-// 			state.moveDown();
-// 	}
-// }
 
 // void
 // XavierPhase4(XavierState& state)
@@ -203,7 +189,7 @@ namespace xavier {
 // 		vectorType antiDiag1F = addOp(match, state.get_antiDiag1());
 
 // 		// antiDiag2S (shift)
-// 		vectorUnionType antiDiag2S = shiftLeft(state.get_antiDiag2());
+// 		VectorRegister antiDiag2S = shiftLeft(state.get_antiDiag2());
 
 // 		// antiDiag2M (pairwise max)
 // 		vectorType antiDiag2M = maxOp(antiDiag2S.simd, state.get_antiDiag2());
@@ -223,7 +209,7 @@ namespace xavier {
 // 		int8_t antiDiagBest = *std::max_element(state.antiDiag3.elem, state.antiDiag3.elem + VECTORWIDTH);
 // 		state.set_curr_score(antiDiagBest + state.get_score_offset());
 
-// 		int64_t scoreThreshold = state.get_best_score() - state.get_score_dropoff();
+// 		int scoreThreshold = state.get_best_score() - state.get_score_dropoff();
 
 // 		if (state.get_curr_score() < scoreThreshold)
 // 		{
