@@ -1,8 +1,6 @@
 /**
  * File: constants.h
- *
  * Author: G. Guidi, E. Younis
- *
  * Description: Xavier Constants.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
@@ -49,7 +47,6 @@
  * in binary and source code form.
  */
 
-
 #ifndef _XAVIER_CONSTANTS_H_
 #define _XAVIER_CONSTANTS_H_
 
@@ -61,18 +58,19 @@
 #define CUTOFF	(std::numeric_limits<int8_t>::max() - 25)
 
 #ifdef DEBUG
-	#define myLog( var ) do { std::cerr << "LOG:	" << __FILE__ << "(" << __LINE__ << ")	" << #var << " = " << (var) << std::endl; } while(0)
+	#define msg( var ) do { std::cerr << "LOG:	" << __FILE__ << "(" << __LINE__ << ")	" << #var << " = " << (var) << std::endl; } while(0)
 #else
-	#define myLog( var )
+	#define msg( var )
 #endif
 
-
-enum ExtDirectionX
+namespace xavier
 {
-	XAVIER_EXTEND_NONE  = 0,
-	XAVIER_EXTEND_LEFT  = 1,
-	XAVIER_EXTEND_RIGHT = 2,
-	XAVIER_EXTEND_BOTH  = 3
-};
-
-#endif
+	enum Direction
+	{
+		EXTEND_NONE  = 0,
+		EXTEND_LEFT  = 1,
+		EXTEND_RIGHT = 2,
+		EXTEND_BOTH  = 3
+	};
+}
+#endif /* _XAVIER_CONSTANTS_H_ */
