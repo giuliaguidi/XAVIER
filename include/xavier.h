@@ -66,12 +66,12 @@ namespace xavier {
 	/**
 	 * TODO: descriptive name and comment (phase I)
 	 */ 
-	void start (State& state);
+	void beg (State& state);
 
 	/**
 	 * TODO: descriptive name and comment (phase II)
 	 */
-	void compute (State& state);
+	void mid (State& state);
 
 	/**
 	 * TODO: descriptive name and comment (phase IV)
