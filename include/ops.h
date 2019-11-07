@@ -1,9 +1,7 @@
 /**
  * File: ops.h
- *
  * Author: G. Guidi, E. Younis
- *
- * Description: Xavier Operations.
+ * Description: Xavier Operations Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -48,6 +46,7 @@
  * distribute, and sublicense such enhancements or derivative works thereof,
  * in binary and source code form.
  */
+
 #ifndef __AVX2__
 #define __AVX2__
 #endif
@@ -78,14 +77,4 @@
 	#define cmpeqOp  	_mm_cmpeq_epi16 // compare equality operation
 #endif
 
-
-
-
-
-
-#ifdef __AVX2__
-
-
-
-#endif
-#endif
+#endif /* _XAVIER_OPS_H_ */
