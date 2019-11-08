@@ -4,16 +4,17 @@
  * Description: Xavier Main Source.
  */
 
-#include<vector>
-#include<iostream>
-#include<omp.h>
-#include<algorithm>
-#include<inttypes.h>
-#include<assert.h>
-#include<iterator>
-#include<x86intrin.h>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <inttypes.h>
+#include <assert.h>
+#include <cassert>
+#include <iterator>
+#include <x86intrin.h>
 
 #include "xavier.h"
+#include "types/seed.h"
 
 namespace xavier {
 
@@ -231,117 +232,109 @@ namespace xavier {
         /* Core vectorized computation */
         mid (state);
         if(state.xDropCond) return;
-]
+
         /* Reaching end of sequences */
         end (state);
         if(state.xDropCond) return;
     }
 
 	std::pair<int, int> xavier (Seed& seed, Direction direction, std::string const& target,
-		std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff);
+		std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff)
+    {
+        if (direction == EXTEND_LEFT)
+        {
+            // GG: need temporary object
+            Seed _seed = seed; 
 
+            std::string targetPrefix = target.substr (0, seed.getEndH());	// GG: from read start until start seed (seed included)
+            std::string queryPrefix  = query.substr  (0, seed.getEndV());	// GG: from read start until start seed (seed included)
+            std::reverse (targetPrefix.begin(), targetPrefix.end());
+            std::reverse (queryPrefix.begin(),  queryPrefix.end());
+
+            State result;
+            result.initState(_seed, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
+
+            if (targetPrefix.length() >= VECTORWIDTH || queryPrefix.length() >= VECTORWIDTH)
+                onedirection (result);
+
+            seed.setBegH(seed.getEndH() - result.seed.getEndH());
+            seed.setBegV(seed.getEndV() - result.seed.getEndV());
+
+            return std::make_pair(result.getBestScore(), result.getCurrScore());
+        }
+        else if (direction == EXTEND_RIGHT)
+        {
+            Seed _seed = seed; // need temporary datastruct
+
+            std::string targetSuffix = target.substr (seed.getBegH(), target.length()); 	// from end seed until the end (seed included)
+            std::string querySuffix  = query.substr  (seed.getBegV(), query.length());		// from end seed until the end (seed included)
+
+            State result;
+            result.initState(_seed, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
+
+            if (targetSuffix.length() >= VECTORWIDTH || querySuffix.length() >= VECTORWIDTH)
+                onedirection (result);
+
+            seed.setEndH (seed.getBegH() + result.seed.getEndH());
+            seed.setEndV (seed.getBegV() + result.seed.getEndV());
+
+            return std::make_pair(result.getBestScore(), result.getCurrScore());
+        }
+        else
+        {
+            Seed _seed1 = seed; // need temporary datastruct
+            Seed _seed2 = seed; // need temporary datastruct
+
+            std::string targetPrefix = target.substr (0, seed.getEndH());	// from read start til start seed (seed not included)
+            std::string queryPrefix  = query.substr  (0, seed.getEndV());	// from read start til start seed (seed not included)
+
+            std::reverse (targetPrefix.begin(), targetPrefix.end());
+            std::reverse (queryPrefix.begin(),  queryPrefix.end());
+
+            State result1;
+            result1.initState(_seed1, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
+
+            if (targetPrefix.length() < VECTORWIDTH || queryPrefix.length() < VECTORWIDTH)
+            {
+                seed.setBegH (seed.getEndH() - targetPrefix.length());
+                seed.setBegV (seed.getEndV() - queryPrefix.length());
+            }
+            else
+            {
+                onedirection (result1);
+
+                seed.setBegH (seed.getEndH() - result1.seed.getEndH());
+                seed.setBegV (seed.getEndV() - result1.seed.getEndV());
+            }
+
+            std::string targetSuffix = target.substr (seed.getEndH(), target.length()); 	// from end seed until the end (seed included)
+            std::string querySuffix  = query.substr  (seed.getEndV(), query.length());	// from end seed until the end (seed included)
+
+            State result2;
+            result2.initState(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);    
+
+            if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH)
+            {
+                seed.setBegH (seed.getEndH() + targetSuffix.length());
+                seed.setBegV (seed.getEndV() + querySuffix.length());
+            }
+            else
+            {
+                onedirection (result2);
+
+                seed.setEndH (seed.getEndH() + result2.seed.getEndH());
+                seed.setEndV (seed.getEndV() + result2.seed.getEndV());
+            }
+
+            // GG: seed already updated and saved in result1
+            // GG: this operation sums up best and exit scores for result1 and result2 and stores them in result1
+            result1 += result2;
+
+            assert(result1.seed.getBegH() <= result1.seed.getEndH());
+            assert(result1.seed.getBegV() <= result1.seed.getEndV());
+
+            return std::make_pair(result1.getBestScore(), result1.getCurrScore());
+        }
+    }
+    
 } /* namespace xavier */
-
-// //======================================================================================
-// // X-DROP ADAPTIVE BANDED ALIGNMENT
-// //======================================================================================
-
-// std::pair<int, int>
-// XavierXDrop
-// (
-// 	SeedX& seed,
-// 	ExtDirectionL direction,
-// 	std::string const& target,
-// 	std::string const& query,
-// 	ScoringSchemeX& scoringScheme,
-// 	int const &scoreDropOff
-// )
-// {
-// 	// TODO: add check scoring scheme correctness/input parameters
-
-// 	if (direction == XAVIER_EXTEND_LEFT)
-// 	{
-// 		SeedX _seed = seed; // need temporary datastruct
-
-// 		std::string targetPrefix = target.substr (0, getEndPositionH(seed));	// from read start til start seed (seed included)
-// 		std::string queryPrefix  = query.substr  (0, getEndPositionV(seed));	// from read start til start seed (seed included)
-// 		std::reverse (targetPrefix.begin(), targetPrefix.end());
-// 		std::reverse (queryPrefix.begin(),  queryPrefix.end());
-
-// 		XavierState result (_seed, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
-
-// 		if (targetPrefix.length() >= VECTORWIDTH || queryPrefix.length() >= VECTORWIDTH)
-// 			XavierOneDirection (result);
-
-// 		setBeginPositionH(seed, getEndPositionH(seed) - getEndPositionH(result.seed));
-// 		setBeginPositionV(seed, getEndPositionV(seed) - getEndPositionV(result.seed));
-
-// 		return std::make_pair(result.get_best_score(), result.get_curr_score());
-// 	}
-// 	else if (direction == XAVIER_EXTEND_RIGHT)
-// 	{
-// 		SeedX _seed = seed; // need temporary datastruct
-
-// 		std::string targetSuffix = target.substr (getBeginPositionH(seed), target.length()); 	// from end seed until the end (seed included)
-// 		std::string querySuffix  = query.substr  (getBeginPositionV(seed), query.length());		// from end seed until the end (seed included)
-
-// 		XavierState result (_seed, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
-
-// 		if (targetSuffix.length() >= VECTORWIDTH || querySuffix.length() >= VECTORWIDTH)
-// 			XavierOneDirection (result);
-
-// 		setEndPositionH (seed, getBeginPositionH(seed) + getEndPositionH(result.seed));
-// 		setEndPositionV (seed, getBeginPositionV(seed) + getEndPositionV(result.seed));
-
-// 		return std::make_pair(result.get_best_score(), result.get_curr_score());
-// 	}
-// 	else
-// 	{
-// 		SeedX _seed1 = seed; // need temporary datastruct
-// 		SeedX _seed2 = seed; // need temporary datastruct
-
-// 		std::string targetPrefix = target.substr (0, getEndPositionH(seed));	// from read start til start seed (seed not included)
-// 		std::string queryPrefix  = query.substr  (0, getEndPositionV(seed));	// from read start til start seed (seed not included)
-
-// 		std::reverse (targetPrefix.begin(), targetPrefix.end());
-// 		std::reverse (queryPrefix.begin(),  queryPrefix.end());
-
-// 		XavierState result1(_seed1, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
-
-// 		if (targetPrefix.length() < VECTORWIDTH || queryPrefix.length() < VECTORWIDTH)
-// 		{
-// 			setBeginPositionH (seed, getEndPositionH(seed) - targetPrefix.length());
-// 			setBeginPositionV (seed, getEndPositionV(seed) - queryPrefix.length());
-// 		}
-// 		else
-// 		{
-// 			XavierOneDirection (result1);
-
-// 			setBeginPositionH (seed, getEndPositionH(seed) - getEndPositionH(result1.seed));
-// 			setBeginPositionV (seed, getEndPositionV(seed) - getEndPositionV(result1.seed));
-// 		}
-
-// 		std::string targetSuffix = target.substr (getEndPositionH(seed), target.length()); 	// from end seed until the end (seed included)
-// 		std::string querySuffix  = query.substr  (getEndPositionV(seed), query.length());	// from end seed until the end (seed included)
-
-// 		XavierState result2(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
-
-// 		if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH)
-// 		{
-// 			setBeginPositionH (seed, getEndPositionH(seed) + targetSuffix.length());
-// 			setBeginPositionV (seed, getEndPositionV(seed) + querySuffix.length());
-// 		}
-// 		else
-// 		{
-// 			XavierOneDirection (result2);
-
-// 			setEndPositionH (seed, getEndPositionH(seed) + getEndPositionH(result2.seed));
-// 			setEndPositionV (seed, getEndPositionV(seed) + getEndPositionV(result2.seed));
-// 		}
-
-// 		// seed already updated and saved in result1
-// 		// this operation sums up best and exit scores for result1 and result2 and stores them in result1
-// 		result1 += result2;
-// 		return std::make_pair(result1.get_best_score(), result1.get_curr_score());
-// 	}
-// }

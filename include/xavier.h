@@ -52,12 +52,12 @@
 
 #include <vector>
 #include <iostream>
-#include <omp.h>
 #include <algorithm>
 #include <inttypes.h>
 #include <assert.h>
 #include <iterator>
 #include <x86intrin.h>
+
 #include "types/state.h"
 #include "constants.h"
 
