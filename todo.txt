@@ -1,5 +1,5 @@
 - [ ] Refactor Directory Structure
-	- [ ] Separate source and header code
+	-[x] Separate source and header code
 		- [ ] Write descriptive comments in the header files
 	- [x] Add clean headers to all files (license, authors, name, ifdef/ifndefs, ...)
 	- [x] Change seed from c-style to c++-style (struct -> class and member funcs)
@@ -8,8 +8,8 @@
 		- [ ] We could move the ops into the vector class
 
 - [ ] Core code
-	- [ ] Give the phases more descriptive names
-	- [ ] Use namespaces
+	- [x] Give the phases more descriptive names
+	- [x] Use namespaces
 	- [ ] Add tracing to the state
 
 - [ ] Correctness
