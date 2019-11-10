@@ -56,7 +56,7 @@
 
 #include <iostream>
 #include <x86intrin.h>
-#include "../ops.h"
+// #include "../ops.h"
 
 namespace xavier
 {
@@ -93,12 +93,12 @@ namespace xavier
 		 */ 
 		VectorRegister()
 		{
-			internal.simd = setOp(0);
+			set (0);
 		}
 
 		VectorRegister(elementType elem)
 		{
-			internal.simd = setOp(elem);
+			set (elem);
 		}
 
 		VectorRegister(vectorType vec)
@@ -127,7 +127,17 @@ namespace xavier
 		inline VectorRegister rshift ();
 
 		/**
-		 * Operators
+		 * Operations
+		 */
+		inline VectorRegister add (VectorRegister& other);
+		inline VectorRegister sub (VectorRegister& other);
+		inline VectorRegister max (VectorRegister& other);
+		inline void set (char a);
+		inline VectorRegister blendv (VectorRegister& other, VectorRegister& mask);
+		inline VectorRegister compeq (VectorRegister& other);
+
+		/**
+		 * Operator
 		 */ 
 		friend std::ostream& operator<<(std::ostream& os, const VectorRegister& vec);
 	};

@@ -16,17 +16,15 @@
 #include "score.h"
 #include "vectors.h"
 #include "../constants.h"
-#include "../ops.h"
 
 namespace xavier
 {
-
-    void VectorRegister::insert(elementType value, unsigned int pos)
+    void VectorRegister::insert (elementType value, unsigned int pos)
     {
         internal.elems[pos] = value;
     }
 
-    elementType VectorRegister::take(unsigned int pos)
+    elementType VectorRegister::take (unsigned int pos)
     {
         return internal.elems[pos];
     }
@@ -57,6 +55,72 @@ namespace xavier
         b.internal.elems[0] = NINF;
 
         return b;
+    }
+
+    /* saturated arithmetic */
+    inline VectorRegister VectorRegister::add (VectorRegister& other)
+    {
+        VectorRegister vec;
+    #ifdef __AVX2__
+	    vec.internal.simd = _mm256_adds_epi8 (internal.simd, other.internal.simd);
+    #elif  __SSE4_2__
+	    vec.internal.simd = _mm_adds_epi16 (internal.simd, other.internal.simd);
+    #endif  
+        return vec;
+    }
+
+    /* saturated arithmetic */
+	inline VectorRegister VectorRegister::sub (VectorRegister& other) 
+    { 
+        VectorRegister vec;
+    #ifdef __AVX2__
+	    vec.internal.simd = _mm256_subs_epi8 (internal.simd, other.internal.simd);
+    #elif  __SSE4_2__
+	    vec.internal.simd = _mm_subs_epi16 (internal.simd, other.internal.simd);
+    #endif  
+        return vec;       
+    }
+
+	inline VectorRegister VectorRegister::max (VectorRegister& other)
+    {
+        VectorRegister vec;
+    #ifdef __AVX2__
+	    vec.internal.simd = _mm256_max_epi8 (internal.simd, other.internal.simd);
+    #elif  __SSE4_2__
+	    vec.internal.simd = _mm_max_epi16 (internal.simd, other.internal.simd);
+    #endif  
+        return vec;       
+    }
+
+    void VectorRegister::set (char a)
+    { 
+    #ifdef __AVX2__
+	    internal.simd = _mm256_set1_epi8 (a);
+    #elif  __SSE4_2__
+	    internal.simd = _mm_set1_epi16 (a);
+    #endif
+    }
+
+	inline VectorRegister VectorRegister::blendv (VectorRegister& other, VectorRegister& mask)
+    { 
+        VectorRegister vec;
+    #ifdef __AVX2__
+	    vec.internal.simd = _mm256_blendv_epi8 (internal.simd, other.internal.simd, mask.internal.simd);
+    #elif  __SSE4_2__
+	    vec.internal.simd = _mm_blendv_epi8 (internal.simd, other.internal.simd, mask.internal.simd);
+    #endif  
+        return vec;         
+    }
+
+	inline VectorRegister VectorRegister::compeq (VectorRegister& other)
+    { 
+        VectorRegister vec;
+    #ifdef __AVX2__
+	    vec.internal.simd = _mm256_cmpeq_epi8 (internal.simd, other.internal.simd);
+    #elif  __SSE4_2__
+	    vec.internal.simd = _mm_cmpeq_epi16 (internal.simd, other.internal.simd);
+    #endif  
+        return vec;         
     }
 
 	std::ostream& operator<<(std::ostream& os, VectorRegister& vec)
