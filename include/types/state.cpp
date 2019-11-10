@@ -10,7 +10,6 @@
 #include "score.h"
 #include "vectors.h"
 #include "../constants.h"
-#include "../ops.h"
 
 namespace xavier
 {
@@ -42,10 +41,10 @@ namespace xavier
 		state.mismatchScore = scoringScheme.getMismatchScore();
 		state.gapScore      = scoringScheme.getGapScore();
 
-		state.vmatchScore    = setOp (state.matchScore   );
-		state.vmismatchScore = setOp (state.mismatchScore);
-		state.vgapScore      = setOp (state.gapScore     );
-		state.vzeros         = _mm256_setzero_si256();
+		state.vzeros = _mm256_setzero_si256();
+		state.vgapScore.set (state.gapScore);
+		state.vmatchScore.set (state.matchScore);
+		state.vmismatchScore.set (state.mismatchScore);
 
 		state.hoffset = LOGICALWIDTH;
 		state.voffset = LOGICALWIDTH;
@@ -113,128 +112,128 @@ namespace xavier
 		return gapScore;      
 	}
 
-	vectorType State::getQueryH () 
+	VectorRegister State::getQueryH () 
 	{ 
-		return vqueryh.simd; 
+		return vqueryh; 
 	}
 
-	vectorType State::getQueryV () 
+	VectorRegister State::getQueryV () 
 	{ 
-		return vqueryv.simd; 
+		return vqueryv; 
 	}
 
-	vectorType State::getAntiDiag1 () 
+	VectorRegister State::getAntiDiag1 () 
 	{ 
-		return antiDiag1.simd; 
+		return antiDiag1; 
 	} 
 
-	vectorType State::getAntiDiag2 () 
+	VectorRegister State::getAntiDiag2 () 
 	{ 
-		return antiDiag2.simd; 
+		return antiDiag2; 
 	}
 	
-	vectorType State::getAntiDiag3 () 
+	VectorRegister State::getAntiDiag3 () 
 	{ 
-		return antiDiag3.simd; 
+		return antiDiag3; 
 	}
 
-	vectorType State::getVmatchScore () 
+	VectorRegister State::getVmatchScore () 
 	{ 
 		return vmatchScore;   
 	}
 
-	vectorType State::getVmismatchScore () 
+	VectorRegister State::getVmismatchScore () 
 	{ 
 		return vmismatchScore;
 	}
 
-	vectorType State::getVgapScore () 
+	VectorRegister State::getVgapScore () 
 	{ 
 		return vgapScore;     
 	}
 
-	vectorType State::getVzeros () 
+	VectorRegister State::getVzeros () 
 	{ 
 		return vzeros;        
 	}
 
 	void State::updateQueryH (uint8_t idx, int8_t value) 
 	{ 
-		vqueryh.elems[idx] = value; 
+		vqueryh.internal.elems[idx] = value; 
 	}
 
 	void State::updateQueryV (uint8_t idx, int8_t value) 
 	{ 
-		vqueryv.elems[idx] = value; 
+		vqueryv.internal.elems[idx] = value; 
 	}
 
 	void State::updateAntiDiag1 (uint8_t idx, int8_t value) 
 	{	
-		antiDiag1.elems[idx] = value; 
+		antiDiag1.internal.elems[idx] = value; 
 	}
 
 	void State::updateAntiDiag2 (uint8_t idx, int8_t value) 
 	{	
-		antiDiag2.elems[idx] = value; 
+		antiDiag2.internal.elems[idx] = value; 
 	}
 
 	void State::updateAntiDiag3 (uint8_t idx, int8_t value) 
 	{	
-		antiDiag3.elems[idx] = value; 
+		antiDiag3.internal.elems[idx] = value; 
 	}
 
 	void State::broadcastAntiDiag1 (int8_t value) 
 	{ 
-		antiDiag1.simd = setOp (value); 
+		antiDiag1.set (value); 
 	}
 
 	void State::broadcastAntiDiag2 (int8_t value) 
 	{ 
-		antiDiag2.simd = setOp (value); 
+		antiDiag2.set (value); 
 	}
 
 	void State::broadcastAntiDiag3 (int8_t value) 
 	{ 
-		antiDiag3.simd = setOp (value); 
+		antiDiag3.set (value); 
 	}
 
-	void State::setAntiDiag1 (vectorType vector) 
+	void State::setAntiDiag1 (VectorRegister vector) 
 	{ 
-		antiDiag1.simd = vector; 
+		antiDiag1 = vector; 
 	}
 
-	void State::setAntiDiag2 (vectorType vector) 
+	void State::setAntiDiag2 (VectorRegister vector) 
 	{ 
-		antiDiag2.simd = vector; 
+		antiDiag2 = vector; 
 	}
 	
-	void State::setAntiDiag3 (vectorType vector) 
+	void State::setAntiDiag3 (VectorRegister vector) 
 	{ 
-		antiDiag3.simd = vector; 
+		antiDiag3 = vector; 
 	}
 
-	void moveRight ()
+	void State::moveRight ()
 	{
 		/* (a) shift to the left on query horizontal */ 
-		vqueryh = shiftLeft (vqueryh.simd);
-		vqueryh.elems[LOGICALWIDTH - 1] = queryh[hoffset++];
+		vqueryh.lshift();
+		vqueryh.internal.elems[LOGICALWIDTH - 1] = queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
-		antiDiag1.simd = antiDiag2.simd;
-		antiDiag1 	   = shiftLeft (antiDiag1.simd);
-		antiDiag2.simd = antiDiag3.simd;
+		antiDiag1 = antiDiag2;
+		antiDiag2 = antiDiag3;
+		antiDiag1.lshift ();
 	}
 
-	void moveDown (void)
+	void State::moveDown ()
 	{
 		/* (a) shift to the right on query vertical */
-		vqueryv = shiftRight (vqueryv.simd);
-		vqueryv.elems[0] = queryv[voffset++];
+		vqueryv.rshift ();
+		vqueryv.internal.elems[0] = queryv[voffset++];
 
 		/* (b) shift to the right on updated vector 2: this places the left-aligned vector 3 as a right-aligned vector 2 */
-		antiDiag1.simd = antiDiag2.simd;
-		antiDiag2.simd = antiDiag3.simd;
-		antiDiag2      = shiftRight (antiDiag2.simd);
+		antiDiag1 = antiDiag2;
+		antiDiag2 = antiDiag3;
+		antiDiag2.rshift ();
 	}
 
 	void operator+=(State& state1, const State& state2)

@@ -85,10 +85,10 @@ namespace xavier
 		int8_t gapScore;
 
 		/* Constant scoring vectors */
-		vectorType vmatchScore;
-		vectorType vmismatchScore;
-		vectorType vgapScore;
-		vectorType vzeros;
+		VectorRegister vmatchScore;
+		VectorRegister vmismatchScore;
+		VectorRegister vgapScore;
+		VectorRegister vzeros;
 
 		/* Computation vectors */
 		VectorRegister antiDiag1;
@@ -132,17 +132,17 @@ namespace xavier
 		int8_t getMismatchScore ();
 		int8_t getGapScore      ();
 
-		vectorType getQueryH ();
-		vectorType getQueryV ();
+		VectorRegister getQueryH ();
+		VectorRegister getQueryV ();
 
-		vectorType getAntiDiag1 ();
-		vectorType getAntiDiag2 ();
-		vectorType getAntiDiag3 ();
+		VectorRegister getAntiDiag1 ();
+		VectorRegister getAntiDiag2 ();
+		VectorRegister getAntiDiag3 ();
 
-		vectorType getVmatchScore    ();
-		vectorType getVmismatchScore ();
-		vectorType getVgapScore      ();
-		vectorType getVzeros        ();
+		VectorRegister getVmatchScore    ();
+		VectorRegister getVmismatchScore ();
+		VectorRegister getVgapScore      ();
+		VectorRegister getVzeros        ();
 
 		void updateQueryH (uint8_t idx, int8_t value);
 		void updateQueryV (uint8_t idx, int8_t value);
@@ -155,9 +155,9 @@ namespace xavier
 		void broadcastAntiDiag2 (int8_t value);
 		void broadcastAntiDiag3 (int8_t value);
 
-		void setAntiDiag1 (vectorType vector);
-		void setAntiDiag2 (vectorType vector);
-		void setAntiDiag3 (vectorType vector);
+		void setAntiDiag1 (VectorRegister vector);
+		void setAntiDiag2 (VectorRegister vector);
+		void setAntiDiag3 (VectorRegister vector);
 
 		void moveRight ();
 		void moveDown  ();

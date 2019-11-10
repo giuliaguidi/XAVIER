@@ -56,7 +56,6 @@
 
 #include <iostream>
 #include <x86intrin.h>
-// #include "../ops.h"
 
 namespace xavier
 {
@@ -129,12 +128,12 @@ namespace xavier
 		/**
 		 * Operations
 		 */
-		inline VectorRegister add (VectorRegister& other);
-		inline VectorRegister sub (VectorRegister& other);
-		inline VectorRegister max (VectorRegister& other);
+		inline VectorRegister add (const VectorRegister& other) const;
+		inline VectorRegister sub (const VectorRegister& other) const;
+		inline VectorRegister max (const VectorRegister& other) const;
 		inline void set (char a);
-		inline VectorRegister blendv (VectorRegister& other, VectorRegister& mask);
-		inline VectorRegister compeq (VectorRegister& other);
+		inline VectorRegister blendv (const VectorRegister& other, const VectorRegister& mask) const;
+		inline VectorRegister compeq (const VectorRegister& other) const;
 
 		/**
 		 * Operator

@@ -104,19 +104,17 @@ namespace xavier {
            && state.voffset < state.vlength)
         {
     		// NOTE: -1 for a match and 0 for a mismatch
-    		vectorType match = cmpeqOp (state.getQueryH(), state.getQueryV());
-    		match = blendvOp (state.getVmismatchScore(), state.getVmatchScore(), match);
+    		VectorRegister match = state.getQueryH().compeq (state.getQueryV());
+    		match = state.getVmismatchScore().blendv (state.getVmatchScore(), match);
 
-    		vectorType antiDiag1F = addOp(match, state.getAntiDiag1());
+    		VectorRegister antiDiag1F = match.add (state.getAntiDiag1());
+    		VectorRegister antiDiag2S = state.getAntiDiag2().lshift();
 
-            VectorRegister ref = state.getAntiDiag2();
-    		VectorRegister antiDiag2S = ref.lshift();
-
-    		vectorType antiDiag2M = maxOp (antiDiag2S.internal.simd, state.getAntiDiag2());
-    		vectorType antiDiag2F = addOp (antiDiag2M, state.getVgapScore());
+    		VectorRegister antiDiag2M = antiDiag2S.max (state.getAntiDiag2());
+    		VectorRegister antiDiag2F = antiDiag2M.add (state.getVgapScore());
 
     		// Compute antiDiag3 and left-aligne
-    		state.setAntiDiag3 (maxOp (antiDiag1F, antiDiag2F));
+    		state.setAntiDiag3 (antiDiag1F.max (antiDiag2F));
     		state.updateAntiDiag3 (LOGICALWIDTH, NINF);
 
     		// TODO: x-drop termination, we don't need to check x-drop every time
@@ -141,14 +139,18 @@ namespace xavier {
     		if (antiDiagBest > CUTOFF)
     		{
     			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + LOGICALWIDTH);
-    			state.setAntiDiag2 (subOp (state.getAntiDiag2(), setOp (min)));
-    			state.setAntiDiag3 (subOp (state.getAntiDiag3(), setOp (min)));
+
+                VectorRegister aux;
+                aux.set (min);
+
+    			state.setAntiDiag2 (state.getAntiDiag2().sub (aux));
+    			state.setAntiDiag3 (state.getAntiDiag3().sub (aux));
     			state.setScoreOffset (state.getScoreOffset() + min);
     		}
 
     		// Update best
     		if (state.getCurrScore() > state.getBestScore())
-    			state.setBestScore(state.getCurrScore());
+    			state.setBestScore (state.getCurrScore());
 
     		// TODO: optimize this
     		int maxpos, max = 0;
@@ -173,19 +175,17 @@ namespace xavier {
         for (int i = 0; i < (LOGICALWIDTH - 3); i++) {
 
     		// NOTE: -1 for a match and 0 for a mismatch
-    		vectorType match = cmpeqOp (state.getQueryH(), state.getQueryV());
-    		match = blendvOp (state.getVmismatchScore(), state.getVmatchScore(), match);
+    		VectorRegister match = state.getQueryH().compeq (state.getQueryV());
+    		match = state.getVmismatchScore().blendv (state.getVmatchScore(), match);
 
-    		vectorType antiDiag1F = addOp(match, state.getAntiDiag1());
+    		VectorRegister antiDiag1F = match.add (state.getAntiDiag1());
+    		VectorRegister antiDiag2S = state.getAntiDiag2().lshift();
 
-            VectorRegister ref = state.getAntiDiag2();
-    		VectorRegister antiDiag2S = ref.lshift();
-
-    		vectorType antiDiag2M = maxOp (antiDiag2S.internal.simd, state.getAntiDiag2());
-    		vectorType antiDiag2F = addOp (antiDiag2M, state.getVgapScore());
+    		VectorRegister antiDiag2M = antiDiag2S.max (state.getAntiDiag2());
+    		VectorRegister antiDiag2F = antiDiag2M.add (state.getVgapScore());
 
     		// Compute antiDiag3 and left-aligne
-    		state.setAntiDiag3 (maxOp (antiDiag1F, antiDiag2F));
+    		state.setAntiDiag3 (antiDiag1F.max (antiDiag2F));
     		state.updateAntiDiag3 (LOGICALWIDTH, NINF);
 
     		// TODO: x-drop termination, we don't need to check x-drop every time
@@ -203,10 +203,14 @@ namespace xavier {
 
             if (antiDiagBest > CUTOFF)
             {
-                int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + LOGICALWIDTH);
-                state.setAntiDiag2 (subOp (state.getAntiDiag2(), setOp (min)));
-                state.setAntiDiag3 (subOp (state.getAntiDiag3(), setOp (min)));
-                state.setScoreOffset (state.getScoreOffset() + min);
+    			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + LOGICALWIDTH);
+
+                VectorRegister aux;
+                aux.set (min);
+
+    			state.setAntiDiag2 (state.getAntiDiag2().sub (aux));
+    			state.setAntiDiag3 (state.getAntiDiag3().sub (aux));
+    			state.setScoreOffset (state.getScoreOffset() + min);
             }
 
             // Update best
