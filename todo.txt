@@ -11,5 +11,11 @@
 	- [x] Give the phases more descriptive names
 	- [x] Use namespaces
 	- [ ] Add tracing to the state
+	- [ ] Optimize max search (from conversation with Colin MacLean)
+		- https://stackoverflow.com/questions/9795529/how-to-find-the-horizontal-maximum-in-a-256-bit-avx-vector
+		- Logical AND it with the vector to get 1s in the maximum positions
+		- Then AND that with a vector with one side one's and one side 0's, to test which half it's on
+		- Then compare that vector to zero to decide what to do
+		- That's a version for doubles, but the same strategy should work for bytes. It'll take a few more 		          instructions but there should be a divide and conquer approach to it. Find the maximum of 16 pairs, then 8, 			4, and 2.
 
 - [ ] Correctness
