@@ -51,6 +51,7 @@
 #define XAVIER_TYPES_STATE_H
 
 #include <string>
+#include <cstdint>
 #include "seed.h"
 #include "score.h"
 #include "vectors.h"

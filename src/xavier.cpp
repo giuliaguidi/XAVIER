@@ -329,9 +329,3 @@ namespace xavier
     }
 
 } /* namespace xavier */
-
-
-int main ( void )
-{
-	return 0;
-}
