@@ -8,49 +8,46 @@
 
 namespace xavier
 {
-	State State::initState(Seed& _seed, std::string const& hseq, std::string const& vseq,
+	State::State(Seed& _seed, std::string const& hseq, std::string const& vseq,
 				ScoringScheme& scoringScheme, int const &_scoreDropOff)
 	{
-		State state;
-		state.seed = _seed;
+		seed = _seed;
 
-		state.hlength = hseq.length() + 1;
-		state.vlength = vseq.length() + 1;
+		hlength = hseq.length() + 1;
+		vlength = vseq.length() + 1;
 
-		if (state.hlength < VECTORWIDTH || state.vlength < VECTORWIDTH)
+		if (hlength < VECTORWIDTH || vlength < VECTORWIDTH)
 		{
-			state.seed.setEndH(state.hlength);
-			state.seed.setEndV(state.vlength);
+			seed.setEndH(hlength);
+			seed.setEndV(vlength);
 		}
 
-		state.queryh = new int8_t[state.hlength + VECTORWIDTH];
-		state.queryv = new int8_t[state.vlength + VECTORWIDTH];
+		queryh = new int8_t[hlength + VECTORWIDTH];
+		queryv = new int8_t[vlength + VECTORWIDTH];
 
-		std::copy(hseq.begin(), hseq.begin() + hlength, state.queryh);
-		std::copy(vseq.begin(), vseq.begin() + vlength, state.queryv);
+		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
+		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
 
-		std::fill(state.queryh + state.hlength, state.queryh + state.hlength + VECTORWIDTH, NINF);
-		std::fill(state.queryv + state.vlength, state.queryv + state.vlength + VECTORWIDTH, NINF);
+		std::fill(queryh + hlength, queryh + hlength + VECTORWIDTH, NINF);
+		std::fill(queryv + vlength, queryv + vlength + VECTORWIDTH, NINF);
 
-		state.matchScore    = scoringScheme.getMatchScore();
-		state.mismatchScore = scoringScheme.getMismatchScore();
-		state.gapScore      = scoringScheme.getGapScore();
+		matchScore    = scoringScheme.getMatchScore();
+		mismatchScore = scoringScheme.getMismatchScore();
+		gapScore      = scoringScheme.getGapScore();
 
-		state.vzeros = _mm256_setzero_si256();
-		state.vgapScore.set (state.gapScore);
-		state.vmatchScore.set (state.matchScore);
-		state.vmismatchScore.set (state.mismatchScore);
+		vzeros = _mm256_setzero_si256();
+		vgapScore.set (gapScore);
+		vmatchScore.set (matchScore);
+		vmismatchScore.set (mismatchScore);
 
-		state.hoffset = LOGICALWIDTH;
-		state.voffset = LOGICALWIDTH;
+		hoffset = LOGICALWIDTH;
+		voffset = LOGICALWIDTH;
 
-		state.bestScore    = 0;
-		state.currScore    = 0;
-		state.scoreOffset  = 0;
-		state.scoreDropOff = _scoreDropOff;
-		state.xDropCond    = false;
-
-		return state;
+		bestScore    = 0;
+		currScore    = 0;
+		scoreOffset  = 0;
+		scoreDropOff = _scoreDropOff;
+		xDropCond    = false;
 	}
 
 	State::~State()

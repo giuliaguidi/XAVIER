@@ -108,12 +108,16 @@ namespace xavier
 		bool xDropCond;
 
 		/**
-		 * Create a new State object
-		 * There's no default constructor
-		 * User should use this function to initialize a new State object
+		 * Constructors
 		 */
-		State initState(Seed& _seed, std::string const& hseq, std::string const& vseq,
-				ScoringScheme& scoringScheme, int const &_scoreDropOff);
+		State
+		(
+		 	Seed& _seed,
+		 	std::string const& hseq,
+		 	std::string const& vseq,
+			ScoringScheme& scoringScheme,
+			int const &_scoreDropOff
+		);
 
 		/**
 		 * Destructor

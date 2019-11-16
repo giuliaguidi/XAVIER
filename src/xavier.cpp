@@ -246,8 +246,7 @@ namespace xavier
             std::reverse (targetPrefix.begin(), targetPrefix.end());
             std::reverse (queryPrefix.begin(),  queryPrefix.end());
 
-            State result;
-            result.initState(_seed, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
+            State result(_seed, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
 
             if (targetPrefix.length() >= VECTORWIDTH || queryPrefix.length() >= VECTORWIDTH)
                 onedirection (result);
@@ -264,8 +263,7 @@ namespace xavier
             std::string targetSuffix = target.substr (seed.getBegH(), target.length()); 	// from end seed until the end (seed included)
             std::string querySuffix  = query.substr  (seed.getBegV(), query.length());		// from end seed until the end (seed included)
 
-            State result;
-            result.initState(_seed, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
+            State result(_seed, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
             if (targetSuffix.length() >= VECTORWIDTH || querySuffix.length() >= VECTORWIDTH)
                 onedirection (result);
@@ -286,8 +284,7 @@ namespace xavier
             std::reverse (targetPrefix.begin(), targetPrefix.end());
             std::reverse (queryPrefix.begin(),  queryPrefix.end());
 
-            State result1;
-            result1.initState(_seed1, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
+            State result1(_seed1, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
 
             if (targetPrefix.length() < VECTORWIDTH || queryPrefix.length() < VECTORWIDTH)
             {
@@ -305,8 +302,7 @@ namespace xavier
             std::string targetSuffix = target.substr (seed.getEndH(), target.length()); 	// from end seed until the end (seed included)
             std::string querySuffix  = query.substr  (seed.getEndV(), query.length());	// from end seed until the end (seed included)
 
-            State result2;
-            result2.initState(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
+            State result2(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
             if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH)
             {

@@ -55,6 +55,28 @@
 
 namespace xavier
 {
+	class TraceEntry
+	{
+	public:
+		TraceEntry ( _ad1, _ad2, _ad3, _vqh, _vqv, offset ):
+			antiDiag1( _ad1 ),
+			antiDiag2( _ad2 ),
+			antiDiag3( _ad3 ),
+			vqueryh( _vqh ),
+			vqueryv( _vqv ),
+			scoreOffset( offset )
+			{ }
+
+	private:
+		VectorRegister antiDiag1;
+		VectorRegister antiDiag2;
+		VectorRegister antiDiag3;
+
+		VectorRegister vqueryh;
+		VectorRegister vqueryv;
+		int scoreOffset;
+	};
+
 	class Trace
 	{
 	public:
