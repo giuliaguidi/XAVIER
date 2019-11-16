@@ -50,63 +50,67 @@
 #ifndef XAVIER_TYPES_SCORE_H
 #define XAVIER_TYPES_SCORE_H
 
+#include <cassert>
+
 namespace xavier
 {
 	class ScoringScheme
 	{
 	private:
+
 		/**
 		 * Fields according to https://www.drive5.com/usearch/manual/cigar.html
 		 */
-		short m_score;  // match
-		short x_score;  // mismatch
-		short g_score;  // gap
-		
+		short match_score;     // match
+		short mismatch_score;  // mismatch
+		short gap_score;       // gap
+
 	public:
+
 		/**
 		 * Declare default constructor
-		 */ 
+		 */
   		ScoringScheme();
 
 		/**
 		 * Declare copy constructor
-		 */  
-		ScoringScheme(ScoringScheme& _copy);
+		 */
+		ScoringScheme ( ScoringScheme& _copy );
 
 		/**
 		 * Return match score
-		 */ 
-		inline short getMatchScore() const;
+		 */
+		short getMatchScore() const;
 
 		/**
 		 * Return mismatch penalty
-		 */ 
-		inline short getMismatchScore() const;
+		 */
+		short getMismatchScore() const;
 
 		/**
 		 * Return gap penalty
-		 */ 	
-		inline short getGapScore() const;
+		 */
+		short getGapScore() const;
 
 		/**
 		 * Return match score (>0)
-		 */ 
-		inline void setMatchScore(short const value);
+		 */
+		void setMatchScore ( short const value );
 
 		/**
 		 * Return mismatch score (<0)
-		 */ 
-		inline void setMismatchScore(short const value);
+		 */
+		void setMismatchScore ( short const value );
 
 		/**
 		 * Return gap penalty (<0)
-		 */ 
-		inline void setGapScore(short const value);
+		 */
+		void setGapScore ( short const value );
 
 		/**
 		 * Return score between two characters (either a match or a mismatch)
-		 */ 
-		inline short score(char valH, char valV);
+		 */
+		short score ( char valH, char valV );
 	};
 }
 

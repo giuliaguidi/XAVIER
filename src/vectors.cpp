@@ -8,14 +8,7 @@
 #define __AVX2__
 #endif
 
-#include <iostream>
-#include <x86intrin.h>
-
-#include "state.h"
-#include "seed.h"
-#include "score.h"
 #include "vectors.h"
-#include "../constants.h"
 
 namespace xavier
 {
@@ -29,7 +22,7 @@ namespace xavier
         return internal.elems[pos];
     }
 
-    inline VectorRegister VectorRegister::lshift ()
+    VectorRegister VectorRegister::lshift ()
     {
         VectorRegister b;
 
@@ -43,7 +36,7 @@ namespace xavier
         return b;
     }
 
-    inline VectorRegister VectorRegister::rshift ()
+    VectorRegister VectorRegister::rshift ()
     {
         VectorRegister b;
 
@@ -58,42 +51,42 @@ namespace xavier
     }
 
     /* saturated arithmetic */
-    inline VectorRegister VectorRegister::add (const VectorRegister& other) const
+    VectorRegister VectorRegister::add (const VectorRegister& other) const
     {
         VectorRegister vec;
     #ifdef __AVX2__
 	    vec = _mm256_adds_epi8 (internal.simd, other.internal.simd);
     #elif  __SSE4_2__
 	    vec = _mm_adds_epi16 (internal.simd, other.internal.simd);
-    #endif  
+    #endif
         return vec;
     }
 
     /* saturated arithmetic */
-	inline VectorRegister VectorRegister::sub (const VectorRegister& other) const
-    { 
+	VectorRegister VectorRegister::sub (const VectorRegister& other) const
+    {
         VectorRegister vec;
     #ifdef __AVX2__
 	    vec = _mm256_subs_epi8 (internal.simd, other.internal.simd);
     #elif  __SSE4_2__
 	    vec = _mm_subs_epi16 (internal.simd, other.internal.simd);
-    #endif  
-        return vec;       
+    #endif
+        return vec;
     }
 
-	inline VectorRegister VectorRegister::max (const VectorRegister& other) const
+	VectorRegister VectorRegister::max (const VectorRegister& other) const
     {
         VectorRegister vec;
     #ifdef __AVX2__
 	    vec = _mm256_max_epi8 (internal.simd, other.internal.simd);
     #elif  __SSE4_2__
 	    vec = _mm_max_epi16 (internal.simd, other.internal.simd);
-    #endif  
-        return vec;       
+    #endif
+        return vec;
     }
 
     void VectorRegister::set (char a)
-    { 
+    {
     #ifdef __AVX2__
 	    internal.simd = _mm256_set1_epi8 (a);
     #elif  __SSE4_2__
@@ -101,26 +94,26 @@ namespace xavier
     #endif
     }
 
-	inline VectorRegister VectorRegister::blendv (const VectorRegister& other, const VectorRegister& mask) const 
-    { 
+	VectorRegister VectorRegister::blendv (const VectorRegister& other, const VectorRegister& mask) const
+    {
         VectorRegister vec;
     #ifdef __AVX2__
 	    vec = _mm256_blendv_epi8 (internal.simd, other.internal.simd, mask.internal.simd);
     #elif  __SSE4_2__
 	    vec = _mm_blendv_epi8 (internal.simd, other.internal.simd, mask.internal.simd);
-    #endif  
-        return vec;         
+    #endif
+        return vec;
     }
 
-	inline VectorRegister VectorRegister::compeq (const VectorRegister& other) const
-    { 
+	VectorRegister VectorRegister::compeq (const VectorRegister& other) const
+    {
         VectorRegister vec;
     #ifdef __AVX2__
 	    vec = _mm256_cmpeq_epi8 (internal.simd, other.internal.simd);
     #elif  __SSE4_2__
 	    vec = _mm_cmpeq_epi16 (internal.simd, other.internal.simd);
-    #endif  
-        return vec;         
+    #endif
+        return vec;
     }
 
 	std::ostream& operator<<(std::ostream& os, VectorRegister& vec)
@@ -129,5 +122,6 @@ namespace xavier
 		for(int i = 0; i < VECTORWIDTH - 1; ++i)
 			os << vec.take(i) << ", ";
 		os << vec.take(VECTORWIDTH - 1) << "}" << std::endl;
+		return os;
 	}
 }

@@ -56,6 +56,8 @@
 
 #include <iostream>
 #include <x86intrin.h>
+#include <limits>
+#include "constants.h"
 
 namespace xavier
 {
@@ -80,7 +82,7 @@ namespace xavier
 
 		/**
 		 * Fields
-		 */ 
+		 */
 		union
 		{
 			vectorType  simd;
@@ -89,7 +91,7 @@ namespace xavier
 
 		/**
 		 * Constructors
-		 */ 
+		 */
 		VectorRegister()
 		{
 			set (0);
@@ -107,37 +109,37 @@ namespace xavier
 
 		/**
 		 * Insert @value in position @pos of VectorRegister
-		 */ 
+		 */
 		void insert(elementType value, unsigned int pos);
 
 		/**
 		 * Return value in position @pos of VectorRegister
-		 */ 
+		 */
 		elementType take(unsigned int pos);
 
 		/**
 		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
-		 */ 
-		inline VectorRegister lshift ();
+		 */
+		VectorRegister lshift ();
 
 		/**
 		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
-		 */ 
-		inline VectorRegister rshift ();
+		 */
+		VectorRegister rshift ();
 
 		/**
 		 * Operations
 		 */
-		inline VectorRegister add (const VectorRegister& other) const;
-		inline VectorRegister sub (const VectorRegister& other) const;
-		inline VectorRegister max (const VectorRegister& other) const;
-		inline void set (char a);
-		inline VectorRegister blendv (const VectorRegister& other, const VectorRegister& mask) const;
-		inline VectorRegister compeq (const VectorRegister& other) const;
+		VectorRegister add (const VectorRegister& other) const;
+		VectorRegister sub (const VectorRegister& other) const;
+		VectorRegister max (const VectorRegister& other) const;
+		void set (char a);
+		VectorRegister blendv (const VectorRegister& other, const VectorRegister& mask) const;
+		VectorRegister compeq (const VectorRegister& other) const;
 
 		/**
 		 * Operator
-		 */ 
+		 */
 		friend std::ostream& operator<<(std::ostream& os, const VectorRegister& vec);
 	};
 }

@@ -4,19 +4,10 @@
  * Description: Xavier Main Source.
  */
 
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <inttypes.h>
-#include <assert.h>
-#include <cassert>
-#include <iterator>
-#include <x86intrin.h>
-
 #include "xavier.h"
-#include "types/seed.h"
 
-namespace xavier {
+namespace xavier
+{
 
 	void beg (State& state)
     {
@@ -100,7 +91,7 @@ namespace xavier {
 
 	void mid (State& state)
     {
-    	while(state.hoffset < state.hlength 
+    	while(state.hoffset < state.hlength
            && state.voffset < state.vlength)
         {
     		// NOTE: -1 for a match and 0 for a mismatch
@@ -131,7 +122,7 @@ namespace xavier {
 
     			state.seed.setEndH (state.hoffset);
     			state.seed.setEndV (state.voffset);
-                
+
                 // GG: void function; values are saved in State object
     			return;
     		}
@@ -196,7 +187,7 @@ namespace xavier {
             // GG: double check correctness; begH/V cannot be > than endH/V
     		int scoreThreshold = state.getBestScore() - state.getScoreDropoff();
     		if (state.getCurrScore() < scoreThreshold) {
-    			state.xDropCond = true; 
+    			state.xDropCond = true;
                 // GG: void function; values are saved in State object
     			return;
     		}
@@ -248,7 +239,7 @@ namespace xavier {
         if (direction == EXTEND_LEFT)
         {
             // GG: need temporary object
-            Seed _seed = seed; 
+            Seed _seed = seed;
 
             std::string targetPrefix = target.substr (0, seed.getEndH());	// GG: from read start until start seed (seed included)
             std::string queryPrefix  = query.substr  (0, seed.getEndV());	// GG: from read start until start seed (seed included)
@@ -315,7 +306,7 @@ namespace xavier {
             std::string querySuffix  = query.substr  (seed.getEndV(), query.length());	// from end seed until the end (seed included)
 
             State result2;
-            result2.initState(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);    
+            result2.initState(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
             if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH)
             {
@@ -340,5 +331,11 @@ namespace xavier {
             return std::make_pair(result1.getBestScore(), result1.getCurrScore());
         }
     }
-    
+
 } /* namespace xavier */
+
+
+int main ( void )
+{
+	return 0;
+}

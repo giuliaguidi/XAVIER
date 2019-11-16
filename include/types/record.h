@@ -1,7 +1,9 @@
 /**
- * File: xavier.h
+ * File: record.h
+ *
  * Author: G. Guidi, E. Younis
- * Description: Xavier Main Header.
+ *
+ * Description: Xavier Record Type.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -47,49 +49,24 @@
  * in binary and source code form.
  */
 
-#ifndef _XAVIER_XAVIER_H_
-#define _XAVIER_XAVIER_H_
 
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <inttypes.h>
-#include <assert.h>
-#include <iterator>
-#include <x86intrin.h>
+#ifndef _XAVIER_TYPES_TRACE_ENTRY_H_
+#define _XAVIER_TYPES_TRACE_ENTRY_H_
 
-#include "types/state.h"
-#include "constants.h"
-#include "types/vectors.h"
+namespace xavier
+{
 
-namespace xavier {
+	class TraceEntry
+	{
+		vectorUnionType antiDiag1;
+		vectorUnionType antiDiag2;
+		vectorUnionType antiDiag3;
 
-	/**
-	 * TODO: descriptive name and comment (phase I)
-	 */
-	void beg (State& state);
+		vectorUnionType vqueryh;
+		vectorUnionType vqueryv;
+		int64_t scoreOffset;
+	};
 
-	/**
-	 * TODO: descriptive name and comment (phase II)
-	 */
-	void mid (State& state);
+}
 
-	/**
-	 * TODO: descriptive name and comment (phase IV)
-	 */
-	void end (State& state);
-
-	/**
-	 * TODO: descriptive name and comment
-	 */
-	void onedirection (State& state);
-
-	/**
-	 * TODO: descriptive name and comment
-	 */
-	std::pair<int, int> xavier (Seed& seed, Direction direction, std::string const& target,
-		std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff);
-
-} /* namespace xavier */
-
-#endif /* _XAVIER_XAVIER_H_ */
+#endif

@@ -54,6 +54,7 @@
 #include "seed.h"
 #include "score.h"
 #include "vectors.h"
+#include "constants.h"
 
 namespace xavier
 {
@@ -64,10 +65,10 @@ namespace xavier
 		 * Fields
 		 */
 
-		/* Define starting position and need to be updated when exiting */ 
-		Seed seed; 
+		/* Define starting position and need to be updated when exiting */
+		Seed seed;
 
-		/* Length of sequences */ 
+		/* Length of sequences */
 		unsigned int hlength;
 		unsigned int vlength;
 
@@ -110,13 +111,13 @@ namespace xavier
 		 * Create a new State object
 		 * There's no default constructor
 		 * User should use this function to initialize a new State object
-		 */ 
+		 */
 		State initState(Seed& _seed, std::string const& hseq, std::string const& vseq,
 				ScoringScheme& scoringScheme, int const &_scoreDropOff);
 
 		/**
 		 * Destructor
-		 */ 
+		 */
 		~State();
 
 		int getScoreOffset  ();
@@ -164,7 +165,7 @@ namespace xavier
 	};
 
 	/**
-	* Operator+= overloading 
+	* Operator+= overloading
 	*/
 	void operator+=(State& state1, const State& state2);
 }

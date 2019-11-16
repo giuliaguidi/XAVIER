@@ -50,6 +50,9 @@
 #ifndef XAVIER_TYPES_SEED_H
 #define XAVIER_TYPES_SEED_H
 
+#include <cassert>
+#include <algorithm>
+
 namespace xavier
 {
 	class Seed
@@ -57,7 +60,7 @@ namespace xavier
 	private:
 		/**
 		 * Fields
-		 */ 
+		 */
 		int begH;
 		int begV;
 		int endH;
@@ -67,91 +70,91 @@ namespace xavier
 
 	public:
 		/**
-		 * Default constructor 
-		 */ 
+		 * Default constructor
+		 */
 		Seed();
 
 		/**
 		 * Constructor from seed
-		 */ 
+		 */
 		Seed(int _begH, int _begV, int _length);
 
 		/**
 		 * Constructor from location
-		 */ 
+		 */
 		Seed(int _begH, int _begV, int _endH, int _endV);
 
 		/**
 		 * Copy constructor
-		 */ 
+		 */
 		Seed(Seed const& other);
 
 		/**
 		 * Return alignment score
-		 */ 
-		inline int getAlignScore() const;
+		 */
+		int getAlignScore() const;
 
 		/**
 		 * Return beginning of alignment on sequenceH
-		 */ 
-		inline int getBegH() const;
+		 */
+		int getBegH() const;
 
 		/**
 		 * Return beginning of alignment on sequenceV
-		 */ 
-		inline int getBegV() const;
+		 */
+		int getBegV() const;
 
 		/**
 		 * Return ending of alignment on sequenceH
-		 */ 
-		inline int getEndH() const;
+		 */
+		int getEndH() const;
 
 		/**
 		 * Return ending of alignment on sequenceV
-		 */ 
-		inline int getEndV() const;
+		 */
+		int getEndV() const;
 
 		/**
 		 * Return length of the alignment
-		 */ 
-		inline int getAlignLength() const;
+		 */
+		int getAlignLength() const;
 
 		/**
 		 * Set alignment score
-		 */ 
-		inline void setAlignScore(int const value);
+		 */
+		void setAlignScore(int const value);
 
 		/**
 		 * Set beginning of alignment on sequenceH
-		 */ 
-		inline void setBegH(int const value);
+		 */
+		void setBegH(int const value);
 
 		/**
 		 * Set beginning of alignment on sequenceV
-		 */ 
-		inline void setBegV(int const value);
+		 */
+		void setBegV(int const value);
 
 		/**
 		 * Set ending of alignment on sequenceH
-		 */ 
-		inline void setEndH(int const value);
+		 */
+		void setEndH(int const value);
 
 		/**
 		 * Set ending of alignment on sequenceV
-		 */ 
-		inline void setEndV(int const value);
+		 */
+		void setEndV(int const value);
 
 		/**
 		 * Set alignment length, cannot be < 0
-		 */ 
-		inline void setAlignLength(int const value);
+		 */
+		void setAlignLength(int const value);
 
 		/**
 		 * Check seed correctness
 		 * begH <= endH
 		 * begV <= endV
-		 */ 
-		inline bool checkConsistency();
+		 */
+		bool checkConsistency();
 	};
 }
 
