@@ -1,2 +1,3 @@
 *.o
 xavier.out
+test/run_tests
