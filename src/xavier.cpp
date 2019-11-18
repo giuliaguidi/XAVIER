@@ -12,11 +12,11 @@ namespace xavier
 	void beg (State& state)
     {
         // we need one more space for the off-grid values and one more space for antiDiag2
-        int DPmatrix[LOGICALWIDTH + 2][LOGICALWIDTH + 2];
+        int DPmatrix[VectorRegister::LOGICALWIDTH + 2][VectorRegister::LOGICALWIDTH + 2];
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
-        for (int i = 1; i < LOGICALWIDTH + 2; i++)
+        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++)
         {
             DPmatrix[0][i] = -i;
             DPmatrix[i][0] = -i;
@@ -26,9 +26,9 @@ namespace xavier
         int DPmax = 0;
 
         // DPmatrix population
-        for (int i = 1; i < LOGICALWIDTH + 2; i++) {
+        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++) {
             // GG: we only need the upper-left triangular matrix
-            for (int j = 1; j <= LOGICALWIDTH + 2 - i; j++) {
+            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 2 - i; j++) {
 
                 int oneF = DPmatrix[i-1][j-1];
 
@@ -49,20 +49,20 @@ namespace xavier
             }
         }
 
-        for (int i = 0; i < LOGICALWIDTH; ++i) {
+        for (int i = 0; i < VectorRegister::LOGICALWIDTH; ++i) {
             state.updateQueryH (i, state.queryh[i + 1]);
-            state.updateQueryV (i, state.queryv[LOGICALWIDTH - i]);
+            state.updateQueryV (i, state.queryv[VectorRegister::LOGICALWIDTH - i]);
         }
 
-        state.updateQueryH (LOGICALWIDTH, NINF);
-        state.updateQueryV (LOGICALWIDTH, NINF);
+        state.updateQueryH (VectorRegister::LOGICALWIDTH, NINF);
+        state.updateQueryV (VectorRegister::LOGICALWIDTH, NINF);
 
         int antiDiagMax = std::numeric_limits<int8_t>::min();
 
         // Load DPmatrix into antiDiag1 and antiDiag2 vector and find max elem at the end of the initial stage in antiDiag1
-        for (int i = 1; i < LOGICALWIDTH + 1; ++i) {
-            int value1 = DPmatrix[i][LOGICALWIDTH - i + 1];
-            int value2 = DPmatrix[i + 1][LOGICALWIDTH - i + 1];
+        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 1; ++i) {
+            int value1 = DPmatrix[i][VectorRegister::LOGICALWIDTH - i + 1];
+            int value2 = DPmatrix[i + 1][VectorRegister::LOGICALWIDTH - i + 1];
 
             state.updateAntiDiag1 (i - 1, value1);
             state.updateAntiDiag2 (i, value2);
@@ -71,7 +71,7 @@ namespace xavier
                 antiDiagMax = value1;
         }
 
-        state.updateAntiDiag1 (LOGICALWIDTH, NINF);
+        state.updateAntiDiag1 (VectorRegister::LOGICALWIDTH, NINF);
         state.updateAntiDiag2 (0, NINF);
         state.broadcastAntiDiag3 (NINF);
 
@@ -106,11 +106,11 @@ namespace xavier
 
     		// Compute antiDiag3 and left-aligne
     		state.setAntiDiag3 (antiDiag1F.max (antiDiag2F));
-    		state.updateAntiDiag3 (LOGICALWIDTH, NINF);
+    		state.updateAntiDiag3 (VectorRegister::LOGICALWIDTH, NINF);
 
     		// TODO: x-drop termination, we don't need to check x-drop every time
     		// TODO: create custom max element function that returns both position and value
-    		int8_t antiDiagBest = *std::max_element (state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VECTORWIDTH);
+    		int8_t antiDiagBest = *std::max_element (state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VectorRegister::VECTORWIDTH);
     		state.setCurrScore (antiDiagBest + state.getScoreOffset());
 
     		int scoreThreshold = state.getBestScore() - state.getScoreDropoff();
@@ -129,7 +129,7 @@ namespace xavier
 
     		if (antiDiagBest > CUTOFF)
     		{
-    			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + LOGICALWIDTH);
+    			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VectorRegister::LOGICALWIDTH);
 
                 VectorRegister aux;
                 aux.set (min);
@@ -145,7 +145,7 @@ namespace xavier
 
     		// TODO: optimize this
     		int maxpos, max = 0;
-    		for (int i = 0; i < VECTORWIDTH; ++i)
+    		for (int i = 0; i < VectorRegister::VECTORWIDTH; ++i)
     			if (state.antiDiag3.take(i) > max) {
     				maxpos = i;
     				max = state.antiDiag3.take(i);
@@ -163,7 +163,7 @@ namespace xavier
 
         int dir = state.hoffset >= state.hlength ? goDOWN : goRIGHT;
 
-        for (int i = 0; i < (LOGICALWIDTH - 3); i++) {
+        for (int i = 0; i < (VectorRegister::LOGICALWIDTH - 3); i++) {
 
     		// NOTE: -1 for a match and 0 for a mismatch
     		VectorRegister match = state.getQueryH().compeq (state.getQueryV());
@@ -177,11 +177,11 @@ namespace xavier
 
     		// Compute antiDiag3 and left-aligne
     		state.setAntiDiag3 (antiDiag1F.max (antiDiag2F));
-    		state.updateAntiDiag3 (LOGICALWIDTH, NINF);
+    		state.updateAntiDiag3 (VectorRegister::LOGICALWIDTH, NINF);
 
     		// TODO: x-drop termination, we don't need to check x-drop every time
     		// TODO: create custom max element function that returns both position and value
-    		int8_t antiDiagBest = *std::max_element (state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VECTORWIDTH);
+    		int8_t antiDiagBest = *std::max_element (state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VectorRegister::VECTORWIDTH);
     		state.setCurrScore (antiDiagBest + state.getScoreOffset());
 
             // GG: double check correctness; begH/V cannot be > than endH/V
@@ -194,7 +194,7 @@ namespace xavier
 
             if (antiDiagBest > CUTOFF)
             {
-    			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + LOGICALWIDTH);
+    			int8_t min = *std::min_element(state.antiDiag3.internal.elems, state.antiDiag3.internal.elems + VectorRegister::LOGICALWIDTH);
 
                 VectorRegister aux;
                 aux.set (min);
@@ -248,7 +248,7 @@ namespace xavier
 
             State result(_seed, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
 
-            if (targetPrefix.length() >= VECTORWIDTH || queryPrefix.length() >= VECTORWIDTH)
+            if (targetPrefix.length() >= VectorRegister::VECTORWIDTH || queryPrefix.length() >= VectorRegister::VECTORWIDTH)
                 onedirection (result);
 
             seed.setBegH(seed.getEndH() - result.seed.getEndH());
@@ -265,7 +265,7 @@ namespace xavier
 
             State result(_seed, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
-            if (targetSuffix.length() >= VECTORWIDTH || querySuffix.length() >= VECTORWIDTH)
+            if (targetSuffix.length() >= VectorRegister::VECTORWIDTH || querySuffix.length() >= VectorRegister::VECTORWIDTH)
                 onedirection (result);
 
             seed.setEndH (seed.getBegH() + result.seed.getEndH());
@@ -286,7 +286,7 @@ namespace xavier
 
             State result1(_seed1, targetPrefix, queryPrefix, scoringScheme, scoreDropOff);
 
-            if (targetPrefix.length() < VECTORWIDTH || queryPrefix.length() < VECTORWIDTH)
+            if (targetPrefix.length() < VectorRegister::VECTORWIDTH || queryPrefix.length() < VectorRegister::VECTORWIDTH)
             {
                 seed.setBegH (seed.getEndH() - targetPrefix.length());
                 seed.setBegV (seed.getEndV() - queryPrefix.length());
@@ -304,7 +304,7 @@ namespace xavier
 
             State result2(_seed2, targetSuffix, querySuffix, scoringScheme, scoreDropOff);
 
-            if (targetSuffix.length() < VECTORWIDTH || querySuffix.length() < VECTORWIDTH)
+            if (targetSuffix.length() < VectorRegister::VECTORWIDTH || querySuffix.length() < VectorRegister::VECTORWIDTH)
             {
                 seed.setBegH (seed.getEndH() + targetSuffix.length());
                 seed.setBegV (seed.getEndV() + querySuffix.length());

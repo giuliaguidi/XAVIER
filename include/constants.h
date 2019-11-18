@@ -50,10 +50,10 @@
 #ifndef _XAVIER_CONSTANTS_H_
 #define _XAVIER_CONSTANTS_H_
 
-#define NINF  	(std::numeric_limits<int8_t>::min())
+
 #define goRIGHT (0)
 #define goDOWN  (1)
-#define MIDDLE 	(LOGICALWIDTH / 2)
+#define MIDDLE 	(VectorRegister::LOGICALWIDTH / 2)
 
 #define CUTOFF	(std::numeric_limits<int8_t>::max() - 25)
 

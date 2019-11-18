@@ -61,20 +61,6 @@
 
 namespace xavier
 {
-	#ifdef  __AVX2__
-		typedef int8_t elementType;
-		typedef __m256i vectorType;
-
-		#define VECTORWIDTH  (32)
-		#define LOGICALWIDTH (VECTORWIDTH - 1)
-
-	#elif __SSE4_2__
-		typedef int8_t elementType;
-		typedef __m128i vectorType;
-
-		#define VECTORWIDTH  (16)
-		#define LOGICALWIDTH (VECTORWIDTH - 1)
-	#endif
 
 	class VectorRegister
 	{
@@ -83,6 +69,18 @@ namespace xavier
 		/**
 		 * Fields
 		 */
+		#ifdef  __AVX2__
+			typedef __m256i vectorType;
+			static const int VECTORWIDTH = 32;
+		#elif __SSE4_2__
+			typedef __m128i vectorType;
+			static const int VECTORWIDTH = 16;
+		#endif
+
+		typedef int8_t elementType;
+		static const int LOGICALWIDTH = VECTORWIDTH - 1;
+		static const elementType NINF = std::numeric_limits<elementType>::min();
+
 		union
 		{
 			vectorType  simd;
@@ -94,44 +92,45 @@ namespace xavier
 		 */
 		VectorRegister()
 		{
-			set (0);
+			set( 0 );
 		}
 
-		VectorRegister(elementType elem)
+		VectorRegister ( elementType elem )
 		{
-			set (elem);
+			set( elem );
 		}
 
-		VectorRegister(vectorType vec)
+		VectorRegister ( vectorType vec )
 		{
 			internal.simd = vec;
 		}
 
-		/**
-		 * Insert @value in position @pos of VectorRegister
-		 */
-		void insert(elementType value, unsigned int pos);
+		VectorRegister ( const VectorRegister& copy )
+		{
+			internal.simd = copy.internal.simd;
+		}
 
 		/**
-		 * Return value in position @pos of VectorRegister
+		 * Operators (VectorRegister op VectorRegister)
 		 */
-		elementType take(unsigned int pos);
+		VectorRegister operator + ( const VectorRegister& rhs ) const;
+		VectorRegister operator - ( const VectorRegister& rhs ) const;
+		elementType& operator[] ( uint32_t idx ) { return internal.elems[idx]; }
+		const elementType& operator[] ( uint32_t idx ) const { return internal.elems[idx]; }
 
 		/**
 		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
 		 */
-		VectorRegister lshift ();
+		void lshift ();
 
 		/**
 		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
 		 */
-		VectorRegister rshift ();
+		void rshift ();
 
 		/**
 		 * Operations
 		 */
-		VectorRegister add (const VectorRegister& other) const;
-		VectorRegister sub (const VectorRegister& other) const;
 		VectorRegister max (const VectorRegister& other) const;
 		void set (char a);
 		VectorRegister blendv (const VectorRegister& other, const VectorRegister& mask) const;

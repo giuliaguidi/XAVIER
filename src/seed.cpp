@@ -30,7 +30,7 @@ namespace xavier
         endH(_endH),
         endV(_endV),
         score(0),
-        length(std::min((_begH - _begV), (_endH - _endV))) { }
+        length(std::min((_endH - _begH), (_endV - _begV))) { }
 
 	Seed::Seed(Seed const& other) :
         begH(other.begH),
@@ -101,7 +101,9 @@ namespace xavier
 
     bool Seed::checkConsistency()
     {
-        if (begH <= endH && begV <= endV) return true;
-        else return false;
+        if (begH <= endH && begV <= endV
+            && length == std::min((endV - begV), (endH - begH)))
+        	return true;
+        return false;
     }
 }

@@ -16,20 +16,20 @@ namespace xavier
 		hlength = hseq.length() + 1;
 		vlength = vseq.length() + 1;
 
-		if (hlength < VECTORWIDTH || vlength < VECTORWIDTH)
+		if (hlength < VectorRegister::VECTORWIDTH || vlength < VectorRegister::VECTORWIDTH)
 		{
 			seed.setEndH(hlength);
 			seed.setEndV(vlength);
 		}
 
-		queryh = new int8_t[hlength + VECTORWIDTH];
-		queryv = new int8_t[vlength + VECTORWIDTH];
+		queryh = new int8_t[hlength + VectorRegister::VECTORWIDTH];
+		queryv = new int8_t[vlength + VectorRegister::VECTORWIDTH];
 
 		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
 		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
 
-		std::fill(queryh + hlength, queryh + hlength + VECTORWIDTH, NINF);
-		std::fill(queryv + vlength, queryv + vlength + VECTORWIDTH, NINF);
+		std::fill(queryh + hlength, queryh + hlength + VectorRegister::VECTORWIDTH, NINF);
+		std::fill(queryv + vlength, queryv + vlength + VectorRegister::VECTORWIDTH, NINF);
 
 		matchScore    = scoringScheme.getMatchScore();
 		mismatchScore = scoringScheme.getMismatchScore();
@@ -40,8 +40,8 @@ namespace xavier
 		vmatchScore.set (matchScore);
 		vmismatchScore.set (mismatchScore);
 
-		hoffset = LOGICALWIDTH;
-		voffset = LOGICALWIDTH;
+		hoffset = VectorRegister::LOGICALWIDTH;
+		voffset = VectorRegister::LOGICALWIDTH;
 
 		bestScore    = 0;
 		currScore    = 0;
@@ -208,7 +208,7 @@ namespace xavier
 	{
 		/* (a) shift to the left on query horizontal */
 		vqueryh.lshift();
-		vqueryh.internal.elems[LOGICALWIDTH - 1] = queryh[hoffset++];
+		vqueryh.internal.elems[VectorRegister::LOGICALWIDTH - 1] = queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1 = antiDiag2;

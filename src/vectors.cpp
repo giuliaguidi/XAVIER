@@ -12,65 +12,51 @@
 
 namespace xavier
 {
-    void VectorRegister::insert (elementType value, unsigned int pos)
-    {
-        internal.elems[pos] = value;
-    }
+	const int VectorRegister::VECTORWIDTH;
+	const int VectorRegister::LOGICALWIDTH;
+	const VectorRegister::elementType VectorRegister::NINF;
 
-    elementType VectorRegister::take (unsigned int pos)
+    void VectorRegister::lshift ()
     {
-        return internal.elems[pos];
-    }
-
-    VectorRegister VectorRegister::lshift ()
-    {
-        VectorRegister b;
-
         #ifdef __AVX2__
-        b.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 1);
+     	   internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 1);
         #elif __SSE4_2__
-        b.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 2);
+        	internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 2);
         #endif
-        b.internal.elems[VECTORWIDTH - 1] = NINF;
-
-        return b;
+    	internal.elems[VECTORWIDTH - 1] = NINF;
     }
 
-    VectorRegister VectorRegister::rshift ()
+    void VectorRegister::rshift ()
     {
-        VectorRegister b;
-
         #ifdef __AVX2__
-        b.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
+     	   internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
         #elif __SSE4_2__
-        b.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
+        	internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
         #endif
-        b.internal.elems[0] = NINF;
-
-        return b;
+    	internal.elems[0] = NINF;
     }
 
     /* saturated arithmetic */
-    VectorRegister VectorRegister::add (const VectorRegister& other) const
+    VectorRegister VectorRegister::operator + (const VectorRegister& rhs) const
     {
         VectorRegister vec;
-    #ifdef __AVX2__
-	    vec = _mm256_adds_epi8 (internal.simd, other.internal.simd);
-    #elif  __SSE4_2__
-	    vec = _mm_adds_epi16 (internal.simd, other.internal.simd);
-    #endif
+	    #ifdef __AVX2__
+		    vec = _mm256_adds_epi8 (internal.simd, rhs.internal.simd);
+	    #elif  __SSE4_2__
+		    vec = _mm_adds_epi16 (internal.simd, rhs.internal.simd);
+	    #endif
         return vec;
     }
 
     /* saturated arithmetic */
-	VectorRegister VectorRegister::sub (const VectorRegister& other) const
+	VectorRegister VectorRegister::operator - (const VectorRegister& rhs) const
     {
         VectorRegister vec;
-    #ifdef __AVX2__
-	    vec = _mm256_subs_epi8 (internal.simd, other.internal.simd);
-    #elif  __SSE4_2__
-	    vec = _mm_subs_epi16 (internal.simd, other.internal.simd);
-    #endif
+	    #ifdef __AVX2__
+		    vec = _mm256_subs_epi8 (internal.simd, rhs.internal.simd);
+	    #elif  __SSE4_2__
+		    vec = _mm_subs_epi16 (internal.simd, rhs.internal.simd);
+	    #endif
         return vec;
     }
 
@@ -119,9 +105,9 @@ namespace xavier
 	std::ostream& operator<<(std::ostream& os, VectorRegister& vec)
 	{
 		os << "{";
-		for(int i = 0; i < VECTORWIDTH - 1; ++i)
-			os << vec.take(i) << ", ";
-		os << vec.take(VECTORWIDTH - 1) << "}" << std::endl;
+		for(int i = 0; i < VectorRegister::VECTORWIDTH - 1; ++i)
+			os << vec[i] << ", ";
+		os << vec[VectorRegister::VECTORWIDTH - 1] << "}" << std::endl;
 		return os;
 	}
 }
