@@ -96,9 +96,9 @@ namespace xavier
 		/**
 		 * Store another trace entry corresponding to the current state.
 		 */
-		void add_state_to_trace ( const VectorRegister& _ad1, const VectorRegister& _ad2,
-		                          const VectorRegister& _ad3, const VectorRegister& _vqh,
-		                          const VectorRegister& _vqv, const int64_t offset);
+		void pushbackState ( const VectorRegister& _ad1, const VectorRegister& _ad2,
+		                     const VectorRegister& _ad3, const VectorRegister& _vqh,
+		                     const VectorRegister& _vqv, const int64_t offset);
 
 	private:
 		std::vector<TraceEntry> trace;

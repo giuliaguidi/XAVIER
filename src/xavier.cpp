@@ -17,8 +17,7 @@ namespace xavier
 	)
 	{
 		Aligner aligner( query1, query2, scoringScheme, scoreDropOff );
-
-		return aligner.align();
+		return  aligner.align();
 	}
 
 	AlignmentResult seed_and_extend
@@ -30,7 +29,7 @@ namespace xavier
 	    const Seed& seed
 	)
 	{
-		// Cut query1 and query2 into left and right sections
+		// Cut query1 and query2 into left and right sequences
 		// from the end of the seed position
 		std::string queryHPrefix = query1.substr( 0, seed.getEndH() );
 		std::string queryVPrefix = query2.substr( 0, seed.getEndV() );
@@ -40,7 +39,7 @@ namespace xavier
 		std::string queryHSuffix = query1.substr( seed.getEndH(), query1.length() );
 		std::string queryVSuffix = query2.substr( seed.getEndV(), query2.length() );
 
-		// Treat the two halves as individual global alignment problems
+		// Treat the two half sequences as individual alignments
 		AlignmentResult left  = semi_global_alignment( queryHPrefix, queryVPrefix, scoringScheme, scoreDropOff );
 		AlignmentResult right = semi_global_alignment( queryHSuffix, queryVSuffix, scoringScheme, scoreDropOff );
 
@@ -66,14 +65,14 @@ namespace xavier
 	    const Seed& seed
 	)
 	{
-		// Cut query1 and query2 into left section
+		// Cut query1 and query2 into left sequences
 		// from the end of the seed position
 		std::string queryHPrefix = query1.substr( 0, seed.getEndH() );
 		std::string queryVPrefix = query2.substr( 0, seed.getEndV() );
 		std::reverse( queryHPrefix.begin(), queryHPrefix.end() );
 		std::reverse( queryVPrefix.begin(), queryVPrefix.end() );
 
-		// Treat the two halves as individual global alignment problems
+		// Treat the left half as individual alignment
 		AlignmentResult left  = semi_global_alignment( queryHPrefix, queryVPrefix, scoringScheme, scoreDropOff );
 
 		// Put together the two extensions
@@ -98,12 +97,12 @@ namespace xavier
 	    const Seed& seed
 	)
 	{
-		// Cut query1 and query2 into right section
+		// Cut query1 and query2 into right sequence
 		// from the end of the seed position
 		std::string queryHSuffix = query1.substr( seed.getBegH(), query1.length() );
 		std::string queryVSuffix = query2.substr( seed.getBegV(), query2.length() );
 
-		// Treat the two halves as individual global alignment problems
+		// Treat the right half as individual alignment
 		AlignmentResult right = semi_global_alignment( queryHSuffix, queryVSuffix, scoringScheme, scoreDropOff );
 
 		// Put together the two extensions

@@ -59,16 +59,15 @@
 
 namespace xavier
 {
-
 	struct AlignmentResult
 	{
 		int bestScore; // Best alignment score discovered
 		int exitScore; // Score and the end
 
-		size_t begH; // Starting position of alignment on horizontal read
-		size_t begV; // Starting position of alignment on vertical read
-		size_t endH; // Ending position of alignment on horizontal read
-		size_t endV; // Ending position of alignment on vertical read
+		size_t begH;   // Starting position of alignment on horizontal read
+		size_t begV;   // Starting position of alignment on vertical read
+		size_t endH;   // Ending position of alignment on horizontal read
+		size_t endV;   // Ending position of alignment on vertical read
 
 		size_t matches;
 	};
