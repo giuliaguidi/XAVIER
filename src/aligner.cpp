@@ -28,8 +28,8 @@ namespace xavier
 		std::fill(queryh + hlength, queryh + hlength + VectorRegister::VECTORWIDTH, VectorRegister::NINF);
 		std::fill(queryv + vlength, queryv + vlength + VectorRegister::VECTORWIDTH, VectorRegister::NINF);
 
-		hoffset = VectorRegister::LOGICALWIDTH;
-		voffset = VectorRegister::LOGICALWIDTH;
+		hoffset = VectorRegister::LOGICALWIDTH + 1;
+		voffset = VectorRegister::LOGICALWIDTH + 1;
 
 		bestScore    = 0;
 		currScore    = 0;
@@ -112,13 +112,26 @@ namespace xavier
         lastMove  = RIGHT;
 	}
 
-	void Aligner::align()
+	AlignmentResult Aligner::produceResults()
+	{
+		AlignmentResult r;
+		r.bestScore = bestScore;
+		r.exitScore = currScore;
+		r.begH = 0;
+		r.begV = 0;
+		r.endH = hoffset;
+		r.endV = voffset;
+		r.matches = 0;
+		return r;
+	}
+
+	AlignmentResult Aligner::align()
 	{
 		// Opening Phase
 		initAntiDiags();
 
-		if ( xdropcondition() )
-			return;
+		if ( xdropCondition() )
+			return produceResults();
 
 		// Core Phase
 		while( !closingCondition() )
@@ -130,8 +143,8 @@ namespace xavier
 			updateCurrScore();
 
 			// If X Drop Condition satisfied; terminate
-			if ( xdropcondition() )
-				return;
+			if ( xdropCondition() )
+				return produceResults();
 
 			// Ensure Anti Diagonals stay in int8_t range
 	    	normalizeVectors();
@@ -160,8 +173,8 @@ namespace xavier
 			updateCurrScore();
 
 			// If X Drop Condition satisfied; terminate
-			if ( xdropcondition() )
-				return;
+			if ( xdropCondition() )
+				return produceResults();
 
 			// Ensure Anti Diagonals stay in int8_t range
 	    	normalizeVectors();
@@ -178,6 +191,8 @@ namespace xavier
 			else
 				moveDown();
 		}
+
+		return produceResults();
 	}
 
 	Aligner::~Aligner()
@@ -238,7 +253,7 @@ namespace xavier
 	}
 
 
-	bool Aligner::xdropcondition()
+	bool Aligner::xdropCondition()
 	{
 		int scoreThreshold = bestScore - scoreDropOff;
 		return currScore < scoreThreshold;

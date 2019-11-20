@@ -60,6 +60,26 @@
 namespace xavier
 {
 
+	struct AlignmentResult
+	{
+		int bestScore; // Best alignment score discovered
+		int exitScore; // Score and the end
+
+		size_t begH; // Starting position of alignment on horizontal read
+		size_t begV; // Starting position of alignment on vertical read
+		size_t endH; // Ending position of alignment on horizontal read
+		size_t endV; // Ending position of alignment on vertical read
+
+		size_t matches;
+	};
+
+	struct AlignmentConfig
+	{
+		ScoringScheme scoringScheme;
+		int scoreDropOff;
+		bool traceState;
+	};
+
 	class Aligner
 	{
 	public:
@@ -145,17 +165,18 @@ namespace xavier
 		/**
 		 * Main Function
 		 */
-		void align();
+		AlignmentResult align();
 
 		/**
 		 * State Transitions and Helper Functions
 		 */
+		AlignmentResult produceResults();
 		void initAntiDiags();
 		void calcAntiDiag3();
 		void moveRight();
 		void moveDown();
 		void updateCurrScore();
-		bool xdropcondition();
+		bool xdropCondition();
 		bool closingCondition();
 		void normalizeVectors();
 		void move();
