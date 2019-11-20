@@ -67,8 +67,7 @@ TEST(SeedTest, DefaultConstructor)
 	ASSERT_EQ( s.getBegV(), 0 );
 	ASSERT_EQ( s.getEndH(), 0 );
 	ASSERT_EQ( s.getEndV(), 0 );
-	ASSERT_EQ( s.getAlignScore(), 0 );
-	ASSERT_EQ( s.getAlignLength(), 0 );
+	ASSERT_EQ( s.getSeedLength(), 0 );
 }
 
 TEST(SeedTest, SeedConstructor)
@@ -78,8 +77,7 @@ TEST(SeedTest, SeedConstructor)
 	ASSERT_EQ( s.getBegV(), 1 );
 	ASSERT_EQ( s.getEndH(), 2 );
 	ASSERT_EQ( s.getEndV(), 3 );
-	ASSERT_EQ( s.getAlignScore(), 0 );
-	ASSERT_EQ( s.getAlignLength(), 2 );
+	ASSERT_EQ( s.getSeedLength(), 2 );
 }
 
 TEST(SeedTest, LocationConstructor)
@@ -89,8 +87,7 @@ TEST(SeedTest, LocationConstructor)
 	ASSERT_EQ( s.getBegV(), 1 );
 	ASSERT_EQ( s.getEndH(), 2 );
 	ASSERT_EQ( s.getEndV(), 3 );
-	ASSERT_EQ( s.getAlignScore(), 0 );
-	ASSERT_EQ( s.getAlignLength(), 2 );
+	ASSERT_EQ( s.getSeedLength(), 2 );
 }
 
 TEST(SeedTest, CopyConstructor)
@@ -101,22 +98,14 @@ TEST(SeedTest, CopyConstructor)
 	ASSERT_EQ( s2.getBegV(), 1 );
 	ASSERT_EQ( s2.getEndH(), 2 );
 	ASSERT_EQ( s2.getEndV(), 3 );
-	ASSERT_EQ( s2.getAlignScore(), 0 );
-	ASSERT_EQ( s2.getAlignLength(), 2 );
+	ASSERT_EQ( s2.getSeedLength(), 2 );
 }
 
-TEST(SeedTest, AlignScore)
+TEST(SeedTest, SeedLength)
 {
 	xavier::Seed s;
-	s.setAlignScore( 17 );
-	ASSERT_EQ( s.getAlignScore(), 17 );
-}
-
-TEST(SeedTest, AlignLength)
-{
-	xavier::Seed s;
-	s.setAlignLength( 17 );
-	ASSERT_EQ( s.getAlignLength(), 17 );
+	s.setSeedLength( 17 );
+	ASSERT_EQ( s.getSeedLength(), 17 );
 }
 
 TEST(SeedTest, BegH)
