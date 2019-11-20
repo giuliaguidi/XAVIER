@@ -53,6 +53,13 @@ namespace xavier
 		result.endV = seed.getEndV() + right.endV;
 		result.matches   = left.matches + right.matches;
 
+		std::cout << "Score	" << left.bestScore << "	" << right.bestScore	<< std::endl;
+		std::cout << "Score	" << left.exitScore << "	" << right.exitScore	<< std::endl;
+		std::cout << "begH	" << seed.getEndH() << "	-	" << left.endH	<< std::endl;
+		std::cout << "begV	" << seed.getEndV() << "	-	" << left.endV	<< std::endl;
+		std::cout << "endH	" << seed.getEndH() << "	+	" << right.endH	<< std::endl;
+		std::cout << "endV	" << seed.getEndV() << "	+	" << right.endV	<< std::endl;
+		
 		return result;
 	}
 

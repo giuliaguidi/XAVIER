@@ -163,8 +163,11 @@ namespace xavier
 				moveDown();
 		}
 
+		int a = 0, b = 0;
+		// lastMove = hoffset >= hlength ? DOWN : RIGHT;
+
 		// Closing Phase
-		for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
+		for ( int i = 0; i < VectorRegister::LOGICALWIDTH - 1; ++i )
 		{
 			// Solve for next Anti Diagonal
 			calcAntiDiag3();
@@ -187,10 +190,19 @@ namespace xavier
 				bestScore = currScore;
 
 			if ( lastMove == DOWN )
+			{
+				a++;
 				moveRight();
+			}
 			else
+			{
+				b++;
 				moveDown();
+			}
 		}
+
+		hoffset -= a;
+		voffset -= b;
 
 		return produceResults();
 	}

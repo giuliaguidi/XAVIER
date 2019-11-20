@@ -127,9 +127,12 @@ int main(int argc, char const *argv[])
 	//===================================================================
 
 	xavier::AlignmentResult result = xavier::seed_and_extend( seq1, seq2, penalties, x, seed );
-	std::cout << "BestScore = " << result.bestScore << std::endl;
-	// std::cout << "begPosH = " << getBeginPositionH(seed) << "\tendPosH = " << getEndPositionH(seed) << std::endl;
-	// std::cout << "begPosV = " << getBeginPositionV(seed) << "\tendPosV = " << getEndPositionV(seed) << std::endl;
+	std::cout << "result.bestScore	" << result.bestScore << std::endl;
+	std::cout << "result.exitScore	" << result.exitScore << std::endl;
+	std::cout << "result.begH	" << result.begH << std::endl;
+	std::cout << "result.endH	" << result.endH << std::endl;
+	std::cout << "result.begV	" << result.begV << std::endl;
+	std::cout << "result.endV	" << result.endV << std::endl;
 
 	return 0;
 }

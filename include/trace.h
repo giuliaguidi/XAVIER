@@ -81,7 +81,7 @@ namespace xavier
 
 		VectorRegister vqueryh;
 		VectorRegister vqueryv;
-		int64_t scoreOffset;
+		int64_t 	   scoreOffset;
 	};
 
 	class Trace
