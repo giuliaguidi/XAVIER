@@ -121,14 +121,5 @@ namespace xavier
 	    vec = _mm_cmpeq_epi16 (internal.simd, other.internal.simd);
     #endif
         return vec;
-    }
-
-	std::ostream& operator<<(std::ostream& os, VectorRegister& vec)
-	{
-		os << "{";
-		for(int i = 0; i < VectorRegister::VECTORWIDTH - 1; ++i)
-			os << vec[i] << ", ";
-		os << vec[VectorRegister::VECTORWIDTH - 1] << "}" << std::endl;
-		return os;
 	}
 }

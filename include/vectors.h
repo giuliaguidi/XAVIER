@@ -141,7 +141,18 @@ namespace xavier
 		/**
 		 * Operator
 		 */
-		friend std::ostream& operator<<(std::ostream& os, const VectorRegister& vec);
+		friend std::ostream& operator<<(std::ostream& os, const VectorRegister& vec)
+		{
+			os << "{";
+			for(int i = 0; i < VectorRegister::VECTORWIDTH - 1; ++i)
+			{
+				int x = vec[i];
+				os << x << ", ";
+			}
+			int x = vec[VectorRegister::VECTORWIDTH - 1];
+			os << x << "}" << std::endl;
+			return os;
+		}
 	};
 }
 

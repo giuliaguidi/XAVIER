@@ -28,8 +28,8 @@ namespace xavier
 	   	                        const VectorRegister& _ad3, const VectorRegister& _vqh,
 		                        const VectorRegister& _vqv, const int64_t offset)
 	{
-		static int i = 0;
-		std::cout << "hello " << i++ << std::endl;
+		// static int i = 0;
+		// std::cout << "hello " << i++ << std::endl;
 		trace.push_back( TraceEntry( _ad1, _ad2, _ad3, _vqh, _vqv, offset ) );
 	}
 
