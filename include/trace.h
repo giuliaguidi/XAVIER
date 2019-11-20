@@ -1,7 +1,7 @@
 /**
- * File: state.h
+ * File: trace.h
  * Author: G. Guidi, E. Younis
- * Description: Xavier State Type Header.
+ * Description: Xavier Trace Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -47,132 +47,62 @@
  * in binary and source code form.
  */
 
-#ifndef XAVIER_TYPES_STATE_H
-#define XAVIER_TYPES_STATE_H
+#ifndef XAVIER_TYPES_TRACE_H
+#define XAVIER_TYPES_TRACE_H
 
-#include <string>
-#include <cstdint>
-#include "seed.h"
-#include "score.h"
+#include <vector>
 #include "vectors.h"
-#include "constants.h"
 
 namespace xavier
 {
-	class State
+
+	class TraceEntry
 	{
 	public:
+		TraceEntry():
+		antiDiag1(0),
+		antiDiag2(0),
+		antiDiag3(0),
+		vqueryh(0),
+		vqueryv(0),
+		scoreOffset(0)
+		{}
+
 		/**
-		 * Fields
+		 * Only Constructor
 		 */
+		TraceEntry ( const VectorRegister& _ad1, const VectorRegister& _ad2,
+		             const VectorRegister& _ad3, const VectorRegister& _vqh,
+		             const VectorRegister& _vqv, const int64_t offset );
 
-		/* Define starting position and need to be updated when exiting */
-		Seed seed;
-
-		/* Length of sequences */
-		unsigned int hlength;
-		unsigned int vlength;
-
-		/* Pointer of sequences */
-		int8_t* queryh;
-		int8_t* queryv;
-
-		/* Offset to deal with any score using int8 */
-		int hoffset;
-		int voffset;
-
-		/* Scoring scheme constants */
-		int8_t matchScore;
-		int8_t mismatchScore;
-		int8_t gapScore;
-
-		/* Constant scoring vectors */
-		VectorRegister vmatchScore;
-		VectorRegister vmismatchScore;
-		VectorRegister vgapScore;
-		VectorRegister vzeros;
-
-		/* Computation vectors */
 		VectorRegister antiDiag1;
 		VectorRegister antiDiag2;
 		VectorRegister antiDiag3;
 
-		/* Sequence vectors */
 		VectorRegister vqueryh;
 		VectorRegister vqueryv;
-
-		/* xDrop variables */
-		long int bestScore;
-		long int currScore;
-		long int scoreOffset;
-		long int scoreDropOff;
-		bool xDropCond;
-
-		/**
-		 * Constructors
-		 */
-		State
-		(
-		 	Seed& _seed,
-		 	std::string const& hseq,
-		 	std::string const& vseq,
-			ScoringScheme& scoringScheme,
-			int const &_scoreDropOff
-		);
-
-		/**
-		 * Destructor
-		 */
-		~State();
-
-		int getScoreOffset  ();
-		int getBestScore    ();
-		int getCurrScore    ();
-		int getScoreDropoff ();
-
-		void setScoreOffset (int _scoreOffset);
-		void setBestScore   (int _bestScore  );
-		void setCurrScore   (int _currScore  );
-
-		int8_t getMatchScore    ();
-		int8_t getMismatchScore ();
-		int8_t getGapScore      ();
-
-		VectorRegister getQueryH ();
-		VectorRegister getQueryV ();
-
-		VectorRegister getAntiDiag1 ();
-		VectorRegister getAntiDiag2 ();
-		VectorRegister getAntiDiag3 ();
-
-		VectorRegister getVmatchScore    ();
-		VectorRegister getVmismatchScore ();
-		VectorRegister getVgapScore      ();
-		VectorRegister getVzeros        ();
-
-		void updateQueryH (uint8_t idx, int8_t value);
-		void updateQueryV (uint8_t idx, int8_t value);
-
-		void updateAntiDiag1 (uint8_t idx, int8_t value);
-		void updateAntiDiag2 (uint8_t idx, int8_t value);
-		void updateAntiDiag3 (uint8_t idx, int8_t value);
-
-		void broadcastAntiDiag1 (int8_t value);
-		void broadcastAntiDiag2 (int8_t value);
-		void broadcastAntiDiag3 (int8_t value);
-
-		void setAntiDiag1 (VectorRegister vector);
-		void setAntiDiag2 (VectorRegister vector);
-		void setAntiDiag3 (VectorRegister vector);
-
-		void moveRight ();
-		void moveDown  ();
+		int64_t scoreOffset;
 	};
 
-	/**
-	* Operator+= overloading
-	*/
-	void operator+=(State& state1, const State& state2);
+	class Trace
+	{
+	public:
+
+		/**
+		 * Default Constructor
+		 */
+		Trace();
+
+		/**
+		 * Store another trace entry corresponding to the current state.
+		 */
+		void add_state_to_trace ( const VectorRegister& _ad1, const VectorRegister& _ad2,
+		                          const VectorRegister& _ad3, const VectorRegister& _vqh,
+		                          const VectorRegister& _vqv, const int64_t offset);
+
+	private:
+		std::vector<TraceEntry> trace;
+	};
 }
 
-#endif /* XAVIER_TYPES_STATE_H */
+#endif /* XAVIER_TYPES_TRACE_H */

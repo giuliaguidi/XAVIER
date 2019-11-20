@@ -1,18 +1,17 @@
 CC = gcc
 CXX = g++
-CFLAGS = -march=native
-#CFLAGS = -O3 -std=c++14  -march=native -Wall -Wextra -pedantic -ansi -Wno-write-strings
+CFLAGS = -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -O3
 
 
 ODIR = obj
 LDIR = lib
 OUT = $(LDIR)/xavierlib.a
 SDIR = src
-INC = -Iinclude -Iinclude/types
+INC = -Iinclude
 
 _OBJS = score.o \
 		seed.o \
-		state.o \
+		aligner.o \
 		trace.o \
 		vectors.o \
 		xavier.o

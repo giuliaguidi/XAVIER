@@ -1,7 +1,7 @@
 /**
- * File: score.h
+ * File: vectors.h
  * Author: G. Guidi, E. Younis
- * Description: Xavier Score Type Header.
+ * Description: Xavier Vectors Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -47,71 +47,102 @@
  * in binary and source code form.
  */
 
-#ifndef XAVIER_TYPES_SCORE_H
-#define XAVIER_TYPES_SCORE_H
+#ifndef __AVX2__
+#define __AVX2__
+#endif
 
-#include <cassert>
+#ifndef XAVIER_TYPES_VECTORS_H
+#define XAVIER_TYPES_VECTORS_H
+
+#include <iostream>
+#include <x86intrin.h>
+#include <limits>
 
 namespace xavier
 {
-	class ScoringScheme
+
+	class VectorRegister
 	{
-	private:
-
-		/**
-		 * Fields according to https://www.drive5.com/usearch/manual/cigar.html
-		 */
-		short match_score;     // match
-		short mismatch_score;  // mismatch
-		short gap_score;       // gap
-
 	public:
 
 		/**
-		 * Declare default constructor
+		 * Fields
 		 */
-  		ScoringScheme();
+		#ifdef  __AVX2__
+			typedef __m256i vectorType;
+			static const int VECTORWIDTH = 32;
+		#elif __SSE4_2__
+			typedef __m128i vectorType;
+			static const int VECTORWIDTH = 16;
+		#endif
+
+		typedef int8_t elementType;
+		static const int LOGICALWIDTH = VECTORWIDTH - 1;
+		static const elementType CUTOFF = std::numeric_limits<int8_t>::max() - 25;
+		static const elementType NINF = std::numeric_limits<elementType>::min();
+
+		union
+		{
+			vectorType  simd;
+			elementType elems[VECTORWIDTH];
+		} internal;
 
 		/**
-		 * Declare copy constructor
+		 * Constructors
 		 */
-		ScoringScheme ( ScoringScheme& _copy );
+		VectorRegister()
+		{
+			set( 0 );
+		}
+
+		VectorRegister ( elementType elem )
+		{
+			set( elem );
+		}
+
+		VectorRegister ( vectorType vec )
+		{
+			internal.simd = vec;
+		}
+
+		VectorRegister ( const VectorRegister& copy )
+		{
+			internal.simd = copy.internal.simd;
+		}
 
 		/**
-		 * Return match score
+		 * Operators (VectorRegister op VectorRegister)
 		 */
-		short getMatchScore() const;
+		VectorRegister operator + ( const VectorRegister& rhs ) const;
+		VectorRegister operator - ( const VectorRegister& rhs ) const;
+		elementType& operator[] ( uint32_t idx ) { return internal.elems[idx]; }
+		const elementType& operator[] ( uint32_t idx ) const { return internal.elems[idx]; }
+		VectorRegister operator= ( const VectorRegister& rhs ) { internal.simd = rhs.internal.simd; return *this; }
 
 		/**
-		 * Return mismatch penalty
+		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
 		 */
-		short getMismatchScore() const;
+		VectorRegister lshift();
 
 		/**
-		 * Return gap penalty
+		 * https://stackoverflow.com/questions/25248766/emulating-shifts-on-32-bytes-with-avx
 		 */
-		short getGapScore() const;
+		VectorRegister rshift();
 
 		/**
-		 * Return match score (>0)
+		 * Operations
 		 */
-		void setMatchScore ( short const value );
+		int argmax() const;
+		VectorRegister max (const VectorRegister& other) const;
+		void set (elementType a);
+		VectorRegister blendv (const VectorRegister& other, const VectorRegister& mask) const;
+		VectorRegister compeq (const VectorRegister& other) const;
 
 		/**
-		 * Return mismatch score (<0)
+		 * Operator
 		 */
-		void setMismatchScore ( short const value );
-
-		/**
-		 * Return gap penalty (<0)
-		 */
-		void setGapScore ( short const value );
-
-		/**
-		 * Return score between two characters (either a match or a mismatch)
-		 */
-		short score ( char valH, char valV );
+		friend std::ostream& operator<<(std::ostream& os, const VectorRegister& vec);
 	};
 }
 
-#endif /* XAVIER_TYPES_SCORE_H */
+#endif /* XAVIER_TYPES_VECTORS_H */

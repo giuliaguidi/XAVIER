@@ -13,10 +13,16 @@ namespace xavier
         mismatch_score(-1),
 		gap_score(-1) {}
 
-    ScoringScheme::ScoringScheme(ScoringScheme& _copy) :
+    ScoringScheme::ScoringScheme(const ScoringScheme& _copy) :
         match_score(_copy.match_score),
         mismatch_score(_copy.mismatch_score),
 		gap_score(_copy.gap_score) {}
+
+	ScoringScheme::ScoringScheme ( const short match, const short mismatch, const short gap ):
+        match_score( match ),
+        mismatch_score( mismatch ),
+		gap_score( gap ) {}
+
 
     short ScoringScheme::getMatchScore() const
 	{

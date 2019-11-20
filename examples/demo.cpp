@@ -1,5 +1,5 @@
 //===========================================================================
-// Title:  Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment 
+// Title:  Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment
 // Author: G. Guidi, E. Younis
 // Date:   29 April 2019
 //===========================================================================
@@ -101,7 +101,7 @@ int main(int argc, char const *argv[])
 	short gap 	   = -1;
 
 	/* Initialize scoring scheme */
-	ScoringSchemeX penalties(match, mismatch, gap);
+	xavier::ScoringScheme penalties(match, mismatch, gap);
 
 	/* Generate pair of sequences */
 	// generate_random_sequence(seq1, len1);
@@ -118,20 +118,16 @@ int main(int argc, char const *argv[])
 	// int len1 = seq1.length();
 	// int len2 = seq2.length();
 	/* seed starting position on seq1, seed starting position on seq2, k-mer lenght */
-	SeedX seed(56, 1916, k);
-
-	/* result.first = best score, result.second = exit score when (if) x-drop termination is satified */
-	std::pair<int, int> result;
+	xavier::Seed seed(56, 1916, k);
 
 	//===================================================================
 	// Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment
 	//===================================================================
 
-	result = XavierXDrop(seed, XAVIER_EXTEND_BOTH, seq1, seq2, penalties, x);
-	std::cout << "BestScore = " << result.first  << std::endl;
-	std::cout << "ExitScore = " << result.second << std::endl;
-	std::cout << "begPosH = " << getBeginPositionH(seed) << "\tendPosH = " << getEndPositionH(seed) << std::endl;
-	std::cout << "begPosV = " << getBeginPositionV(seed) << "\tendPosV = " << getEndPositionV(seed) << std::endl;
+	int result = xavier::seed_and_extend( seq1, seq2, penalties, x, seed );
+	std::cout << "BestScore = " << result << std::endl;
+	// std::cout << "begPosH = " << getBeginPositionH(seed) << "\tendPosH = " << getEndPositionH(seed) << std::endl;
+	// std::cout << "begPosV = " << getBeginPositionV(seed) << "\tendPosV = " << getEndPositionV(seed) << std::endl;
 
 	return 0;
 }

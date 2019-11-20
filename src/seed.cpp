@@ -13,7 +13,6 @@ namespace xavier
         begV(0),
         endH(0),
         endV(0),
-        score(0),
         length(0) { }
 
 	Seed::Seed(int _begH, int _begV, int _length) :
@@ -21,7 +20,6 @@ namespace xavier
         begV(_begV),
         endH(_begH + _length),
         endV(_begV + _length),
-        score(0),
         length(_length) { }
 
 	Seed::Seed(int _begH, int _begV, int _endH, int _endV) :
@@ -29,7 +27,6 @@ namespace xavier
         begV(_begV),
         endH(_endH),
         endV(_endV),
-        score(0),
         length(std::min((_endH - _begH), (_endV - _begV))) { }
 
 	Seed::Seed(Seed const& other) :
@@ -37,13 +34,7 @@ namespace xavier
         begV(other.begV),
         endH(other.endH),
         endV(other.endV),
-        score(other.score),
         length(other.length) { }
-
-	int Seed::getAlignScore() const
-	{
-		return score;
-	}
 
 	int Seed::getBegH() const
 	{
@@ -63,14 +54,9 @@ namespace xavier
 		return endV;
 	}
 
-	int Seed::getAlignLength() const
+	int Seed::getSeedLength() const
 	{
 		return length;
-	}
-
-	void Seed::setAlignScore(int const value)
-	{
-		score = value;
 	}
 
 	void Seed::setBegH(int const value)
@@ -93,7 +79,7 @@ namespace xavier
 		endV = value;
 	}
 
-	void Seed::setAlignLength(int const value)
+	void Seed::setSeedLength(int const value)
 	{
         assert(value >= 0);
 		length = value;

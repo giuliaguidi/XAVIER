@@ -1,7 +1,7 @@
 /**
- * File: constants.h
+ * File: seed.h
  * Author: G. Guidi, E. Younis
- * Description: Xavier Constants.
+ * Description: Xavier Seed Type Header.
  *
  * Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment (Xavier)
  * Copyright (c) 2019, The Regents of the University of California, through
@@ -47,30 +47,105 @@
  * in binary and source code form.
  */
 
-#ifndef _XAVIER_CONSTANTS_H_
-#define _XAVIER_CONSTANTS_H_
+#ifndef XAVIER_TYPES_SEED_H
+#define XAVIER_TYPES_SEED_H
 
-
-#define goRIGHT (0)
-#define goDOWN  (1)
-#define MIDDLE 	(VectorRegister::LOGICALWIDTH / 2)
-
-#define CUTOFF	(std::numeric_limits<int8_t>::max() - 25)
-
-#ifdef DEBUG
-	#define msg( var ) do { std::cerr << "LOG:	" << __FILE__ << "(" << __LINE__ << ")	" << #var << " = " << (var) << std::endl; } while(0)
-#else
-	#define msg( var )
-#endif
+#include <cassert>
+#include <algorithm>
 
 namespace xavier
 {
-	enum Direction
+	class Seed
 	{
-		EXTEND_NONE  = 0,
-		EXTEND_LEFT  = 1,
-		EXTEND_RIGHT = 2,
-		EXTEND_BOTH  = 3
+	private:
+		/**
+		 * Fields
+		 */
+		int begH;
+		int begV;
+		int endH;
+		int endV;
+		int length;
+
+	public:
+		/**
+		 * Default constructor
+		 */
+		Seed();
+
+		/**
+		 * Constructor from seed
+		 */
+		Seed(int _begH, int _begV, int _length);
+
+		/**
+		 * Constructor from location
+		 */
+		Seed(int _begH, int _begV, int _endH, int _endV);
+
+		/**
+		 * Copy constructor
+		 */
+		Seed(Seed const& other);
+
+		/**
+		 * Return beginning of alignment on sequenceH
+		 */
+		int getBegH() const;
+
+		/**
+		 * Return beginning of alignment on sequenceV
+		 */
+		int getBegV() const;
+
+		/**
+		 * Return ending of alignment on sequenceH
+		 */
+		int getEndH() const;
+
+		/**
+		 * Return ending of alignment on sequenceV
+		 */
+		int getEndV() const;
+
+		/**
+		 * Return length of the seed
+		 */
+		int getSeedLength() const;
+
+		/**
+		 * Set beginning of alignment on sequenceH
+		 */
+		void setBegH(int const value);
+
+		/**
+		 * Set beginning of alignment on sequenceV
+		 */
+		void setBegV(int const value);
+
+		/**
+		 * Set ending of alignment on sequenceH
+		 */
+		void setEndH(int const value);
+
+		/**
+		 * Set ending of alignment on sequenceV
+		 */
+		void setEndV(int const value);
+
+		/**
+		 * Set seed length, cannot be < 0
+		 */
+		void setSeedLength(int const value);
+
+		/**
+		 * Check seed correctness
+		 * begH <= endH
+		 * begV <= endV
+		 * length is reasonable
+		 */
+		bool checkConsistency();
 	};
 }
-#endif /* _XAVIER_CONSTANTS_H_ */
+
+#endif /* XAVIER_TYPES_SEED_H */

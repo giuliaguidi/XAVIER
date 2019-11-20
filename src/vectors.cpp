@@ -15,25 +15,30 @@ namespace xavier
 	const int VectorRegister::VECTORWIDTH;
 	const int VectorRegister::LOGICALWIDTH;
 	const VectorRegister::elementType VectorRegister::NINF;
+	const VectorRegister::elementType VectorRegister::CUTOFF;
 
-    void VectorRegister::lshift ()
+    VectorRegister VectorRegister::lshift ()
     {
+    	VectorRegister vec;
         #ifdef __AVX2__
-     	   internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 1);
+     	   vec.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 1);
         #elif __SSE4_2__
-        	internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 2);
+        	vec.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 2);
         #endif
-    	internal.elems[VECTORWIDTH - 1] = NINF;
+    	vec.internal.elems[VECTORWIDTH - 1] = NINF;
+    	return vec;
     }
 
-    void VectorRegister::rshift ()
+    VectorRegister VectorRegister::rshift ()
     {
+    	VectorRegister vec;
         #ifdef __AVX2__
-     	   internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
+     	   vec.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
         #elif __SSE4_2__
-        	internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
+        	vec.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
         #endif
-    	internal.elems[0] = NINF;
+    	vec.internal.elems[0] = NINF;
+    	return vec;
     }
 
     /* saturated arithmetic */
@@ -60,6 +65,22 @@ namespace xavier
         return vec;
     }
 
+	int VectorRegister::argmax() const
+	{
+		int pos = 0;
+		int max = NINF;
+
+		for ( int i = 0; i < VECTORWIDTH; ++i )
+		{
+			if ( internal.elems[i] > max )
+			{
+				max = internal.elems[i];
+				pos = i;
+			}
+		}
+		return pos;
+	}
+
 	VectorRegister VectorRegister::max (const VectorRegister& other) const
     {
         VectorRegister vec;
@@ -71,7 +92,7 @@ namespace xavier
         return vec;
     }
 
-    void VectorRegister::set (char a)
+    void VectorRegister::set (elementType a)
     {
     #ifdef __AVX2__
 	    internal.simd = _mm256_set1_epi8 (a);

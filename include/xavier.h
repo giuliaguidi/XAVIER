@@ -58,37 +58,24 @@
 #include <iterator>
 #include <x86intrin.h>
 
-#include "types/state.h"
-#include "constants.h"
-#include "types/vectors.h"
+#include "aligner.h"
+#include "vectors.h"
 
-namespace xavier {
+namespace xavier
+{
 
-	/**
-	 * TODO: descriptive name and comment (phase I)
-	 */
-	void beg (State& state);
+	int global_alignment( const std::string& query1, const std::string& query2,
+	                      const ScoringScheme& scoringScheme, const int scoreDropOff );
 
-	/**
-	 * TODO: descriptive name and comment (phase II)
-	 */
-	void mid (State& state);
-
-	/**
-	 * TODO: descriptive name and comment (phase IV)
-	 */
-	void end (State& state);
+	int seed_and_extend( const std::string& query1, const std::string& query2,
+	                     const ScoringScheme& scoringScheme, const int scoreDropOff,
+	                     const Seed& seed );
 
 	/**
 	 * TODO: descriptive name and comment
 	 */
-	void onedirection (State& state);
-
-	/**
-	 * TODO: descriptive name and comment
-	 */
-	std::pair<int, int> xavier (Seed& seed, Direction direction, std::string const& target,
-		std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff);
+	// std::pair<int, int> xavier (Seed& seed, Direction direction, std::string const& target,
+	// 	std::string const& query, ScoringScheme& scoringScheme, int const &scoreDropOff);
 
 } /* namespace xavier */
 
