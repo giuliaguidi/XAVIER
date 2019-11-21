@@ -127,36 +127,32 @@ namespace xavier
 
 	AlignmentResult Aligner::align()
 	{
-
-		// Opening Phase
+		/**
+		 * Opening stage
+		 */ 
 		initAntiDiags();
 
 		if ( xdropCondition() )
 			return produceResults();
 
-		std::cout << bestScore << std::endl;
-		std::cout << "h\t" << hoffset << "	" << lastMove << std::endl;
-		std::cout << "v\t" << voffset << "	" << lastMove << std::endl;
-		std::cout << std::endl;
-
-		// Core Phase
+		/**
+		 * Core stage
+		 */  
 		while( !closingCondition() )
 		{
-			// Solve for next Anti Diagonal
+			// Solve for next anti-diagonal
 			calcAntiDiag3();
 			// std::cout << "calcAntiDiag3();" << std::endl;
 
-			// Track new Curr score
+			// Track new currScore
 			updateCurrScore();
-			// std::cout << "updateCurrScore();" << std::endl;
 
-			// If X Drop Condition satisfied; terminate
+			// If x-drop condition satisfied; terminate
 			if ( xdropCondition() )
 				return produceResults();
 
-			// Ensure Anti Diagonals stay in int8_t range
+			// Ensure anti-diagonals stay in int8_t range
 	    	normalizeVectors();
-			// std::cout << "normalizeVectors();" << std::endl;
 
 	    	// Trace state
 	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
@@ -165,34 +161,32 @@ namespace xavier
 			if ( currScore > bestScore )
 				bestScore = currScore;
 
-			// Move AntiDiags
-			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 )
-			{
-				moveRight();
-				// std::cout << "moveRight();" << std::endl;
-			}
-			else
-			{
-				moveDown();
-				// std::cout << "moveDown();" << std::endl;
-			}
+			// Update anti-diagonals
+			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 ) moveRight();
+			else moveDown();
 		}
-		std::cout << std::endl;
 
-		// Closing Phase
-		for ( int i = 0; i < VectorRegister::LOGICALWIDTH - 1; ++i )
+		// The extension on both sequences cannot be greater than 
+		// the length of the sequence that hit the edge first
+		uint64_t max = hoffset > hlength ? hlength : vlength;
+
+		/**
+		 * Closing stage
+		 */ 
+		for ( int i = 0; i < VectorRegister::VECTORWIDTH + 1; ++i )
 		{
-			// Solve for next Anti Diagonal
+
+			// Solve for next anti-diagonal
 			calcAntiDiag3();
 
-			// Track new Curr score
+			// Track new currScore
 			updateCurrScore();
 
-			// If X Drop Condition satisfied; terminate
+			// If x-drop condition satisfied; terminate
 			if ( xdropCondition() )
 				return produceResults();
 
-			// Ensure Anti Diagonals stay in int8_t range
+			// Ensure anti-iagonals stay in int8_t range
 	    	normalizeVectors();
 
 	    	// Trace state
@@ -200,23 +194,15 @@ namespace xavier
 
 			// Update best
 			if ( currScore > bestScore ) bestScore = currScore;
-			else currScore = bestScore;	// Only in the closing phase
+			else currScore = bestScore;	// Only in closing stage
 
-			if ( lastMove == DOWN )
-			{
-				moveRight();
-			}
-			else
-			{
-				moveDown();
-			}
-
-		std::cout << bestScore << std::endl;
-		std::cout << "h\t" << hoffset << "	" << lastMove << std::endl;
-		std::cout << "v\t" << voffset << "	" << lastMove << std::endl;
-		
+			// Update anti-diagonals
+			if ( lastMove == DOWN ) moveRight();
+			else moveDown();
 		}
-		std::cout << std::endl;
+
+		// Function to check offset (and so extension) are valid values
+		checkOffsetValidity(max);
 
 		return produceResults();
 	}
@@ -248,7 +234,7 @@ namespace xavier
 		vqueryh = vqueryh.lshift();
 		// vqueryh[VectorRegister::LOGICALWIDTH - 1] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
 		// GG: shouldn't we load the next one in pos LOGICALWIDTH?
-		vqueryh[VectorRegister::LOGICALWIDTH] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
+		vqueryh[VectorRegister::LOGICALWIDTH] = hoffset > hlength ? VectorRegister::NINF : queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1 = antiDiag2;
@@ -262,7 +248,7 @@ namespace xavier
 	{
 		/* (a) shift to the right on query vertical */
 		vqueryv = vqueryv.rshift();
-		vqueryv[0] = voffset >= vlength ? VectorRegister::NINF : queryv[voffset++];
+		vqueryv[0] = voffset > vlength ? VectorRegister::NINF : queryv[voffset++];
 
 		/* (b) shift to the right on updated vector 2: this places the left-aligned vector 3 as a right-aligned vector 2 */
 		antiDiag1 = antiDiag2;
@@ -289,7 +275,7 @@ namespace xavier
 
 	bool Aligner::closingCondition()
 	{
-		return hoffset >= hlength || voffset >= vlength;
+		return hoffset > hlength || voffset > vlength;
 	}
 
 	void Aligner::normalizeVectors()
@@ -304,5 +290,27 @@ namespace xavier
 			antiDiag3 = antiDiag3 - antiDiagWorst;
 			scoreOffset += antiDiagWorst;
 		}
+	}
+
+	void Aligner::checkOffsetValidity(const uint64_t& max)
+	{
+		// If max == hlength, vqueryh hit the edge, thus we need to rescale voffset, otherwise rescale hoffset
+		// as those keep increasing (two separate movvement funcs might be a better option)
+		if( max == hlength )
+			voffset = std::max( 2 * voffset - vlength - 1, 
+									voffset - ( VectorRegister::VECTORWIDTH / 2 ) - 1 );
+		else
+			hoffset = std::max( 2 * hoffset - hlength - 1, 
+									hoffset - ( VectorRegister::VECTORWIDTH / 2 ) - 1 );
+
+		// GG: Closing stage add + 1 and the min operation is safer for external application
+		// hoffset--;
+		// GG: Previous check already account for this decrement
+		// voffset--; 
+		hoffset = std::min(hoffset, max);
+		voffset = std::min(voffset, max);
+
+		assert(hoffset <= hlength);
+		assert(voffset <= vlength);
 	}
 }

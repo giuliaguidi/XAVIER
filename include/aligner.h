@@ -178,6 +178,7 @@ namespace xavier
 		bool xdropCondition();
 		bool closingCondition();
 		void normalizeVectors();
+		void checkOffsetValidity(const uint64_t& max);
 		void move();
 		void step();
 
