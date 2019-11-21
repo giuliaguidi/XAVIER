@@ -16,11 +16,11 @@ namespace xavier
 	scoringScheme( _scoringScheme )
 	{
 
-		hlength = hseq.length() + 1;
-		vlength = vseq.length() + 1;
+		hlength = hseq.length(); // + 1;
+		vlength = vseq.length(); // + 1;
 
-		queryh = new int8_t[hlength + VectorRegister::VECTORWIDTH];
-		queryv = new int8_t[vlength + VectorRegister::VECTORWIDTH];
+		queryh = new int8_t[hlength	+ VectorRegister::VECTORWIDTH];
+		queryv = new int8_t[vlength	+ VectorRegister::VECTORWIDTH];
 
 		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
 		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
@@ -29,7 +29,7 @@ namespace xavier
 		std::fill(queryv + vlength, queryv + vlength + VectorRegister::VECTORWIDTH, VectorRegister::NINF);
 
 		hoffset = VectorRegister::LOGICALWIDTH + 1;
-		voffset = VectorRegister::LOGICALWIDTH;
+		voffset = VectorRegister::LOGICALWIDTH + 1;
 
 		bestScore    = 0;
 		currScore    = 0;
@@ -127,14 +127,60 @@ namespace xavier
 
 	AlignmentResult Aligner::align()
 	{
+
 		// Opening Phase
 		initAntiDiags();
 
 		if ( xdropCondition() )
 			return produceResults();
 
+		std::cout << bestScore << std::endl;
+		std::cout << "h\t" << hoffset << "	" << lastMove << std::endl;
+		std::cout << "v\t" << voffset << "	" << lastMove << std::endl;
+		std::cout << std::endl;
+
 		// Core Phase
 		while( !closingCondition() )
+		{
+			// Solve for next Anti Diagonal
+			calcAntiDiag3();
+			// std::cout << "calcAntiDiag3();" << std::endl;
+
+			// Track new Curr score
+			updateCurrScore();
+			// std::cout << "updateCurrScore();" << std::endl;
+
+			// If X Drop Condition satisfied; terminate
+			if ( xdropCondition() )
+				return produceResults();
+
+			// Ensure Anti Diagonals stay in int8_t range
+	    	normalizeVectors();
+			// std::cout << "normalizeVectors();" << std::endl;
+
+	    	// Trace state
+	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
+
+			// Update best
+			if ( currScore > bestScore )
+				bestScore = currScore;
+
+			// Move AntiDiags
+			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 )
+			{
+				moveRight();
+				// std::cout << "moveRight();" << std::endl;
+			}
+			else
+			{
+				moveDown();
+				// std::cout << "moveDown();" << std::endl;
+			}
+		}
+		std::cout << std::endl;
+
+		// Closing Phase
+		for ( int i = 0; i < VectorRegister::LOGICALWIDTH - 1; ++i )
 		{
 			// Solve for next Anti Diagonal
 			calcAntiDiag3();
@@ -150,70 +196,27 @@ namespace xavier
 	    	normalizeVectors();
 
 	    	// Trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
+	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
 
 			// Update best
-			if ( currScore > bestScore )
-				bestScore = currScore;
+			if ( currScore > bestScore ) bestScore = currScore;
+			else currScore = bestScore;	// Only in the closing phase
 
-			// Move AntiDiags
-			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 )
+			if ( lastMove == DOWN )
+			{
 				moveRight();
+			}
 			else
+			{
 				moveDown();
+			}
 
-			std::cout << vqueryh << std::endl;
-			std::cout << vqueryv << std::endl;	
-			std::cout << antiDiag1 << std::endl;
-			std::cout << antiDiag2 << std::endl;
-			std::cout << antiDiag3 << "\n" << std::endl;
+		std::cout << bestScore << std::endl;
+		std::cout << "h\t" << hoffset << "	" << lastMove << std::endl;
+		std::cout << "v\t" << voffset << "	" << lastMove << std::endl;
+		
 		}
-
-		int offsetOffset[2]    = {0, 0};
-		offsetOffset[lastMove] = 1;
-
-		// // Closing Phase
-		// for ( int i = 0; i < VectorRegister::LOGICALWIDTH - 1; ++i )
-		// {
-		// 	// Solve for next Anti Diagonal
-		// 	calcAntiDiag3();
-
-		// 	// Track new Curr score
-		// 	updateCurrScore();
-
-		// 	// If X Drop Condition satisfied; terminate
-		// 	if ( xdropCondition() )
-		// 		return produceResults();
-
-		// 	// Ensure Anti Diagonals stay in int8_t range
-	    // 	normalizeVectors();
-
-	    // 	// Trace state
-	    // 	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
-
-		// 	// Update best
-		// 	if ( currScore > bestScore )
-		// 		bestScore = currScore;
-
-		// 	if ( lastMove == DOWN )
-		// 	{
-		// 		moveRight();
-		// 	}
-		// 	else
-		// 	{
-		// 		moveDown();
-		// 	}
-		// 	offsetOffset[lastMove]++;
-
-		// 	std::cout << vqueryh << std::endl;
-		// 	std::cout << vqueryv << std::endl;	
-		// 	std::cout << antiDiag1 << std::endl;
-		// 	std::cout << antiDiag2 << std::endl;
-		// 	std::cout << antiDiag3 << "\n" << std::endl;
-		// }
-
-		hoffset -= offsetOffset[ RIGHT ];
-		voffset -= offsetOffset[ DOWN  ];
+		std::cout << std::endl;
 
 		return produceResults();
 	}
@@ -243,12 +246,14 @@ namespace xavier
 	{
 		/* (a) shift to the left on query horizontal */
 		vqueryh = vqueryh.lshift();
-		vqueryh[VectorRegister::LOGICALWIDTH - 1] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
+		// vqueryh[VectorRegister::LOGICALWIDTH - 1] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
+		// GG: shouldn't we load the next one in pos LOGICALWIDTH?
+		vqueryh[VectorRegister::LOGICALWIDTH] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1 = antiDiag2;
-		antiDiag2 = antiDiag3;
 		antiDiag1 = antiDiag1.lshift();
+		antiDiag2 = antiDiag3;
 
 		lastMove = RIGHT;
 	}
