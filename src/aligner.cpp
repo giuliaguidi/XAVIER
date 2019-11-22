@@ -168,14 +168,16 @@ namespace xavier
 
 		// The extension on both sequences cannot be greater than 
 		// the length of the sequence that hit the edge first
-		uint64_t max = hoffset > hlength ? hlength : vlength;
+		uint64_t hit = hoffset > hlength ? hlength : vlength;
+
+
+
 
 		/**
 		 * Closing stage
 		 */ 
 		for ( int i = 0; i < VectorRegister::VECTORWIDTH + 1; ++i )
 		{
-
 			// Solve for next anti-diagonal
 			calcAntiDiag3();
 
@@ -202,7 +204,7 @@ namespace xavier
 		}
 
 		// Function to check offset (and so extension) are valid values
-		checkOffsetValidity(max);
+		checkOffsetValidity(hit);
 
 		return produceResults();
 	}
@@ -292,25 +294,21 @@ namespace xavier
 		}
 	}
 
-	void Aligner::checkOffsetValidity(const uint64_t& max)
+	void Aligner::checkOffsetValidity(const uint64_t& hit)
 	{
 		// If max == hlength, vqueryh hit the edge, thus we need to rescale voffset, otherwise rescale hoffset
-		// as those keep increasing (two separate movvement funcs might be a better option)
-		if( max == hlength )
-			voffset = std::max( 2 * voffset - vlength - 1, 
-									voffset - ( VectorRegister::VECTORWIDTH / 2 ) - 1 );
+		if( hit == hlength )
+		{
+			hoffset--;
+			voffset = std::min( hlength, voffset );
+		}
 		else
-			hoffset = std::max( 2 * hoffset - hlength - 1, 
-									hoffset - ( VectorRegister::VECTORWIDTH / 2 ) - 1 );
+		{
+			voffset--;
+			hoffset = std::min( vlength, hoffset );
+		}
 
-		// GG: Closing stage add + 1 and the min operation is safer for external application
-		// hoffset--;
-		// GG: Previous check already account for this decrement
-		// voffset--; 
-		hoffset = std::min(hoffset, max);
-		voffset = std::min(voffset, max);
-
-		assert(hoffset <= hlength);
-		assert(voffset <= vlength);
+		assert( hoffset <= hit );
+		assert( voffset <= hit );
 	}
 }
