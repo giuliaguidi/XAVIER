@@ -49,15 +49,15 @@
 // #include <seqan/basic.h>
 // #include <seqan/stream.h>
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-// #include "libgaba/gaba.h" 		 // sometimes the forefront vector will not reach the end
-// 								 // of the sequences. It is more likely to occur when the input
-// 								 // sequence lengths greatly differ
-// #ifdef __cplusplus
-// }
-// #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "libgaba/gaba.h" 	 // sometimes the forefront vector will not reach the end
+							 // of the sequences. It is more likely to occur when the input
+							 // sequence lengths greatly differ
+#ifdef __cplusplus
+}
+#endif
 
 //======================================================================================
 // GLOBAL VARIABLE DECLARATION
@@ -73,7 +73,7 @@
 #define BW 		(128)		// bandwidth (the alignment path of the input sequence and the result does not go out of the band)
 
 #define KSW2
-// #define GABA
+#define GABA
 // #define NOSIMD
 // #define SEQAN
 // #define SSW
@@ -174,10 +174,10 @@ int main(int argc, char const *argv[])
 	std::cout << std::endl;
 	std::cout << "result.bestScore	" << result.bestScore << std::endl;
 	std::cout << "result.exitScore	" << result.exitScore << std::endl;
-	std::cout << "result.begH	" << result.begH << std::endl;
-	std::cout << "result.endH	" << result.endH << std::endl;
-	std::cout << "result.begV	" << result.begV << std::endl;
-	std::cout << "result.endV	" << result.endV << std::endl;
+	// std::cout << "result.begH	" << result.begH << std::endl;
+	// std::cout << "result.endH	" << result.endH << std::endl;
+	// std::cout << "result.begV	" << result.begV << std::endl;
+	// std::cout << "result.endV	" << result.endV << std::endl;
 
 	std::cout << "time  " << diff1.count() << "\t" << (double)LEN1 / diff1.count() << "\tbases aligned per second" << std::endl;
 
@@ -261,9 +261,7 @@ int main(int argc, char const *argv[])
 	);
 
 	// until x-drop condition is detected
-	// x-drop has to be within [-127, 127] in libagaba
 	gaba_fill_t const *m = f;
-	// track max
 
 	while((f->status & GABA_TERM) == 0) {
 		// substitute the pointer by the tail section's if it reached the end
@@ -283,8 +281,10 @@ int main(int argc, char const *argv[])
 	auto end3 = std::chrono::high_resolution_clock::now();
 	diff3 = end3-start3;
 
-	std::cout << xdrop << "\t" << r->score << "\t" << diff3.count() << "\t" << (double)LEN1 / diff3.count() << "\tbases aligned per second" << std::endl;
-
+	std::cout << std::endl;
+	std::cout << "result.bestScore	" << r->score << std::endl;
+	std::cout << "time  " << diff3.count() << "\t" << (double)LEN1 / diff3.count() << "\tbases aligned per second" << std::endl;
+	
 	// clean up
 	gaba_dp_res_free(dp, r); gaba_dp_clean(dp);
 	gaba_clean(ctx);
