@@ -1,5 +1,5 @@
 [submodule "benchmark/benchmark/tools/ksw2"]
-	path = benchmark/benchmark/tools/ksw2
+	path = benchmark/tools/ksw2
 	url = https://github.com/lh3/ksw2
 [submodule "benchmark/tools/libgaba"]
 	path = benchmark/tools/libgaba
