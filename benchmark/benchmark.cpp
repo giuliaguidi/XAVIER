@@ -215,7 +215,7 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff2;
 	auto start2 = std::chrono::high_resolution_clock::now();
 
-	ksw_extz2_sse(0, ql, qs, tl, ts, 5, mat, 0, -GAP, 64, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
+	ksw_extz2_sse(0, ql, qs, tl, ts, 5, mat, 0, -GAP, -1, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
 
 	auto end2 = std::chrono::high_resolution_clock::now();
 	diff2 = end2-start2;
@@ -284,7 +284,7 @@ int main(int argc, char const *argv[])
 	std::cout << std::endl;
 	std::cout << "result.bestScore	" << r->score << std::endl;
 	std::cout << "time  " << diff3.count() << "\t" << (double)LEN1 / diff3.count() << "\tbases aligned per second" << std::endl;
-	
+
 	// clean up
 	gaba_dp_res_free(dp, r); gaba_dp_clean(dp);
 	gaba_clean(ctx);
@@ -295,9 +295,8 @@ int main(int argc, char const *argv[])
 	// SEQAN SEED EXTENSION (not vectorized, not banded, x-drop)
 	//======================================================================================
 
-#ifdef NOSIMD
-	// SeqAn
-	std::cout << "SeqAn" << std::endl;
+#ifdef SEQAN
+
 	seqan::Score<int, seqan::Simple> scoringSchemeSeqAn(MAT, MIS, GAP);
 	seqan::Seed<seqan::Simple> seed1(0, 0, 0);
 	std::chrono::duration<double> diff4;
@@ -310,33 +309,6 @@ int main(int argc, char const *argv[])
 	std::cout << xdrop << "\t" << score << "\t" << diff4.count() << "\t" << (double)LEN1 / diff4.count() << "\tbases aligned per second" << std::endl;
 #endif
 	std::cout << std::endl;
-	//======================================================================================
-	// SEQAN BANDED GLOBAL (vectorized, banded)
-	//======================================================================================
-
-#ifdef SEQAN
-	seqan::Score<int16_t, seqan::Simple> scoringSchemeSeqAn(MAT, MIS, GAP);
-	using TSequence    = seqan::String<seqan::Dna>;
-	using TThreadModel = seqan::WavefrontAlignment<seqan::BlockOffsetOptimization>;
-	using TVectorSpec  = seqan::Vectorial;
-	using TExecPolicy  = seqan::ExecutionPolicy<TThreadModel, TVectorSpec>;
-
-	seqan::StringSet<TSequence> seqs1;
-	seqan::StringSet<TSequence> seqs2;
-
-	appendValue(seqs1, TSequence{targetSeg.c_str()});
-	appendValue(seqs2, TSequence{querySeg.c_str()});
-
-	TExecPolicy execPolicy;
-	setNumThreads(execPolicy, 1);
-	std::chrono::duration<double> diff9;
-	auto start9 = std::chrono::high_resolution_clock::now();
-	seqan::String<int16_t> scores = seqan::globalAlignmentScore(execPolicy, seqs1, seqs2, scoringSchemeSeqAn);
-	auto end9 = std::chrono::high_resolution_clock::now();
-	diff9 = end9-start9;
-
-	std::cout << "SeqAn's best (not banded, vectorized) " << scores[0] << " in " << diff9.count() << " sec " << std::endl;
-#endif
 
 	//======================================================================================
 	// SSW LOCAL ALIGNMENT (SSE2 vectorized, not banded)

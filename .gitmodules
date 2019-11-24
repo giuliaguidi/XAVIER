@@ -4,3 +4,6 @@
 [submodule "benchmark/tools/libgaba"]
 	path = benchmark/tools/libgaba
 	url = https://github.com/ocxtal/libgaba
+[submodule "benchmark/tools/seqan"]
+	path = benchmark/tools/seqan
+	url = https://github.com/seqan/seqan
