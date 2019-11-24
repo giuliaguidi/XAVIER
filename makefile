@@ -1,6 +1,6 @@
 CC = gcc
 CXX = g++
-CFLAGS = -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -fsanitize=address -O1 -fno-omit-frame-pointer
+CFLAGS = -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -O3
 
 
 ODIR = obj

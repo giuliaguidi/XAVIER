@@ -155,7 +155,7 @@ namespace xavier
 	    	normalizeVectors();
 
 	    	// Trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
+	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
 
 			// Update best
 			if ( currScore > bestScore )
@@ -189,7 +189,7 @@ namespace xavier
 	    	normalizeVectors();
 
 	    	// Trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
+	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
 
 			// Update best
 			if ( currScore > bestScore ) bestScore = currScore;
