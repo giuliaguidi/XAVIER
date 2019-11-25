@@ -41,6 +41,7 @@
 // #include <edlib.h>
 
 // #include <seqan/align.h>
+// #include <seqan/seeds/seeds_extension.h>
 // #include <seqan/sequence.h>
 // #include <seqan/align.h>
 // #include <seqan/seeds.h>
@@ -74,8 +75,6 @@ extern "C" {
 
 #define KSW2
 #define GABA
-// #define NOSIMD
-// #define SEQAN
 // #define SSW
 // #define PARASAIL1
 // #define PARASAIL2
@@ -290,25 +289,6 @@ int main(int argc, char const *argv[])
 	gaba_clean(ctx);
 
 #endif
-
-	//======================================================================================
-	// SEQAN SEED EXTENSION (not vectorized, not banded, x-drop)
-	//======================================================================================
-
-#ifdef SEQAN
-
-	seqan::Score<int, seqan::Simple> scoringSchemeSeqAn(MAT, MIS, GAP);
-	seqan::Seed<seqan::Simple> seed1(0, 0, 0);
-	std::chrono::duration<double> diff4;
-	auto start4 = std::chrono::high_resolution_clock::now();
-	int score = seqan::extendSeed(seed1, targetSeg, querySeg, seqan::EXTEND_RIGHT,
-		scoringSchemeSeqAn, xdrop, seqan::GappedXDrop(), 0);
-	auto end4 = std::chrono::high_resolution_clock::now();
-	diff4 = end4-start4;
-
-	std::cout << xdrop << "\t" << score << "\t" << diff4.count() << "\t" << (double)LEN1 / diff4.count() << "\tbases aligned per second" << std::endl;
-#endif
-	std::cout << std::endl;
 
 	//======================================================================================
 	// SSW LOCAL ALIGNMENT (SSE2 vectorized, not banded)
