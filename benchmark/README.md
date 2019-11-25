@@ -18,4 +18,5 @@ autoreconf -fi
 ./configure
 make 
 make install
+export LD_LIBRARY_PATH=/where/you/installed/lib
 ```
