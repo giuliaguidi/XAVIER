@@ -4,5 +4,5 @@ INCLUDE= -Itools/libgaba -I../include -Itools -I/global/cscratch1/sd/gguidi/xavi
 LIBS= -Ltools/libgaba -L/global/cscratch1/sd/gguidi/xavier/benchmark/tools/parasail/lib -lgaba -lparasail #-ledlib
 CFLAGS = -I. -O3 -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -fpermissive
 
-build_benchmark: tools/ksw2
-	$(CXX) -march=native -std=c++14 $(INCLUDE) benchmark.cpp ../lib/xavierlib.a  $(CFLAGS) -o test $(LIBS)
+build_benchmark: ssw_cpp.cpp ssw.c benchmark.cpp tools/ksw2
+	$(CXX) -march=native -std=c++14 $(INCLUDE) ../lib/xavierlib.a  $(CFLAGS) -o test ssw_cpp.cpp ssw.c benchmark.cpp $(LIBS)
