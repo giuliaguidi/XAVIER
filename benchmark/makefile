@@ -1,7 +1,7 @@
 CC= gcc
 CXX= g++
 INCLUDE= -Itools/libgaba -I../include -Itools -Itools/seqan/include -IComplete-Striped-Smith-Waterman-Library/src
-LIBS= -Ltools/libgaba -lgaba -lparasail
+LIBS= -Ltools/libgaba -lgaba -lparasail -ledlib
 CFLAGS = -I. -O3 -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -fpermissive
 
 build_benchmark: tools/ksw2

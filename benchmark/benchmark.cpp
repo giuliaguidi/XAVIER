@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <iterator>
 #include <x86intrin.h>
+#include <random>
 
 #include "xavier.h"
 #include "ksw2/ksw2.h"
@@ -64,8 +65,6 @@ extern "C" {
 // GLOBAL VARIABLE DECLARATION
 //======================================================================================
 
-#define LEN1 	(10000)		// read length (this is going to be a distribution of length in the adaptive version)
-#define LEN2 	(10000)		// 2nd read length
 #define MAT		( 1)		// match score
 #define MIS		(-1)		// mismatch score
 #define GAP		(-1)		// gap score
@@ -75,10 +74,10 @@ extern "C" {
 
 #define KSW2
 #define GABA
-// #define SSW
 #define PARASAIL1
-#define PARASAIL2
-// #define EDLIB
+#define EDLIB
+// #define PARASAIL2
+// #define SSW
 
 //======================================================================================
 // READ SIMULATOR
@@ -91,18 +90,18 @@ char random_base(void)
 	return(table[rand() % 4]);
 }
 
-void generate_random_sequence(std::string& seq)
+void generate_random_sequence(std::string& seq, int& len1)
 {
-	for(int i = 0; i < LEN1; i++)
+	for(int i = 0; i < len1; i++)
 		seq.append(1, random_base());
 }
 
-std::string generate_mutated_sequence(const std::string& seq)
+std::string generate_mutated_sequence(const std::string& seq, int& len2)
 {
 	int i, j, wave = 0;	// wave is q-coordinate of the alignment path
 	std::string mutated;
 
-	for(i = 0, j = 0; i < LEN2; i++)
+	for(i = 0, j = 0; i < len2; i++)
 	{
 		if(((double)rand()/(double)RAND_MAX) < PMIS)
 		{
@@ -113,7 +112,7 @@ std::string generate_mutated_sequence(const std::string& seq)
 		{
 			if(rand() & 0x01 && wave > (-BW + 1))
 			{
-				char tmp = (j < LEN2) ? seq[j++] : random_base();
+				char tmp = (j < len2) ? seq[j++] : random_base();
 				mutated.append(1, tmp);
 				j++; wave--; // deletion
 			}
@@ -124,13 +123,13 @@ std::string generate_mutated_sequence(const std::string& seq)
 			}
 			else
 			{
-				char tmp = (j < LEN2) ? seq[j++] : random_base();
+				char tmp = (j < len2) ? seq[j++] : random_base();
 				mutated.append(1, tmp);
 			}
 		}
 		else
 		{
-			char tmp = (j < LEN2) ? seq[j++] : random_base();
+			char tmp = (j < len2) ? seq[j++] : random_base();
 			mutated.append(1, tmp);
 		}
 	}
@@ -146,10 +145,22 @@ int main(int argc, char const *argv[])
 {
 	/* Simulate read pair */
 	std::string targetSeg;
-	generate_random_sequence(targetSeg);
-	std::string querySeg = generate_mutated_sequence(targetSeg);
+
+	// std::default_random_engine generator;
+	// std::normal_distribution<float> distribution(11000.0, 2000.0);
+
+    // int len1 = (int)distribution(generator);
+	// int len2 = (int)distribution(generator);
+    int len1 = 10000;
+	int len2 = 12000;
+
+	std::cout << len1 << "	" << len2 << std::endl;
+
+	generate_random_sequence(targetSeg, len1);
+	std::string querySeg = generate_mutated_sequence(targetSeg, len2);
 
 	int xdrop = std::stoi(argv[1]);
+	int bw = std::stoi(argv[2]);
 
 	//======================================================================================
 	// XAVIER (vectorized SSE2 and AVX2, banded, (not yet) x-drop)
@@ -171,14 +182,7 @@ int main(int argc, char const *argv[])
 	diff1 = end1-start1;
 
 	std::cout << std::endl;
-	std::cout << "result.bestScore	" << result.bestScore << std::endl;
-	std::cout << "result.exitScore	" << result.exitScore << std::endl;
-	// std::cout << "result.begH	" << result.begH << std::endl;
-	// std::cout << "result.endH	" << result.endH << std::endl;
-	// std::cout << "result.begV	" << result.begV << std::endl;
-	// std::cout << "result.endV	" << result.endV << std::endl;
-
-	std::cout << "time  " << diff1.count() << "\t" << (double)LEN1 / diff1.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "X	" << result.bestScore << "	" << diff1.count() << "	" <<  (double)len1 / diff1.count() << std::endl;
 
 	//======================================================================================
 	// KSW2 GLOBAL AND EXTENSION (vectorized SSE4.1 and x-drop, not banded)
@@ -214,16 +218,14 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff2;
 	auto start2 = std::chrono::high_resolution_clock::now();
 
-	ksw_extz2_sse(0, ql, qs, tl, ts, 5, mat, 0, -GAP, -1, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
+	ksw_extz2_sse(0, ql, qs, tl, ts, 5, mat, 0, -GAP, bw, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
 
 	auto end2 = std::chrono::high_resolution_clock::now();
 	diff2 = end2-start2;
 
 	free(ts); free(qs);
 
-	std::cout << std::endl;
-	std::cout << "result.bestScore	" << ez.score << std::endl;
-	std::cout << "time  " << diff2.count() << "\t" << (double)LEN1 / diff2.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "K	" << ez.score << "	" << diff2.count() << "	" << (double)len1 / diff2.count() << std::endl;
 #endif
 
 	//======================================================================================
@@ -280,9 +282,7 @@ int main(int argc, char const *argv[])
 	auto end3 = std::chrono::high_resolution_clock::now();
 	diff3 = end3-start3;
 
-	std::cout << std::endl;
-	std::cout << "result.bestScore	" << r->score << std::endl;
-	std::cout << "time  " << diff3.count() << "\t" << (double)LEN1 / diff3.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "G	" << r->score << "	" << diff3.count() << "	" << (double)len1 / diff3.count() << std::endl;
 
 	// clean up
 	gaba_dp_res_free(dp, r); gaba_dp_clean(dp);
@@ -315,7 +315,7 @@ int main(int argc, char const *argv[])
 
 	std::cout << std::endl;
 	std::cout << "result.bestScore	" << alignment.sw_score << std::endl;
-	std::cout << "time  " << diff5.count() << "\t" << (double)LEN1 / diff5.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "time  " << diff5.count() << "\t" << (double)len1 / diff5.count() << "\tbases aligned per second" << std::endl;
 #endif
 
 	//======================================================================================
@@ -331,9 +331,7 @@ int main(int argc, char const *argv[])
 	auto end7 = std::chrono::high_resolution_clock::now();
 	diff7 = end7-start7;
 
-	std::cout << std::endl;
-	std::cout << "result.editDistance	" << edresult.editDistance << std::endl;
-	std::cout << "time  " << diff7.count() << "\t" << (double)LEN1 / diff7.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "E	" << edresult.editDistance << "	" << diff7.count() << "	" << (double)len1 / diff7.count() << std::endl;
 	edlibFreeAlignResult(edresult);
 #endif
 
@@ -352,15 +350,14 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff6;
 	auto start6 = std::chrono::high_resolution_clock::now();
 
-	result1 = parasail_nw_banded(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, 16, matrix);
+	result1 = parasail_nw_banded(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, bw, matrix);
 	parasail_result_free(result1);
 
 	auto end6 = std::chrono::high_resolution_clock::now();
 	diff6 = end6-start6;
 
+	std::cout << "P	" << parasail_result_get_score(result1) << "	" << diff6.count() << "	" << (double)len1 / diff6.count() << std::endl;
 	std::cout << std::endl;
-	std::cout << "result.bestScore	" << parasail_result_get_score(result1) << std::endl;
-	std::cout << "time  " << diff6.count() << std::endl;
 #endif
 
 	//======================================================================================
@@ -380,8 +377,8 @@ int main(int argc, char const *argv[])
 	diff8 = end8-start8;
 
 	std::cout << std::endl;
-	std::cout << "result.bestScore	" << parasail_result_get_score(result2) << std::endl;
-	std::cout << "time  " << diff8.count() << "\t" << (double)LEN1 / diff8.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "global, vectorized parasail result.bestScore	" << parasail_result_get_score(result2) << std::endl;
+	std::cout << "global, vectorized parasail time  " << diff8.count() << "\t" << (double)len1 / diff8.count() << "\tbases aligned per second" << std::endl;
 #endif
 	return 0;
 }
