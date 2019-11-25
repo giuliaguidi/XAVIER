@@ -33,12 +33,12 @@
 #include "ksw2/ksw2.h"
 #include "ksw2/ksw2_extz2_sse.c"
 
-// #include "parasail/parasail.h"
-// #include "parasail/parasail/io.h"
-// #include "parasail/parasail/memory.h"
-// #include "parasail/parasail/stats.h"
+#include "parasail/parasail.h"
+#include "parasail/parasail/io.h"
+#include "parasail/parasail/memory.h"
+#include "parasail/parasail/stats.h"
 // #include "Complete-Striped-Smith-Waterman-Library/src/ssw_cpp.h"
-// #include <edlib.h>
+#include <edlib.h>
 
 // #include <seqan/align.h>
 // #include <seqan/seeds/seeds_extension.h>
@@ -76,8 +76,8 @@ extern "C" {
 #define KSW2
 #define GABA
 // #define SSW
-// #define PARASAIL1
-// #define PARASAIL2
+#define PARASAIL1
+#define PARASAIL2
 // #define EDLIB
 
 //======================================================================================
@@ -313,8 +313,9 @@ int main(int argc, char const *argv[])
 	auto end5 = std::chrono::high_resolution_clock::now();
 	diff5 = end5-start5;
 
-	// SeqAn is doing more computation
-	std::cout << "SSW's best (not banded, vectorized) " << alignment.sw_score << " in " << diff5.count() << " sec " << std::endl;
+	std::cout << std::endl;
+	std::cout << "result.bestScore	" << alignment.sw_score << std::endl;
+	std::cout << "time  " << diff5.count() << "\t" << (double)LEN1 / diff5.count() << "\tbases aligned per second" << std::endl;
 #endif
 
 	//======================================================================================
@@ -330,7 +331,9 @@ int main(int argc, char const *argv[])
 	auto end7 = std::chrono::high_resolution_clock::now();
 	diff7 = end7-start7;
 
-	std::cout << "Edlib's edit distance (banded, not vectorized) " << edresult.editDistance << " in " << diff7.count() << " sec " << std::endl;
+	std::cout << std::endl;
+	std::cout << "result.editDistance	" << edresult.editDistance << std::endl;
+	std::cout << "time  " << diff7.count() << "\t" << (double)LEN1 / diff7.count() << "\tbases aligned per second" << std::endl;
 	edlibFreeAlignResult(edresult);
 #endif
 
@@ -341,7 +344,7 @@ int main(int argc, char const *argv[])
 #ifdef PARASAIL1
 	int s1Len = (int)strlen(targetSeg.c_str());
 	int s2Len = (int)strlen(querySeg.c_str());
-	parasail_result_t *result = NULL;
+	parasail_result_t *result1 = NULL;
 
 	const char alphabet[4] = {'A','T','C', 'G'};
 	const parasail_matrix_t *matrix = parasail_matrix_create(alphabet, MAT, MIS);
@@ -349,14 +352,15 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff6;
 	auto start6 = std::chrono::high_resolution_clock::now();
 
-	result = parasail_nw_banded(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, 16, matrix);
-	parasail_result_free(result);
+	result1 = parasail_nw_banded(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, 16, matrix);
+	parasail_result_free(result1);
 
 	auto end6 = std::chrono::high_resolution_clock::now();
 	diff6 = end6-start6;
 
-	// SeqAn is doing more computation
-	std::cout << "Parasail's best (banded, not vectorized) " << parasail_result_get_score(result) << " in " << diff6.count() << " sec " << std::endl;
+	std::cout << std::endl;
+	std::cout << "result.bestScore	" << parasail_result_get_score(result1) << std::endl;
+	std::cout << "time  " << diff6.count() << std::endl;
 #endif
 
 	//======================================================================================
@@ -375,8 +379,9 @@ int main(int argc, char const *argv[])
 	auto end8 = std::chrono::high_resolution_clock::now();
 	diff8 = end8-start8;
 
-	// SeqAn is doing more computation
-	std::cout << "Parasail's best (not banded, vectorized) " << parasail_result_get_score(result2) << " in " << diff8.count() << " sec " << std::endl;
+	std::cout << std::endl;
+	std::cout << "result.bestScore	" << parasail_result_get_score(result2) << std::endl;
+	std::cout << "time  " << diff8.count() << "\t" << (double)LEN1 / diff8.count() << "\tbases aligned per second" << std::endl;
 #endif
 	return 0;
 }

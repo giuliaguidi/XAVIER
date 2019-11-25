@@ -7,3 +7,15 @@
 [submodule "benchmark/tools/seqan"]
 	path = benchmark/tools/seqan
 	url = https://github.com/seqan/seqan
+[submodule "benchmark/benchmark/tools/parasail"]
+	path = benchmark/benchmark/tools/parasail
+	url = https://github.com/jeffdaily/parasail.git
+[submodule "benchmark/benchmark/tools/edlib"]
+	path = benchmark/benchmark/tools/edlib
+	url = https://github.com/Martinsos/edlib.git
+[submodule "benchmark/tools/edlib"]
+	path = benchmark/tools/edlib
+	url = https://github.com/Martinsos/edlib.git
+[submodule "benchmark/tools/parasail"]
+	path = benchmark/tools/parasail
+	url = https://github.com/jeffdaily/parasail.git
