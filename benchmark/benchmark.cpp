@@ -38,8 +38,10 @@
 #include "parasail/parasail/io.h"
 #include "parasail/parasail/memory.h"
 #include "parasail/parasail/stats.h"
-// #include "Complete-Striped-Smith-Waterman-Library/src/ssw_cpp.h"
-#include <edlib.h>
+#include "ssw.h"
+#include "ssw_cpp.h"
+
+// #include <edlib.h>
 
 // #include <seqan/align.h>
 // #include <seqan/seeds/seeds_extension.h>
@@ -75,9 +77,9 @@ extern "C" {
 #define KSW2
 #define GABA
 #define PARASAIL1
-#define EDLIB
-// #define PARASAIL2
-// #define SSW
+// #define EDLIB
+#define PARASAIL2
+#define SSW
 
 //======================================================================================
 // READ SIMULATOR
@@ -313,9 +315,7 @@ int main(int argc, char const *argv[])
 	auto end5 = std::chrono::high_resolution_clock::now();
 	diff5 = end5-start5;
 
-	std::cout << std::endl;
-	std::cout << "result.bestScore	" << alignment.sw_score << std::endl;
-	std::cout << "time  " << diff5.count() << "\t" << (double)len1 / diff5.count() << "\tbases aligned per second" << std::endl;
+	std::cout << "G	" << alignment.sw_score << "	" << diff5.count() << "	" << (double)len1 / diff5.count() << std::endl;
 #endif
 
 	//======================================================================================
@@ -350,14 +350,14 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff6;
 	auto start6 = std::chrono::high_resolution_clock::now();
 
-	result1 = parasail_nw_banded(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, bw, matrix);
-	parasail_result_free(result1);
+	result1 = parasail_sg(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, matrix);
 
 	auto end6 = std::chrono::high_resolution_clock::now();
 	diff6 = end6-start6;
 
-	std::cout << "P	" << parasail_result_get_score(result1) << "	" << diff6.count() << "	" << (double)len1 / diff6.count() << std::endl;
+	std::cout << "P2	" << parasail_result_get_score(result1) << "	" << diff6.count() << "	" << (double)len1 / diff6.count() << std::endl;
 	std::cout << std::endl;
+	parasail_result_free(result1);
 #endif
 
 	//======================================================================================
@@ -370,15 +370,14 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff8;
 	auto start8 = std::chrono::high_resolution_clock::now();
 
-	result2 = parasail_nw(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, matrix); // check if properly triggered intrinsics
-	parasail_result_free(result2);
+	result2 = parasail_nw_banded(targetSeg.c_str(), s1Len, querySeg.c_str(), s2Len, 0, 1, bw, matrix); // check if properly triggered intrinsics
 
 	auto end8 = std::chrono::high_resolution_clock::now();
 	diff8 = end8-start8;
 
+	std::cout << "P2	" << parasail_result_get_score(result2) << "	" << diff8.count() << "	" << (double)len1 / diff8.count() << std::endl;
 	std::cout << std::endl;
-	std::cout << "global, vectorized parasail result.bestScore	" << parasail_result_get_score(result2) << std::endl;
-	std::cout << "global, vectorized parasail time  " << diff8.count() << "\t" << (double)len1 / diff8.count() << "\tbases aligned per second" << std::endl;
+	parasail_result_free(result2);
 #endif
 	return 0;
 }

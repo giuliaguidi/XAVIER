@@ -19,3 +19,6 @@
 [submodule "benchmark/tools/parasail"]
 	path = benchmark/tools/parasail
 	url = https://github.com/jeffdaily/parasail.git
+[submodule "benchmark/tools/Complete-Striped-Smith-Waterman-Library"]
+	path = benchmark/tools/Complete-Striped-Smith-Waterman-Library
+	url = https://github.com/mengyao/Complete-Striped-Smith-Waterman-Library.git
