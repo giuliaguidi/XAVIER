@@ -20,3 +20,9 @@ make
 make install
 export LD_LIBRARY_PATH=/where/you/installed/lib
 ```
+* Build [SSW](https://github.com/mengyao/Complete-Striped-Smith-Waterman-Library)
+```
+cd tools/Complete-Striped-Smith-Waterman-Library/src/
+make
+```
+
