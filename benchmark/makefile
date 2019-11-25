@@ -5,4 +5,4 @@ LIBS= -Ltools/libgaba -L/global/cscratch1/sd/gguidi/xavier/benchmark/tools/paras
 CFLAGS = -I. -O3 -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -fpermissive
 
 build_benchmark: ssw_cpp.cpp ssw.c benchmark.cpp tools/ksw2
-	$(CXX) -march=native -std=c++14 $(INCLUDE) ../lib/xavierlib.a  $(CFLAGS) -o test ssw_cpp.cpp ssw.c benchmark.cpp $(LIBS)
+	$(CXX) -march=native -std=c++14 $(INCLUDE)  ssw_cpp.cpp ssw.c benchmark.cpp ../lib/xavierlib.a  $(CFLAGS) -o test $(LIBS)
