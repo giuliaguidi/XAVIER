@@ -183,11 +183,11 @@ namespace xavier
 		void step();
 
 	private:
-		/* The trace tracks the state as it moves through the DP Matrix. */
-		Trace trace;
-
 		/* The scoring scheme contains the scoring information. */
 		ScoringScheme scoringScheme;
+
+		/* The trace tracks the state as it moves through the DP Matrix. */
+		Trace trace;
 
 		/* Sequences */
 		int8_t* queryh;

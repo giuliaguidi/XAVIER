@@ -52,6 +52,8 @@
 
 #include <vector>
 #include "vectors.h"
+#include "score.h"
+#include <algorithm>
 
 namespace xavier
 {
@@ -65,7 +67,8 @@ namespace xavier
 		antiDiag3(0),
 		vqueryh(0),
 		vqueryv(0),
-		scoreOffset(0)
+		scoreOffset(0),
+		lastMove(0)
 		{}
 
 		/**
@@ -73,7 +76,8 @@ namespace xavier
 		 */
 		TraceEntry ( const VectorRegister& _ad1, const VectorRegister& _ad2,
 		             const VectorRegister& _ad3, const VectorRegister& _vqh,
-		             const VectorRegister& _vqv, const int64_t offset );
+		             const VectorRegister& _vqv, const int64_t offset,
+		             const int _lastMove );
 
 		VectorRegister antiDiag1;
 		VectorRegister antiDiag2;
@@ -82,26 +86,42 @@ namespace xavier
 		VectorRegister vqueryh;
 		VectorRegister vqueryv;
 		int64_t 	   scoreOffset;
+		int            lastMove;
 	};
 
 	class Trace
 	{
 	public:
 
+		struct AlignmentPair
+		{
+			std::string alignH;
+			std::string alignV;
+			size_t matches;
+		};
+
 		/**
 		 * Default Constructor
 		 */
-		Trace();
+		Trace( const ScoringScheme& score ):
+		scoringScheme( score ) {}
 
 		/**
 		 * Store another trace entry corresponding to the current state.
 		 */
 		void pushbackState ( const VectorRegister& _ad1, const VectorRegister& _ad2,
 		                     const VectorRegister& _ad3, const VectorRegister& _vqh,
-		                     const VectorRegister& _vqv, const int64_t offset);
+		                     const VectorRegister& _vqv, const int64_t offset,
+		                     const int _lastMove );
+
+		AlignmentPair getAlignment();
+
+		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix );
 
 	private:
 		std::vector<TraceEntry> trace;
+		ScoringScheme scoringScheme;
+		std::vector< std::vector<int> > DPMatrix;
 	};
 }
 

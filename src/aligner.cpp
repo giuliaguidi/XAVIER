@@ -13,7 +13,8 @@ namespace xavier
 		 	const std::string& vseq,
 			const ScoringScheme& _scoringScheme,
 			const int& _scoreDropOff):
-	scoringScheme( _scoringScheme )
+	scoringScheme( _scoringScheme ),
+	trace( _scoringScheme )
 	{
 
 		hlength = hseq.length(); // + 1;
@@ -41,7 +42,7 @@ namespace xavier
 	{
         // we need one more space for the off-grid values
         // and one more space for antiDiag2
-        int DPmatrix[VectorRegister::LOGICALWIDTH + 2][VectorRegister::LOGICALWIDTH + 2];
+        std::vector< std::vector<int> > DPmatrix( VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2) );
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
@@ -96,6 +97,10 @@ namespace xavier
             int value1 = DPmatrix[i][VectorRegister::LOGICALWIDTH - i + 1];
             int value2 = DPmatrix[i + 1][VectorRegister::LOGICALWIDTH - i + 1];
 
+            // EY: I am pretty sure we are loading these values into
+            // the vector registers incorrectly.
+            // I think we are doing this upside down (the vectors are in
+            // reverse order)
             antiDiag1[i - 1] = value1;
             antiDiag2[i] = value2;
 
@@ -110,6 +115,9 @@ namespace xavier
         bestScore = DPmax;
         currScore = antiDiagMax;
         lastMove  = RIGHT;
+
+        // Hand off DPMatrix to trace
+        trace.saveOpeningPhaseDPMatrix( DPmatrix );
 	}
 
 	AlignmentResult Aligner::produceResults()
@@ -129,7 +137,7 @@ namespace xavier
 	{
 		/**
 		 * Opening stage
-		 */ 
+		 */
 		initAntiDiags();
 
 		if ( xdropCondition() )
@@ -137,7 +145,7 @@ namespace xavier
 
 		/**
 		 * Core stage
-		 */  
+		 */
 		while( !closingCondition() )
 		{
 			// Solve for next anti-diagonal
@@ -155,7 +163,7 @@ namespace xavier
 	    	normalizeVectors();
 
 	    	// Trace state
-	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update best
 			if ( currScore > bestScore )
@@ -166,13 +174,13 @@ namespace xavier
 			else moveDown();
 		}
 
-		// The extension on both sequences cannot be greater than 
+		// The extension on both sequences cannot be greater than
 		// the length of the sequence that hit the edge first
 		uint64_t hit = hoffset > hlength ? hlength : vlength;
 
 		/**
 		 * Closing stage
-		 */ 
+		 */
 		for ( int i = 0; i < VectorRegister::VECTORWIDTH + 1; ++i )
 		{
 			// Solve for next anti-diagonal
@@ -189,7 +197,7 @@ namespace xavier
 	    	normalizeVectors();
 
 	    	// Trace state
-	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset );
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update best
 			if ( currScore > bestScore ) bestScore = currScore;
