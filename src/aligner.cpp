@@ -153,14 +153,14 @@ namespace xavier
 			// std::cout << "calcAntiDiag3();" << std::endl;
 
 			// Track new currScore
-			updateCurrScore();
+			int8_t norm = updateCurrScore();
 
 			// If x-drop condition satisfied; terminate
 			if ( xdropCondition() )
 				return produceResults();
 
 			// Ensure anti-diagonals stay in int8_t range
-	    	normalizeVectors();
+	    	normalizeVectors(norm);
 
 	    	// Trace state
 	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
@@ -187,14 +187,14 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Track new currScore
-			updateCurrScore();
+			int8_t norm = updateCurrScore();
 
 			// If x-drop condition satisfied; terminate
 			if ( xdropCondition() )
 				return produceResults();
 
 			// Ensure anti-iagonals stay in int8_t range
-	    	normalizeVectors();
+	    	normalizeVectors(norm);
 
 	    	// Trace state
 	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
@@ -265,12 +265,14 @@ namespace xavier
 		lastMove = DOWN;
 	}
 
-	void Aligner::updateCurrScore()
+	int8_t Aligner::updateCurrScore()
 	{
 		int8_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
 		                                         antiDiag3.internal.elems
 		                                          + VectorRegister::VECTORWIDTH );
 		currScore = antiDiagBest + scoreOffset;
+
+		return antiDiagBest;
 	}
 
 
@@ -285,17 +287,15 @@ namespace xavier
 		return hoffset > hlength || voffset > vlength;
 	}
 
-	void Aligner::normalizeVectors()
+	void Aligner::normalizeVectors(int8_t& normfactor)
 	{
 		int64_t antiDiagBest = currScore - scoreOffset;
+
 		if ( antiDiagBest > VectorRegister::CUTOFF )
 		{
-			int8_t antiDiagWorst = *std::max_element( antiDiag3.internal.elems,
-		                                              antiDiag3.internal.elems
-		                                               + VectorRegister::VECTORWIDTH );
-			antiDiag2 = antiDiag2 - antiDiagWorst;
-			antiDiag3 = antiDiag3 - antiDiagWorst;
-			scoreOffset += antiDiagWorst;
+			antiDiag2 = antiDiag2 - normfactor;
+			antiDiag3 = antiDiag3 - normfactor;
+			scoreOffset += normfactor;
 		}
 	}
 

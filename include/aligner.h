@@ -174,13 +174,13 @@ namespace xavier
 		void calcAntiDiag3();
 		void moveRight();
 		void moveDown();
-		void updateCurrScore();
 		bool xdropCondition();
 		bool closingCondition();
-		void normalizeVectors();
+		void normalizeVectors(int8_t& normfactor);
 		void checkOffsetValidity(const uint64_t& max);
 		void move();
 		void step();
+		int8_t updateCurrScore();
 
 	private:
 		/* The scoring scheme contains the scoring information. */
