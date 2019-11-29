@@ -315,7 +315,7 @@ int main(int argc, char const *argv[])
 	auto end5 = std::chrono::high_resolution_clock::now();
 	diff5 = end5-start5;
 
-	std::cout << "G	" << alignment.sw_score << "	" << diff5.count() << "	" << (double)len1 / diff5.count() << std::endl;
+	std::cout << "S	" << alignment.sw_score << "	" << diff5.count() << "	" << (double)len1 / diff5.count() << std::endl;
 #endif
 
 	//======================================================================================
