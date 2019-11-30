@@ -156,7 +156,7 @@ int main(int argc, char const *argv[])
     int len1 = 10000;
 	int len2 = 12000;
 
-	std::cout << len1 << "	" << len2 << std::endl;
+	// std::cout << len1 << "	" << len2 << std::endl;
 
 	generate_random_sequence(targetSeg, len1);
 	std::string querySeg = generate_mutated_sequence(targetSeg, len2);
@@ -182,8 +182,6 @@ int main(int argc, char const *argv[])
 
 	auto end1 = std::chrono::high_resolution_clock::now();
 	diff1 = end1-start1;
-
-	std::cout << std::endl;
 	std::cout << "X	" << result.bestScore << "	" << diff1.count() << "	" <<  (double)len1 / diff1.count() << std::endl;
 
 	//======================================================================================
@@ -355,8 +353,7 @@ int main(int argc, char const *argv[])
 	auto end6 = std::chrono::high_resolution_clock::now();
 	diff6 = end6-start6;
 
-	std::cout << "P2	" << parasail_result_get_score(result1) << "	" << diff6.count() << "	" << (double)len1 / diff6.count() << std::endl;
-	std::cout << std::endl;
+	std::cout << "P1	" << parasail_result_get_score(result1) << "	" << diff6.count() << "	" << (double)len1 / diff6.count() << std::endl;
 	parasail_result_free(result1);
 #endif
 
