@@ -1,3 +1,5 @@
+## State-of-the-Art Benchmark
+
 * Clone repository recursively
 ```
 git submodule update --init --recursive
@@ -26,7 +28,7 @@ cd tools/Complete-Striped-Smith-Waterman-Library/src/
 make
 ```
 
-# Python Semi-Global X-Drop Alignment Benchmark
+## Python Semi-Global X-Drop Alignment Benchmark
 
 Command line input:
 ```
@@ -37,8 +39,9 @@ Command line input:
 -m = match
 -d = mismatch
 -g = gap
-
-# Run
+```
+Run:
+```
 python3 align.py -i test1.seq -j test2.seq -x 50 -o test.out -m 1 -d -1 -g -1
 ```
 
