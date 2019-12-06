@@ -19,35 +19,35 @@ def main():
     gapPenalty  = commandArgs[5]
     mismatchPenalty = commandArgs[4]
 
-    result = []
-    result = semiglobalAlign(seq1[0], seq2[0], matchScore, mismatchPenalty, gapPenalty)
+    output = open(commandArgs[6],'w+')
+    for i in range(0, len(seq1)):
+        result = []
+        result = semiglobalAlign(seq1[i], seq2[i], matchScore, mismatchPenalty, gapPenalty)
 
-    #output
-    output = open(commandArgs[6],'w')
-    for item in result:
-        tempSeq1 = item[0]
-        tempSeq2 = item[1]
-        while len(tempSeq1) > 60:
-            startSeq1 = item[4]
-            endSeq1 = startSeq1+len(item[0][0:60].replace("_",""))
-            output.write(seq1[0]+": "+str(startSeq1)+" "+tempSeq1+" "+str(endSeq1)+"\n")
-            print(seq1[0]+": "+str(startSeq1)+" "+tempSeq1+" "+str(endSeq1)+"\n")
-            startSeq1 = endSeq1
-            tempSeq1 = tempSeq1[60:]
-            startSeq2 = item[5]
-            endSeq2 = startSeq2+len(item[0][0:60].replace("_",""))
-            output.write(seq1[0]+": "+str(startSeq2)+" "+tempSeq2+" "+str(endSeq2)+"\n")
-            print(seq1[0]+": "+str(startSeq2)+" "+tempSeq2+" "+str(endSeq2)+"\n")
-            startSeq2 = endSeq2
-            tempSeq2 = tempSeq2[60:]
-        output.write(seq1[0]+": "+str(item[4])+" "+item[0]+" "+str(item[4]+len(item[0][0:60].replace("_","")))+"\n")
-        output.write(seq2[0]+": "+str(item[5])+" "+item[1]+" "+str(item[5]+len(item[0][0:60].replace("_","")))+"\n")
-        output.write("Score: "+str(item[2])+"\n")
-        output.write("Identities: "+str(item[3])+"/"+str(len(item[0]))+" ("+str(item[3]*100//len(item[0]))+"%)")
-        print(seq1[0]+": "+str(item[4])+" "+item[0]+" "+str(item[4]+len(item[0][0:60].replace("_","")))+"\n")
-        print(seq2[0]+": "+str(item[5])+" "+item[1]+" "+str(item[5]+len(item[0][0:60].replace("_","")))+"\n")
-        print("Score: "+str(item[2]))
-        print("Identities: "+str(item[3])+"/"+str(len(item[0]))+" ("+str(item[3]*100//len(item[0]))+"%)\n")
+        #output
+        for item in result:
+            tempSeq1 = item[0]
+            tempSeq2 = item[1]
+            while len(tempSeq1) > 60:
+                startSeq1 = item[4]
+                endSeq1 = startSeq1+len(item[0][0:60].replace("_",""))
+                output.write("\n")
+                output.write(seq1[i]+": "+str(startSeq1)+" "+tempSeq1+" "+str(endSeq1)+"\n")
+                startSeq1 = endSeq1
+                tempSeq1 = tempSeq1[60:]
+                startSeq2 = item[5]
+                endSeq2 = startSeq2+len(item[0][0:60].replace("_",""))
+                output.write(seq1[i]+": "+str(startSeq2)+" "+tempSeq2+" "+str(endSeq2)+"\n")
+                startSeq2 = endSeq2
+                tempSeq2 = tempSeq2[60:]
+            print("\n"+seq1[i]+": "+str(item[4])+" "+item[0]+" "+str(item[4]+len(item[0][0:60].replace("_",""))))
+            print(seq2[i]+": "+str(item[5])+" "+item[1]+" "+str(item[5]+len(item[0][0:60].replace("_","")))+"\n")
+            print("Score: "+str(item[2]))
+            print("Identities: "+str(item[3])+"/"+str(len(item[0]))+" ("+str(item[3]*100//len(item[0]))+"%)\n")
+            output.write(seq1[i]+": "+str(item[4])+" "+item[0]+" "+str(item[4]+len(item[0][0:60].replace("_","")))+"\n")
+            output.write(seq2[i]+": "+str(item[5])+" "+item[1]+" "+str(item[5]+len(item[0][0:60].replace("_","")))+"\n")
+            output.write("\nScore: "+str(item[2])+"\n")
+            output.write("Identities: "+str(item[3])+"/"+str(len(item[0]))+" ("+str(item[3]*100//len(item[0]))+"%)\n\n")
     output.close()
 
 main()

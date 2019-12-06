@@ -26,3 +26,19 @@ cd tools/Complete-Striped-Smith-Waterman-Library/src/
 make
 ```
 
+# Python Semi-Global X-Drop Alignment Benchmark
+
+Command line input:
+```
+-i = input sequence file 1 (">" new sequence)
+-j = input sequence file 2 (">" new sequence)
+-o = output file name
+-x = x-drop
+-m = match
+-d = mismatch
+-g = gap
+
+# Run
+python3 align.py -i test1.seq -j test2.seq -x 50 -o test.out -m 1 -d -1 -g -1
+```
+

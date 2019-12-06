@@ -10,9 +10,6 @@ def loadSeq(fileName):
     for line in dnaFile:
         if line[0] == ">":
             seqList.append(line[1:-1])
-        if line[0] != ">":
-            dna += line.replace("\n","")
-    seqList.append(dna)
     dnaFile.close()
     return seqList
 
