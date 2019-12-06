@@ -22,3 +22,6 @@
 [submodule "benchmark/tools/Complete-Striped-Smith-Waterman-Library"]
 	path = benchmark/tools/Complete-Striped-Smith-Waterman-Library
 	url = https://github.com/mengyao/Complete-Striped-Smith-Waterman-Library.git
+[submodule "benchmark/tools/sequence_alignments"]
+	path = benchmark/tools/sequence_alignments
+	url = https://github.com/sbrb/sequence_alignments
