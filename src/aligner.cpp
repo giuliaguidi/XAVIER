@@ -76,6 +76,8 @@ namespace xavier
                 // Heuristic to keep track of the max in initial stage of the computation
                 if (DPmatrix[i][j] > DPmax)
                     DPmax = DPmatrix[i][j];
+				else 
+					xdropCondition();
             }
         }
 
@@ -140,6 +142,7 @@ namespace xavier
 		 */
 		initAntiDiags();
 
+		// For the opening stage, it's okay to check separately the xdrop termination (happens only once)
 		if ( xdropCondition() )
 			return produceResults();
 
@@ -150,14 +153,9 @@ namespace xavier
 		{
 			// Solve for next anti-diagonal
 			calcAntiDiag3();
-			// std::cout << "calcAntiDiag3();" << std::endl;
 
 			// Track new currScore
-			int8_t norm = updateCurrScore();
-
-			// If x-drop condition satisfied; terminate
-			if ( xdropCondition() )
-				return produceResults();
+			int8_t norm = updateCurrScore(); // currScore contains scoreOffset 
 
 			// Ensure anti-diagonals stay in int8_t range
 	    	normalizeVectors(norm);
@@ -165,9 +163,11 @@ namespace xavier
 	    	// Trace state
 	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
-			// Update best
-			if ( currScore > bestScore )
-				bestScore = currScore;
+			// Update bestScore
+			if ( currScore > bestScore ) bestScore = currScore;
+			// If xdrop condition satisfied; terminate
+			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
+			else if ( xdropCondition() ) return produceResults();
 
 			// Update anti-diagonals
 			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 ) moveRight();
@@ -189,18 +189,17 @@ namespace xavier
 			// Track new currScore
 			int8_t norm = updateCurrScore();
 
-			// If x-drop condition satisfied; terminate
-			if ( xdropCondition() )
-				return produceResults();
-
 			// Ensure anti-iagonals stay in int8_t range
 	    	normalizeVectors(norm);
 
 	    	// Trace state
 	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
-			// Update best
+			// Update bestScore
 			if ( currScore > bestScore ) bestScore = currScore;
+			// If xdrop condition satisfied; terminate
+			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
+			else if ( xdropCondition() ) return produceResults();
 			else currScore = bestScore;	// Only in closing stage
 
 			// Update anti-diagonals
