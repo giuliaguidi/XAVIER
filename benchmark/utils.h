@@ -80,4 +80,61 @@ std::string generate_mutated_sequence(const std::string& seq, int& len2, double&
 	return mutated;
 }
 
+// pearson correlation coefficient
+double sum(std::vector<double> a)
+{
+	double s = 0;
+	for (int i = 0; i < a.size(); i++)
+	{
+		s += a[i];
+	}
+	return s;
+}
+
+double mean(std::vector<double> a)
+{
+	return sum(a) / a.size();
+}
+
+double sqsum(std::vector<double> a)
+{
+	double s = 0;
+	for (int i = 0; i < a.size(); i++)
+	{
+		s += pow(a[i], 2);
+	}
+	return s;
+}
+
+double stdev(std::vector<double> nums)
+{
+	double N = nums.size();
+	return pow(sqsum(nums) / N - pow(sum(nums) / N, 2), 0.5);
+}
+
+std::vector<double> operator-(std::vector<double> a, double b)
+{
+	std::vector<double> retvect;
+	for (int i = 0; i < a.size(); i++)
+	{
+		retvect.push_back(a[i] - b);
+	}
+	return retvect;
+}
+
+std::vector<double> operator*(std::vector<double> a, std::vector<double> b)
+{
+	std::vector<double> retvect;
+	for (int i = 0; i < a.size() ; i++)
+	{
+		retvect.push_back(a[i] * b[i]);
+	}
+	return retvect;
+}
+
+double pearsoncoeff(std::vector<double> X, std::vector<double> Y)
+{
+	return sum((X - mean(X))*(Y - mean(Y))) / (X.size()*stdev(X)* stdev(Y));
+}
+
 #endif
