@@ -25,7 +25,6 @@
 #include <random>
 
 #include "utils.h"
-#include "software.h"
 
 #include "xavier.h"
 #include "ksw2/ksw2.h"
@@ -51,7 +50,7 @@ extern "C" {
 }
 #endif
 
-void xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+int xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 	// init scoring scheme
@@ -67,13 +66,15 @@ void xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop,
 	auto end1 = std::chrono::high_resolution_clock::now();
 	diff1 = end1-start1;
 
-	std::cout 	<< result.bestScore << 
-	"	" 		<< diff1.count()	<< 
+	// std::cout 	<< result.bestScore << 
+	// "	" 		<< diff1.count()	<< 
 	// "	" 		<< (double)std::min(targetSeg.length(), querySeg.length()) / diff1.count() <<
-	std::endl;
+	// std::endl;
+
+    return result.bestScore;
 }
 
-void ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+int ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop, 
     std::string& targetSeg, std::string& querySeg, int& bw)
 {
     // init
@@ -106,20 +107,22 @@ void ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop,
 	std::chrono::duration<double> diff2;
 	auto start2 = std::chrono::high_resolution_clock::now();
 
-	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -GAP, bw, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
+	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -gap, bw, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
 
 	auto end2 = std::chrono::high_resolution_clock::now();
 	diff2 = end2-start2;
 
-	std::cout 	<< ez.score 		<< 
-	"	" 		<< diff2.count() 	<< 
-	// "	" 		<< (double)len1 / diff2.count() <<
-	std::endl;
+	// std::cout 	<< ez.score 		<< 
+	// "	" 		<< diff2.count() 	<< 
+	// // "	" 		<< (double)len1 / diff2.count() <<
+	// std::endl;
 
 	free(ts); free(qs);
+
+    return ez.score;
 }
 
-void gabaAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+int gabaAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 gaba_t *ctx = gaba_init(GABA_PARAMS(
@@ -171,14 +174,18 @@ gaba_t *ctx = gaba_init(GABA_PARAMS(
 	auto end3 = std::chrono::high_resolution_clock::now();
 	diff3 = end3-start3;
 
-	std::cout 	<< r->score 		<< 
-	"	" 		<< diff3.count() 	<< 
-	// "	" 		<< (double)len1 / diff3.count() << 
-	std::endl;
+	// std::cout 	<< r->score 		<< 
+	// "	" 		<< diff3.count() 	<< 
+	// // "	" 		<< (double)len1 / diff3.count() << 
+	// std::endl;
 
+    int score = r->score;
+    
 	// clean up
 	gaba_dp_res_free(dp, r); gaba_dp_clean(dp);
 	gaba_clean(ctx);    
+
+    return score;
 }
 
 // void seqanAlign()

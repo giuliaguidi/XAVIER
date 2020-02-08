@@ -2,7 +2,7 @@ CC= 	gcc
 CXX= 	g++
 INCLUDE= 	-Itools/libgaba -I../include -Itools -Itools/seqan/include
 LIBS= 		-Ltools/libgaba -lgaba
-CFLAGS = 	-I. -O3 -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -fpermissive
+CFLAGS = 	-I. -O3 -std=c++14 -march=native -Wall -Wextra -pedantic -Wno-write-strings -fpermissive -fopenmp
 
 test-pc: test-pc.cpp tools/ksw2
 	$(CXX) -march=native -std=c++14 $(INCLUDE) test-pc.cpp ../lib/xavierlib.a $(CFLAGS) -o test-pc-exe $(LIBS)

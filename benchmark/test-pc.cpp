@@ -31,31 +31,66 @@
 #include <x86intrin.h>
 #include <random>
 #include <bits/stdc++.h> 
+#include <omp.h>
 
 #include "utils.h"
 #include "software.h"
 
 // pearson correlation coefficient
-float pc(std::vector<std::pair<int, int>> xy) 
-{ 
-	int n = xy.length();
+double sum(std::vector<double> a)
+{
+	double s = 0;
+	for (int i = 0; i < a.size(); i++)
+	{
+		s += a[i];
+	}
+	return s;
+}
 
-    int sumx = 0, sumy = 0, sumxy = 0; 
-    int sum2x = 0, sum2y = 0; 
-  
-    for (int i = 0; i < n; i++) 
-    { 
-        sumx 	= sumx 	+ xy[i].first; 
-        sumy 	= sumy 	+ xy[i].second; 
-        sumxy 	= sumxy + xy[i].first * xy[i].second; 
-  
-        sum2x 	= sum2x + xy[i].first 	* xy[i].first; 
-        sum2y 	= sum2y + xy[i].second 	* xy[i].second; 
-    } 
-  
-    float pcorr = (float)(n * sumxy - sumx * sumy) / std::sqrt((n * sum2x - sumx * sumx) * (n * sum2y - sumy * sumy)); 
+double mean(std::vector<double> a)
+{
+	return sum(a) / a.size();
+}
 
-    return pcorr; 
+double sqsum(std::vector<double> a)
+{
+	double s = 0;
+	for (int i = 0; i < a.size(); i++)
+	{
+		s += pow(a[i], 2);
+	}
+	return s;
+}
+
+double stdev(std::vector<double> nums)
+{
+	double N = nums.size();
+	return pow(sqsum(nums) / N - pow(sum(nums) / N, 2), 0.5);
+}
+
+std::vector<double> operator-(std::vector<double> a, double b)
+{
+	std::vector<double> retvect;
+	for (int i = 0; i < a.size(); i++)
+	{
+		retvect.push_back(a[i] - b);
+	}
+	return retvect;
+}
+
+std::vector<double> operator*(std::vector<double> a, std::vector<double> b)
+{
+	std::vector<double> retvect;
+	for (int i = 0; i < a.size() ; i++)
+	{
+		retvect.push_back(a[i] * b[i]);
+	}
+	return retvect;
+}
+
+double pearsoncoeff(std::vector<double> X, std::vector<double> Y)
+{
+	return sum((X - mean(X))*(Y - mean(Y))) / (X.size()*stdev(X)* stdev(Y));
 }
 
 int main(int argc, char const *argv[])
@@ -63,28 +98,35 @@ int main(int argc, char const *argv[])
 	// variables declaration
 	int xdrop = std::stoi(argv[1]);
 	int bw	  = std::stoi(argv[2]);
-	int k	  = std::stoi(argv[8]);
-	int iter  = std::stoi(argv[9]);
+
+	double pmis = std::stoi(argv[3]);
+	double pgap = std::stoi(argv[4]);
 
 	int mat = std::stoi(argv[5]);
 	int mis = std::stoi(argv[6]);
 	int gap = std::stoi(argv[7]);
 
-	double pmis = std::stoi(argv[3]);
-	double pgap = std::stoi(argv[4]);
+	int k	  = std::stoi(argv[8]);
+	int iter  = std::stoi(argv[9]);
+
+	int maxt = 1;
+	#pragma omp parallel 
+	{
+		maxt = omp_get_num_threads();
+	}
 
 	std::default_random_engine generator;
-	std::vector<std::pair<int, int>> xpc, kpc, gpc;
-	std::vector<std::vector<std::pair<int, int>>> vxpc, vkpc, vgpc;
+	std::vector<std::pair<int, int>> xpc(iter), kpc(iter), gpc(iter);
+	std::vector<std::vector<std::pair<int, int>>> vxpc(maxt), vkpc(maxt), vgpc(maxt);
 
 #pragma omp parallel for
 	for(int i = 0; i < iter; i++)
 	{
-		int tid = omp_get_num_threds();
+		int tid = omp_get_thread_num();
 
 		std::string randomSeg;
-		std::normal_distribution<float> distribution(1200.0, 3000.0);
-
+		std::normal_distribution<double> distribution(12000.0, 3000.0);
+	
 		int len1 = (int)distribution(generator);
 		int len2 = (int)distribution(generator);
 		int len3 = (int)distribution(generator);
@@ -101,18 +143,18 @@ int main(int argc, char const *argv[])
 		int gscore = gabaAlign  (mat, mis, gap, k, xdrop, targetSeg, querySeg);
 		int kscore = ksw2Align  (mat, mis, gap, k, xdrop, targetSeg, querySeg, bw);
 
-		vxpc[tid].push_back(std::make_pair(rscore, xscore));
-		vkpc[tid].push_back(std::make_pair(rscore, kscore));
-		vgpc[tid].push_back(std::make_pair(rscore, gscore));
+		vxpc[tid].push_back(std::make_pair(xscore, xscore));
+		vkpc[tid].push_back(std::make_pair(xscore, kscore));
+		vgpc[tid].push_back(std::make_pair(xscore, gscore));
 	}
 
 	unsigned int xpcsofar = 0;
 	unsigned int kpcsofar = 0;
 	unsigned int gpcsofar = 0;
 
-	for(int t = 0; t < MAXTHREADS; ++t)
+	for(int t = 0; t < maxt; ++t)
 	{
-		copy(vxpc[t].begin(), vxpc[t].end(), xpc.begin() + xpcsofar);
+		std::copy(vxpc[t].begin(), vxpc[t].end(), xpc.begin() + xpcsofar);
 		xpcsofar += vxpc[t].size();
 
 		copy(vkpc[t].begin(), vkpc[t].end(), kpc.begin() + kpcsofar);
@@ -122,20 +164,34 @@ int main(int argc, char const *argv[])
 		gpcsofar += vgpc[t].size();
 	}
 
+	std::cout << std::endl;
+	std::vector<double> a(iter), b(iter);
 	for(int i = 0; i < iter; i++)
+	{
 		std::cout << xpc[i].first << "\t" << xpc[i].second << std::endl;
-	float pcx = pc(xpc);
-	std::cout << pcx << "\n" << std::endl;
+		a[i] = xpc[i].first;
+		b[i] = xpc[i].second;
+	}
+	double pcx = pearsoncoeff(a, b);
+	std::cout << "pearsoncoeff " << pcx << "\n" << std::endl;
 
 	for(int i = 0; i < iter; i++)
+	{
 		std::cout << kpc[i].first << "\t" << kpc[i].second << std::endl;
-	float pck = pc(kpc);
-	std::cout << pck << "\n" << std::endl;
+		a[i] = kpc[i].first;
+		b[i] = kpc[i].second;
+	}
+	double pck = pearsoncoeff(a, b);
+	std::cout << "pearsoncoeff " << pck << "\n" << std::endl;
 
 	for(int i = 0; i < iter; i++)
+	{
 		std::cout << gpc[i].first << "\t" << gpc[i].second << std::endl;
-	float pcg = pc(gpc);
-	std::cout << pcg << "\n" << std::endl;
+		a[i] = gpc[i].first;
+		b[i] = gpc[i].second;
+	}
+	double pcg = pearsoncoeff(a, b);
+	std::cout << "pearsoncoeff " << pcg << "\n" << std::endl;
 
 	return 0;
 }

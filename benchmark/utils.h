@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -76,3 +79,5 @@ std::string generate_mutated_sequence(const std::string& seq, int& len2, double&
 	}
 	return mutated;
 }
+
+#endif
