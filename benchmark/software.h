@@ -24,21 +24,21 @@
 #include <x86intrin.h>
 #include <random>
 
+#include <seqan/align.h>
+#include <seqan/sequence.h>
+#include <seqan/align.h>
+#include <seqan/seeds.h>
+#include <seqan/score.h>
+#include <seqan/modifier.h>
+#include <seqan/basic.h>
+#include <seqan/stream.h>
+#include <seqan/seeds/seeds_extension.h>
+
 #include "utils.h"
 
 #include "xavier.h"
 #include "ksw2/ksw2.h"
 #include "ksw2/ksw2_extz2_sse.c"
-
-// #include <seqan/align.h>
-// #include <seqan/seeds/seeds_extension.h>
-// #include <seqan/sequence.h>
-// #include <seqan/align.h>
-// #include <seqan/seeds.h>
-// #include <seqan/score.h>
-// #include <seqan/modifier.h>
-// #include <seqan/basic.h>
-// #include <seqan/stream.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +49,30 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+int seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+    std::string& targetSeg, std::string& querySeg)
+{
+	// init scoring scheme
+	xavier::ScoringScheme penalties (mat, mis, gap);
+	// seed starting position on seq1, seed starting position on seq2, k-mer length
+	xavier::Seed seed(0, 0, k);
+
+	std::chrono::duration<double> diff1;
+	auto start1 = std::chrono::high_resolution_clock::now();
+
+	xavier::AlignmentResult result = xavier::seed_and_extend_right(targetSeg, querySeg, penalties, xdrop, seed);
+
+	auto end1 = std::chrono::high_resolution_clock::now();
+	diff1 = end1-start1;
+
+	// std::cout 	<< result.bestScore << 
+	// "	" 		<< diff1.count()	<< 
+	// "	" 		<< (double)std::min(targetSeg.length(), querySeg.length()) / diff1.count() <<
+	// std::endl;
+
+    return result.bestScore;
+}
 
 int xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
     std::string& targetSeg, std::string& querySeg)
