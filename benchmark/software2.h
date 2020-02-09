@@ -1,10 +1,3 @@
-//==============================================================================
-// Title:   Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment
-// Author:  G. Guidi, E. Younis
-// Date:    7 February 2020
-// Test:    
-//==============================================================================
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -31,19 +24,21 @@
 #include <x86intrin.h>
 #include <random>
 
+#include <seqan/align.h>
+#include <seqan/sequence.h>
+#include <seqan/align.h>
+#include <seqan/seeds.h>
+#include <seqan/score.h>
+#include <seqan/modifier.h>
+#include <seqan/basic.h>
+#include <seqan/stream.h>
+#include <seqan/seeds/seeds_extension.h>
+
 #include "utils.h"
+
 #include "xavier.h"
 #include "ksw2/ksw2.h"
 #include "ksw2/ksw2_extz2_sse.c"
-// #include <seqan/align.h>
-// #include <seqan/seeds/seeds_extension.h>
-// #include <seqan/sequence.h>
-// #include <seqan/align.h>
-// #include <seqan/seeds.h>
-// #include <seqan/score.h>
-// #include <seqan/modifier.h>
-// #include <seqan/basic.h>
-// #include <seqan/stream.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,38 +50,25 @@ extern "C" {
 }
 #endif
 
-// TODO: design test pearson correlation
-int main(int argc, char const *argv[])
+double seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+    std::string& targetSeg, std::string& querySeg)
 {
-	// simulate read
-	std::string randomSeg;
 
-	std::default_random_engine generator;
-	std::normal_distribution<float> distribution(11500.0, 900.0);
+	seqan::Score<int, seqan::Simple> scoringSchemeSeqAn(mat, mis, gap);
+	seqan::Seed<seqan::Simple> seed(0, 0, k);
 
-    int len1 = (int)distribution(generator);
-	int len2 = (int)distribution(generator);
-	int len3 = (int)distribution(generator);
+	std::chrono::duration<double> diff4;
+	auto start4 = std::chrono::high_resolution_clock::now();
+	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, k, seqan::GappedXDrop());
+	auto end4 = std::chrono::high_resolution_clock::now();
+	diff4 = end4-start4;
 
-	int xdrop = std::stoi(argv[1]);
-	int bw    = std::stoi(argv[2]);
+    return diff4.count();
+}
 
-	int mat = std::stoi(argv[5]);
-	int mis = std::stoi(argv[6]);
-	int gap = std::stoi(argv[7]);
-
-	double pmis =	std::stoi(argv[3]);
-	double pgap =	std::stoi(argv[4]);
-
-	int k = std::stoi(argv[8]);
-
-	generate_random_sequence(randomSeg, len1);
-	// introduce error in both sequences
-	std::string querySeg  = generate_mutated_sequence(randomSeg, len2, pmis, pgap, bw);
-	std::string targetSeg = generate_mutated_sequence(randomSeg, len3, pmis, pgap, bw);
-
-	// Call xavier
-
+double xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+    std::string& targetSeg, std::string& querySeg)
+{
 	// init scoring scheme
 	xavier::ScoringScheme penalties (mat, mis, gap);
 	// seed starting position on seq1, seed starting position on seq2, k-mer length
@@ -100,14 +82,13 @@ int main(int argc, char const *argv[])
 	auto end1 = std::chrono::high_resolution_clock::now();
 	diff1 = end1-start1;
 
-	std::cout 	<< result.bestScore << 
-	"	" 		<< diff1.count()	<< 
-	// TODO: implement length
-	// "	" 		<< (double)result.length / diff1.count() <<
-	std::endl;
+    return diff1.count();
+}
 
-	// Call ksw2
-	// init
+double ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+    std::string& targetSeg, std::string& querySeg, int& bw)
+{
+    // init
 	int8_t a = mat, b = mis < 0? mis : -mis; // a>0 and b<0
 	int8_t matrix[25] = { a,b,b,b,0, b,a,b,b,0, b,b,a,b,0, b,b,b,a,0, 0,0,0,0,0 };
 	int tl = strlen(targetSeg.c_str()), ql = strlen(querySeg.c_str());
@@ -137,21 +118,20 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> diff2;
 	auto start2 = std::chrono::high_resolution_clock::now();
 
-	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -GAP, bw, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
+	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -gap, -1, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
 
 	auto end2 = std::chrono::high_resolution_clock::now();
 	diff2 = end2-start2;
 
-	std::cout 	<< ez.score 		<< 
-	"	" 		<< diff2.count() 	<< 
-	"	" 		<< (double)len1 / diff2.count() <<
-	std::endl;
-
 	free(ts); free(qs);
 
-	// Call libgaba
+    return diff2.count();
+}
 
-	gaba_t *ctx = gaba_init(GABA_PARAMS(
+double gabaAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+    std::string& targetSeg, std::string& querySeg)
+{
+gaba_t *ctx = gaba_init(GABA_PARAMS(
 		// match award, mismatch penalty, gap open penalty (G_i), and gap extension penalty (G_e)
 		GABA_SCORE_SIMPLE(mat, -mis, 0, -gap),
 		gfa : 0,
@@ -200,14 +180,9 @@ int main(int argc, char const *argv[])
 	auto end3 = std::chrono::high_resolution_clock::now();
 	diff3 = end3-start3;
 
-	std::cout 	<< r->score 		<< 
-	"	" 		<< diff3.count() 	<< 
-	"	" 		<< (double)len1 / diff3.count() << 
-	std::endl;
-
 	// clean up
 	gaba_dp_res_free(dp, r); gaba_dp_clean(dp);
-	gaba_clean(ctx);
+	gaba_clean(ctx);    
 
-	return 0;
+    return diff3.count();
 }

@@ -53,25 +53,22 @@ extern "C" {
 int seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
-	// init scoring scheme
-	xavier::ScoringScheme penalties (mat, mis, gap);
-	// seed starting position on seq1, seed starting position on seq2, k-mer length
-	xavier::Seed seed(0, 0, k);
 
-	std::chrono::duration<double> diff1;
-	auto start1 = std::chrono::high_resolution_clock::now();
+	seqan::Score<int, seqan::Simple> scoringSchemeSeqAn(mat, mis, gap);
+	seqan::Seed<seqan::Simple> seed(0, 0, k);
 
-	xavier::AlignmentResult result = xavier::seed_and_extend_right(targetSeg, querySeg, penalties, xdrop, seed);
+	std::chrono::duration<double> diff4;
+	auto start4 = std::chrono::high_resolution_clock::now();
+	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, k, seqan::GappedXDrop());
+	auto end4 = std::chrono::high_resolution_clock::now();
+	diff4 = end4-start4;
 
-	auto end1 = std::chrono::high_resolution_clock::now();
-	diff1 = end1-start1;
-
-	// std::cout 	<< result.bestScore << 
-	// "	" 		<< diff1.count()	<< 
-	// "	" 		<< (double)std::min(targetSeg.length(), querySeg.length()) / diff1.count() <<
+	// std::cout 	<< score << 
+	// "	" 		<< diff4.count()	<< 
+	// "	" 		<< (double)std::min(targetSeg.length(), querySeg.length()) / diff4.count() <<
 	// std::endl;
 
-    return result.bestScore;
+    return score;
 }
 
 int xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
@@ -131,7 +128,7 @@ int ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop,
 	std::chrono::duration<double> diff2;
 	auto start2 = std::chrono::high_resolution_clock::now();
 
-	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -gap, bw, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
+	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -gap, -1, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
 
 	auto end2 = std::chrono::high_resolution_clock::now();
 	diff2 = end2-start2;

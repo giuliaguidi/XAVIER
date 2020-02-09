@@ -59,8 +59,8 @@ int main(int argc, char const *argv[])
 	}
 
 	std::default_random_engine generator;
-	std::vector<std::pair<int, int>> xpc(iter), kpc(iter), gpc(iter);
-	std::vector<std::vector<std::pair<int, int>>> vxpc(maxt), vkpc(maxt), vgpc(maxt);
+	std::vector<std::pair<int, int>> spc(iter), xpc(iter), kpc(iter), gpc(iter);
+	std::vector<std::vector<std::pair<int, int>>> vspc(maxt), vxpc(maxt), vkpc(maxt), vgpc(maxt);
 
 #pragma omp parallel for
 	for(int i = 0; i < iter; i++)
@@ -75,6 +75,7 @@ int main(int argc, char const *argv[])
 		int len3 = (int)distribution(generator);
 
 		generate_random_sequence(randomSeg, len1);
+
 		std::string querySeg  = generate_mutated_sequence(randomSeg, len2, pmis, pgap, bw);
 		std::string targetSeg = generate_mutated_sequence(randomSeg, len3, pmis, pgap, bw);
 
@@ -82,21 +83,27 @@ int main(int argc, char const *argv[])
 		// int rscore = truthAlign(mat, mis, gap, k, xdrop, targetSeg, querySeg);
 
 		// aligner
+		int sscore = seqanAlign (mat, mis, gap, k, xdrop, targetSeg, querySeg);
 		int xscore = xavireAlign(mat, mis, gap, k, xdrop, targetSeg, querySeg);
 		int gscore = gabaAlign  (mat, mis, gap, k, xdrop, targetSeg, querySeg);
 		int kscore = ksw2Align  (mat, mis, gap, k, xdrop, targetSeg, querySeg, bw);
 
-		vxpc[tid].push_back(std::make_pair(xscore, xscore));
-		vkpc[tid].push_back(std::make_pair(xscore, kscore));
-		vgpc[tid].push_back(std::make_pair(xscore, gscore));
+		vspc[tid].push_back(std::make_pair(sscore, sscore));
+		vxpc[tid].push_back(std::make_pair(sscore, xscore));
+		vkpc[tid].push_back(std::make_pair(sscore, kscore));
+		vgpc[tid].push_back(std::make_pair(sscore, gscore));
 	}
 
+	unsigned int spcsofar = 0;
 	unsigned int xpcsofar = 0;
 	unsigned int kpcsofar = 0;
 	unsigned int gpcsofar = 0;
 
 	for(int t = 0; t < maxt; ++t)
 	{
+		std::copy(vspc[t].begin(), vspc[t].end(), spc.begin() + spcsofar);
+		spcsofar += vspc[t].size();
+
 		std::copy(vxpc[t].begin(), vxpc[t].end(), xpc.begin() + xpcsofar);
 		xpcsofar += vxpc[t].size();
 
@@ -109,6 +116,15 @@ int main(int argc, char const *argv[])
 
 	std::cout << std::endl;
 	std::vector<double> a(iter), b(iter);
+	for(int i = 0; i < iter; i++)
+	{
+		std::cout << spc[i].first << "\t" << spc[i].second << std::endl;
+		a[i] = spc[i].first;
+		b[i] = spc[i].second;
+	}
+	double pcs = pearsoncoeff(a, b);
+	std::cout << "pearsoncoeff " << pcs << "\n" << std::endl;
+
 	for(int i = 0; i < iter; i++)
 	{
 		std::cout << xpc[i].first << "\t" << xpc[i].second << std::endl;
