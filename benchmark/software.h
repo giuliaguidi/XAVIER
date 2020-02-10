@@ -59,7 +59,7 @@ int seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop,
 
 	std::chrono::duration<double> diff4;
 	auto start4 = std::chrono::high_resolution_clock::now();
-	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, k, seqan::GappedXDrop());
+	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, seqan::GappedXDrop(), k);
 	auto end4 = std::chrono::high_resolution_clock::now();
 	diff4 = end4-start4;
 

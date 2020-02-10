@@ -47,6 +47,9 @@
 
 #ifndef SEQAN_SEEDS_SEEDS_EXTENSION_H_
 #define SEQAN_SEEDS_SEEDS_EXTENSION_H_
+//#define BEST
+#define LONGEST
+#define KMER_LENGTH 0
 
 namespace seqan {
 
@@ -286,7 +289,6 @@ extendSeed(Seed<Simple, TConfig> & seed,
            ExtensionDirection direction,
            Score<TScoreValue, TScoreSpec> const & scoringScheme,
            TScoreValue scoreDropOff,
-           TScoreValue kmerLen,
            UnGappedXDrop const &)
 {
     // For ungapped X-drop extension of Simple Seeds, we can simply
@@ -360,7 +362,7 @@ extendSeed(Seed<Simple, TConfig> & seed,
         setEndPositionV(seed, posV - mismatchingSuffixLength);
     }
 
-    tmpScore = tmpScoreRight + tmpScoreLeft + kmerLen;
+    tmpScore = tmpScoreRight + tmpScoreLeft + KMER_LENGTH;
     return (int)tmpScore;
 
     // TODO(holtgrew): Update score?!
@@ -669,8 +671,16 @@ _extendSeedGappedXDropOneDirection(
     TDiagonal lowerDiag = 0;
     TDiagonal upperDiag = 0;
 
+#ifdef BEST
+    TSize bestExtensionCol = 0;
+    TSize bestExtensionRow = 0;
+    TScoreValue bestExtensionScore = 0;
+#endif
+    //int index = 0;
     while (minCol < maxCol)
     {
+
+    
         ++antiDiagNo;
         _swapAntiDiags(antiDiag1, antiDiag2, antiDiag3);
         offset1 = offset2;
@@ -679,8 +689,10 @@ _extendSeedGappedXDropOneDirection(
         _initAntiDiag3(antiDiag3, offset3, maxCol, antiDiagNo, best - scoreDropOff, gapCost, undefined);
 
         TScoreValue antiDiagBest = antiDiagNo * gapCost;
+        //auto start = std::chrono::high_resolution_clock::now(); 
         for (TSize col = minCol; col < maxCol; ++col) {
             // indices on anti-diagonals
+             
             TSize i3 = col - offset3;
             TSize i2 = col - offset2;
             TSize i1 = col - offset1;
@@ -697,11 +709,13 @@ _extendSeedGappedXDropOneDirection(
                 queryPos = cols - 1 - col;
                 dbPos = rows - 1 + col - antiDiagNo;
             }
-
+            
             // Calculate matrix entry (-> antiDiag3[col])
             TScoreValue tmp = _max(antiDiag2[i2-1], antiDiag2[i2]) + gapCost;
             tmp = _max(tmp, antiDiag1[i1 - 1] + score(scoringScheme, sequenceEntryForScore(scoringScheme, querySeg, queryPos),
                                                       sequenceEntryForScore(scoringScheme, databaseSeg, dbPos)));
+
+            // auto start = std::chrono::high_resolution_clock::now();
             if (tmp < best - scoreDropOff)
             {
                 antiDiag3[i3] = undefined;
@@ -711,7 +725,19 @@ _extendSeedGappedXDropOneDirection(
                 antiDiag3[i3] = tmp;
                 antiDiagBest = _max(antiDiagBest, tmp);
             }
+            
+            
         }
+
+#ifdef BEST
+        // seed extension wrt best score
+        if (antiDiagBest >= best)
+        {
+            bestExtensionCol    = length(antiDiag3) + offset3 - 2;
+            bestExtensionRow    = antiDiagNo - bestExtensionCol;
+            bestExtensionScore  = best;
+        }
+#endif
         best = _max(best, antiDiagBest);
 
         // Calculate new minCol and minCol
@@ -737,15 +763,16 @@ _extendSeedGappedXDropOneDirection(
         minCol = _max((int)minCol, (int)antiDiagNo + 2 - (int)rows);
         // end of querySeg reached?
         maxCol = _min(maxCol, cols);
+        //index++;
     }
 
+#ifdef LONGEST
     // find positions of longest extension
-
     // reached ends of both segments
     TSize longestExtensionCol = length(antiDiag3) + offset3 - 2;
     TSize longestExtensionRow = antiDiagNo - longestExtensionCol;
     TScoreValue longestExtensionScore = antiDiag3[longestExtensionCol - offset3];
-
+    
     if (longestExtensionScore == undefined)
     {
         if (antiDiag2[length(antiDiag2)-2] != undefined)
@@ -777,11 +804,19 @@ _extendSeedGappedXDropOneDirection(
             }
         }
     }
-
-    // update seed
+    // update seed wrt longest score
     if (longestExtensionScore != undefined)
         _updateExtendedSeed(seed, direction, longestExtensionCol, longestExtensionRow, lowerDiag, upperDiag);
     return longestExtensionScore;
+#endif
+
+#ifdef BEST
+    // update seed wrt best score
+    if (bestExtensionScore != undefined)
+        _updateExtendedSeed(seed, direction, bestExtensionCol, bestExtensionRow, lowerDiag, upperDiag);
+    return bestExtensionScore;
+#endif
+
 }
 
 template <typename TConfig, typename TDatabase, typename TQuery, typename TScoreValue, typename TScoreSpec>
@@ -792,8 +827,8 @@ extendSeed(Seed<Simple, TConfig> & seed,
            ExtensionDirection direction,
            Score<TScoreValue, TScoreSpec> const & scoringScheme,
            TScoreValue scoreDropOff,
-           TScoreValue kmerLen,
-           GappedXDrop const &)
+           GappedXDrop const &,
+           int kmerLen)
 {
     // For gapped X-drop extension of Simple Seeds, we can simply
     // update the begin and end values in each dimension as well as the diagonals.
@@ -807,10 +842,11 @@ extendSeed(Seed<Simple, TConfig> & seed,
     SEQAN_ASSERT_LT(scoreGapOpen(scoringScheme), 0);
     SEQAN_ASSERT_LT(scoreGapExtend(scoringScheme), 0);
     SEQAN_ASSERT_EQ(scoreGapExtend(scoringScheme), scoreGapOpen(scoringScheme));
-    TScoreValue longestExtensionScoreLeft  = 0;
-    TScoreValue longestExtensionScoreRight = 0;
-    TScoreValue longestExtensionScore;
-
+    TScoreValue longestExtensionScoreLeft=0;
+    TScoreValue longestExtensionScoreRight=0;
+    TScoreValue longestExtensionScore=0;
+    //AAAA this was not initialized, initializing all values to zero fixes the bugs
+    //std::cout<<"scoreLeft before calculation: "<<longestExtensionScoreLeft << std::endl;
     if (direction == EXTEND_LEFT || direction == EXTEND_BOTH)
     {
         // Do not extend to the left if we are already at the beginning of an
@@ -842,9 +878,12 @@ extendSeed(Seed<Simple, TConfig> & seed,
         // TODO(holtgrew): Update _extendSeedGappedXDropOneDirection and switch query/database order.
         longestExtensionScoreRight =  _extendSeedGappedXDropOneDirection(seed, querySuffix, databaseSuffix, EXTEND_RIGHT, scoringScheme, scoreDropOff);
     }
-    
+    //std::cout<<"scoreLeft: "<<longestExtensionScoreLeft<<" scoreRight: "<<longestExtensionScoreRight<<std::endl;
     longestExtensionScore = longestExtensionScoreRight + longestExtensionScoreLeft;
-    return (int)(longestExtensionScore + kmerLen);
+    return (int)longestExtensionScore + kmerLen;
+    //return (int)longestExtensionScore+KMER_LENGTH;
+    //AAAA KMER_LENGTH is fixed to 17 that's why we got a different value
+    //now it changes accordingly to the kmer-length set by the user
     // TODO(holtgrew): Update seed's score?!
 }
 
