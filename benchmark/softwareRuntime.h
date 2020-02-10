@@ -50,7 +50,7 @@ extern "C" {
 }
 #endif
 
-double seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+double seqanAlign(int mat, int mis, int gap, int k, int xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 
@@ -63,10 +63,10 @@ double seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop,
 	auto end4 = std::chrono::high_resolution_clock::now();
 	diff4 = end4-start4;
 
-    return diff4.count();
+	return diff4.count();
 }
 
-double xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+double xavireAlign(int mat, int mis, int gap, int k, int xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 	// init scoring scheme
@@ -85,8 +85,8 @@ double xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop,
     return diff1.count();
 }
 
-double ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop, 
-    std::string& targetSeg, std::string& querySeg, int& bw)
+double ksw2Align(int mat, int mis, int gap, int k, int xdrop, 
+    std::string& targetSeg, std::string& querySeg, int bw)
 {
     // init
 	int8_t a = mat, b = mis < 0? mis : -mis; // a>0 and b<0
@@ -128,7 +128,7 @@ double ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop,
     return diff2.count();
 }
 
-double gabaAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+double gabaAlign(int mat, int mis, int gap, int k, int xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 gaba_t *ctx = gaba_init(GABA_PARAMS(

@@ -50,28 +50,19 @@ extern "C" {
 }
 #endif
 
-int seqanAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+int seqanAlign(int mat, int mis, int gap, int k, int xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 
 	seqan::Score<int, seqan::Simple> scoringSchemeSeqAn(mat, mis, gap);
 	seqan::Seed<seqan::Simple> seed(0, 0, k);
 
-	std::chrono::duration<double> diff4;
-	auto start4 = std::chrono::high_resolution_clock::now();
 	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, seqan::GappedXDrop(), k);
-	auto end4 = std::chrono::high_resolution_clock::now();
-	diff4 = end4-start4;
-
-	// std::cout 	<< score << 
-	// "	" 		<< diff4.count()	<< 
-	// "	" 		<< (double)std::min(targetSeg.length(), querySeg.length()) / diff4.count() <<
-	// std::endl;
 
     return score;
 }
 
-int xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+int xavireAlign(int mat, int mis, int gap, int k, int xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 	// init scoring scheme
@@ -79,24 +70,13 @@ int xavireAlign(int& mat, int& mis, int& gap, int& k, int& xdrop,
 	// seed starting position on seq1, seed starting position on seq2, k-mer length
 	xavier::Seed seed(0, 0, k);
 
-	std::chrono::duration<double> diff1;
-	auto start1 = std::chrono::high_resolution_clock::now();
-
 	xavier::AlignmentResult result = xavier::seed_and_extend_right(targetSeg, querySeg, penalties, xdrop, seed);
-
-	auto end1 = std::chrono::high_resolution_clock::now();
-	diff1 = end1-start1;
-
-	// std::cout 	<< result.bestScore << 
-	// "	" 		<< diff1.count()	<< 
-	// "	" 		<< (double)std::min(targetSeg.length(), querySeg.length()) / diff1.count() <<
-	// std::endl;
 
     return result.bestScore;
 }
 
-int ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop, 
-    std::string& targetSeg, std::string& querySeg, int& bw)
+int ksw2Align(int mat, int mis, int gap, int k, int xdrop, 
+    std::string& targetSeg, std::string& querySeg, int bw)
 {
     // init
 	int8_t a = mat, b = mis < 0? mis : -mis; // a>0 and b<0
@@ -125,25 +105,14 @@ int ksw2Align(int& mat, int& mis, int& gap, int& k, int& xdrop,
 	}
 
 	// CHECK: KSW_EZ_SCORE_ONLY
-	std::chrono::duration<double> diff2;
-	auto start2 = std::chrono::high_resolution_clock::now();
-
 	ksw_extz2_sse(0, ql, qs, tl, ts, 5, matrix, 0, -gap, -1, xdrop, 0, KSW_EZ_SCORE_ONLY, &ez);
-
-	auto end2 = std::chrono::high_resolution_clock::now();
-	diff2 = end2-start2;
-
-	// std::cout 	<< ez.score 		<< 
-	// "	" 		<< diff2.count() 	<< 
-	// // "	" 		<< (double)len1 / diff2.count() <<
-	// std::endl;
 
 	free(ts); free(qs);
 
     return ez.score;
 }
 
-int gabaAlign(int& mat, int& mis, int& gap, int& k, int& xdrop, 
+int gabaAlign(int mat, int mis, int gap, int k, int xdrop, 
     std::string& targetSeg, std::string& querySeg)
 {
 gaba_t *ctx = gaba_init(GABA_PARAMS(
@@ -154,9 +123,6 @@ gaba_t *ctx = gaba_init(GABA_PARAMS(
 		xdrop : (int8_t)xdrop,
 		filter_thresh : 0,
 	));
-
-	std::chrono::duration<double> diff3;
-	auto start3 = std::chrono::high_resolution_clock::now();
 
 	char const t[64] = {0};	// tail array
 	gaba_section_t asec = gaba_build_section(0, (uint8_t const *)targetSeg.c_str(), (uint32_t)targetSeg.size());
@@ -192,14 +158,6 @@ gaba_t *ctx = gaba_init(GABA_PARAMS(
 		NULL	// custom allocator: see struct gaba_alloc_s in gaba.h
 	);
 
-	auto end3 = std::chrono::high_resolution_clock::now();
-	diff3 = end3-start3;
-
-	// std::cout 	<< r->score 		<< 
-	// "	" 		<< diff3.count() 	<< 
-	// // "	" 		<< (double)len1 / diff3.count() << 
-	// std::endl;
-
     int score = r->score;
     
 	// clean up
@@ -208,8 +166,3 @@ gaba_t *ctx = gaba_init(GABA_PARAMS(
 
     return score;
 }
-
-// void seqanAlign()
-// {
-    
-// }

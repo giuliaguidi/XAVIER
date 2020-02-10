@@ -34,13 +34,13 @@ char random_base(void)
 	return(table[rand() % 4]);
 }
 
-void generate_random_sequence(std::string& seq, int& len1)
+void generate_random_sequence(std::string& seq, int len1)
 {
 	for(int i = 0; i < len1; i++)
 		seq.append(1, random_base());
 }
 
-std::string generate_mutated_sequence(const std::string& seq, int& len2, double& pmis, double& pgap, int& bw)
+std::string generate_mutated_sequence(const std::string& seq, int& len2, double& pmis, double& pgap, int bw)
 {
 	int i, j, wave = 0;	// wave is q-coordinate of the alignment path
 	std::string mutated;
