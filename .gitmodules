@@ -7,3 +7,7 @@
 [submodule "benchmark/tools/seqan"]
 	path = benchmark/tools/seqan
 	url = https://github.com/seqan/seqan
+[submodule "benchmark/PyAligner"]
+	path = benchmark/PyAligner
+	url = https://github.com/edyounis/PyAligner.git
+	branch = master
