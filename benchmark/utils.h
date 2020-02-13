@@ -56,7 +56,7 @@ std::string generate_mutated_sequence(const std::string& seq, int& len2, double&
 		{
 			if(rand() & 0x01 && wave > (-bw + 1))
 			{
-				char tmp = (j < len2) ? seq[j++] : random_base();
+				char tmp = (j < seq.size()) ? seq[j++] : random_base();
 				mutated.append(1, tmp);
 				j++; wave--; // deletion
 			}
@@ -67,13 +67,13 @@ std::string generate_mutated_sequence(const std::string& seq, int& len2, double&
 			}
 			else
 			{
-				char tmp = (j < len2) ? seq[j++] : random_base();
+				char tmp = (j < seq.size()) ? seq[j++] : random_base();
 				mutated.append(1, tmp);
 			}
 		}
 		else
 		{
-			char tmp = (j < len2) ? seq[j++] : random_base();
+			char tmp = (j < seq.size()) ? seq[j++] : random_base();
 			mutated.append(1, tmp);
 		}
 	}

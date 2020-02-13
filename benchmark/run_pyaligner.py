@@ -13,5 +13,5 @@ if __name__ == "__main__":
         seq1 = pyaligner.Sequence(x)
         seq2 = pyaligner.Sequence(y)
         scorer = pyaligner.Scorer( 1, -1, -1, args.xdrop )
-        matrix = pyaligner.Matrix( seq1, seq2, scorer, semiglobal = True )
+        matrix = pyaligner.DPMatrix( seq1, seq2, scorer, semiglobal = True )
         print( matrix.max_score, matrix.calc_alignment_score() )
