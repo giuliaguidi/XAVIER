@@ -59,13 +59,13 @@ int main(int argc, char const *argv[])
 	// }
 
 	std::default_random_engine generator;
-	std::vector<std::pair<std::string, std::string>> seqs(n);
+	std::vector<std::pair<std::string, std::string>> seqs;
 	// std::vector<std::vector<std::pair<std::string, std::string>>> vseqs(maxt);
 
 	// #pragma omp parallel for
 	for(int i = 0; i < n; i++)
 	{
-		int tid = omp_get_thread_num();
+		// int tid = omp_get_thread_num();
 
 		std::normal_distribution<double> distribution(mean, sd);
 	
