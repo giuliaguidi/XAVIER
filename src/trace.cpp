@@ -4,6 +4,7 @@
  * Description: Xavier Trace Type Source.
  */
 
+#include <iostream>
 #include "trace.h"
 
 namespace xavier
@@ -22,101 +23,180 @@ namespace xavier
 		lastMove( _lastMove )
 		{ }
 
+	TraceEntry::TraceEntry ( const TraceEntry& copy ):
+		antiDiag1( copy.antiDiag1 ),
+		antiDiag2( copy.antiDiag2 ),
+		antiDiag3( copy.antiDiag3 ),
+		vqueryh( copy.vqueryh ),
+		vqueryv( copy.vqueryv ),
+		scoreOffset( copy.scoreOffset ),
+		lastMove( copy.lastMove )
+		{ }
+
 	void Trace::pushbackState ( const VectorRegister& _ad1, const VectorRegister& _ad2,
 	   	                        const VectorRegister& _ad3, const VectorRegister& _vqh,
 		                        const VectorRegister& _vqv, const int64_t offset,
 		                        const int _lastMove )
 	{
-		trace.push_back( TraceEntry( _ad1, _ad2, _ad3, _vqh, _vqv, offset, _lastMove ) );
+		trace.emplace_back( _ad1, _ad2, _ad3, _vqh, _vqv, offset, _lastMove );
 	}
 
 	Trace::AlignmentPair Trace::getAlignment()
 	{
-
-		// Start on last trace entry
-		auto it = trace.rbegin();
-		TraceEntry& e = *it;
-
-		// Find antiDiag3's max => This is exit score (need position)
-		size_t dp_pos = e.antiDiag3.argmax();
+		std::cout << trace.size() << std::endl;
 
 		// Initialize return struct
 		AlignmentPair alignments = { "", "", 0 };
 
+		// Find antiDiag3's max => This is exit score (need position)
+		size_t dp_pos = trace.rbegin()->antiDiag3.argmax();
+
 		// Follow dp_pos back and track alignment
-		for ( auto it = trace.rbegin(); it != trace.rend(); ++it )
+		size_t sq_left_pos  = 0;
+		size_t sq_above_pos = 0;
+		size_t sq_diag_pos  = 0;
+
+		for ( auto it = trace.rbegin(); std::next(it) != trace.rend(); ++it )
 		{
-			e = *it;
+			// Calculate necessary position in antiDiag1 and antiDiag2
+			auto nit = std::next(it);
 
-			size_t sq_left_pos  = dp_pos;
-			size_t sq_above_pos = dp_pos + 1;
-			size_t sq_diag_pos  = dp_pos;
-
-			char queryHChar = e.vqueryh[dp_pos];
-			char queryVChar = e.vqueryv[dp_pos];
-
-			if ( queryHChar == queryVChar )
-				alignments.matches++;
-
-			int sa = e.antiDiag2[sq_above_pos] + scoringScheme.getGapScore();
-			int sl = e.antiDiag2[sq_left_pos]  + scoringScheme.getGapScore();
-			int sd = e.antiDiag1[sq_diag_pos]  + scoringScheme.score( queryHChar, queryVChar );
-
-			// EY: What should the default choice be??
-			if ( sa > sl && sa > sd )
+			if ( it->lastMove == 0 )
 			{
-				alignments.alignH.append( 1, '-' );
-				dp_pos = sq_above_pos;
+				sq_left_pos  = dp_pos;
+				sq_above_pos = dp_pos + 1;
+
+				if ( nit == trace.rend() )
+				{
+					sq_diag_pos = dp_pos;
+				}
+				else if ( nit->lastMove == 0 )
+				{
+					sq_diag_pos = dp_pos + 1;
+				}
+				else if ( nit->lastMove == 1 )
+				{
+					sq_diag_pos = dp_pos;
+				}
 			}
-			else if ( sl > sd )
+			else if ( it->lastMove == 1 )
 			{
-				alignments.alignV.append( 1, '-' );
-				dp_pos = sq_left_pos;
+				sq_left_pos  = dp_pos - 1;
+				sq_above_pos = dp_pos;
+
+				if ( nit == trace.rend() )
+				{
+					// std::cout << "here1" << std::endl;
+					sq_diag_pos = dp_pos;
+				}
+				else if ( nit->lastMove == 0 )
+				{
+					// std::cout << "here2" << std::endl;
+					sq_diag_pos = dp_pos;
+				}
+				else if ( nit->lastMove == 1 )
+				{
+					// std::cout << "here3" << std::endl;
+					sq_diag_pos = dp_pos + 1;
+				}
 			}
-			else
+
+			// Calculate where the max value came from
+			char queryHChar = it->vqueryh[dp_pos];
+			char queryVChar = it->vqueryv[dp_pos];
+
+			int st = it->antiDiag3[dp_pos] + it->scoreOffset;
+
+			int offset = nit == trace.rend() ? 0 : nit->scoreOffset;
+			int sa = sq_above_pos >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_above_pos] + scoringScheme.getGapScore() + offset;
+			int sl = sq_left_pos >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_left_pos]  + scoringScheme.getGapScore() + offset;
+			int sd = sq_diag_pos >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag1[sq_diag_pos]  + scoringScheme.score( queryHChar, queryVChar ) + offset;
+
+			// std::cout << dp_pos << std::endl;
+			// std::cout << sq_diag_pos << std::endl;
+			// std::cout << it->antiDiag1 << std::endl;
+			// std::cout << it->antiDiag2 << std::endl;
+			// std::cout << it->antiDiag3 << std::endl;
+			// std::cout << offset << std::endl;
+			// std::cout << st << " " << it->scoreOffset << " " << sd << std::endl;
+			// std::cout << (it->lastMove == 0 ? "RIGHT" : "DOWN" )<< std::endl;
+			if ( sd != VectorRegister::NINF && sd == st )
 			{
-				alignments.alignH.append( 1, queryHChar );
-				alignments.alignV.append( 1, queryVChar );
+				if ( queryHChar == queryVChar )
+					alignments.matches++;
+
+				alignments.alignH.push_back( queryHChar );
+				alignments.alignV.push_back( queryVChar );
 				dp_pos = sq_diag_pos;
 				++it;
 			}
-
+			else if ( sl != VectorRegister::NINF && sl == st )
+			{
+				alignments.alignH.push_back( queryHChar );
+				alignments.alignV.push_back( '-' );
+				std::cout << "dp, slp, sl, st, sd: " << dp_pos << " " << sq_left_pos << " " << sl << " " << st << " " << sd << std::endl;
+				dp_pos = sq_left_pos;
+			std::cout << it->antiDiag1 << std::endl;
+			std::cout << it->antiDiag2 << std::endl;
+			std::cout << it->antiDiag3 << std::endl;
+			}
+			else if ( sa != VectorRegister::NINF && sa == st )
+			{
+				alignments.alignH.push_back( '-' );
+				alignments.alignV.push_back( queryVChar );
+				dp_pos = sq_above_pos;
+			}
+			else
+			{
+				std::cout << "ERROR1" << std::endl;
+			}
+			// std::cout << std::endl << std::endl;
 		}
 
 		// Handle Opening Phase Specially
 
 		// Find position in matrix
-		// dp_pos is pos in the 3rd anti diag, this is not in dp_matrix
-		int i = VectorRegister::LOGICALWIDTH - dp_pos + 2;
-		int j = dp_pos + 2;
+		// dp_pos is pos in antiDiag2 now, need to convert to DPMatrix coord
+		int i = dp_pos;
+		int j = VectorRegister::LOGICALWIDTH - dp_pos + 1;
 
 		while ( i > 0 && j > 0 )
 		{
-			char queryHChar = e.vqueryh[i-2]; // Don't have access to full queries (this might be buggy)
-			char queryVChar = e.vqueryv[j-2]; // Don't have access to full queries (this might be buggy)
+			std::cout << i << " " << j << std::endl;
+			char queryHChar = queryh[i-1];
+			char queryVChar = queryv[j-1];
 
+			int st = DPMatrix[i][j];
 			int sa = DPMatrix[i-1][j]   + scoringScheme.getGapScore();
 			int sl = DPMatrix[i][j-1]   + scoringScheme.getGapScore();
 			int sd = DPMatrix[i-1][j-1] + scoringScheme.score( queryHChar, queryVChar );
 
-			if ( sa > sl && sa > sd )
+			if ( sd == st )
 			{
-				alignments.alignH.append( 1, '-' );
+				if ( queryHChar == queryVChar )
+					alignments.matches++;
+
+				alignments.alignH.push_back( queryHChar );
+				alignments.alignV.push_back( queryVChar );
 				--i;
-			}
-			else if ( sl > sd )
-			{
-				alignments.alignV.append( 1, '-' );
 				--j;
+			}
+			else if ( sl == st )
+			{
+				alignments.alignH.push_back( queryHChar );
+				alignments.alignV.push_back( '-' );
+				--j;
+			}
+			else if ( sa != VectorRegister::NINF && sa == st )
+			{
+				alignments.alignH.push_back( '-' );
+				alignments.alignV.push_back( queryVChar );
+				--i;
 			}
 			else
 			{
-				alignments.alignH.append( 1, queryHChar );
-				alignments.alignV.append( 1, queryVChar );
-				--i;
-				--j;
+				std::cout << "ERROR2" << std::endl;
 			}
-
 		}
 
 		std::reverse( alignments.alignH.begin(), alignments.alignH.end() );
@@ -124,9 +204,11 @@ namespace xavier
 		return alignments;
 	}
 
-	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix )
+	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv )
 	{
 		DPMatrix = _DPMatrix;
+		queryh = _queryh;
+		queryv = _queryv;
 	}
 
 }

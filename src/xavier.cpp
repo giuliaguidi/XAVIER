@@ -51,15 +51,15 @@ namespace xavier
 		result.begV = seed.getEndV() - left.endV;
 		result.endH = seed.getEndH() + right.endH;
 		result.endV = seed.getEndV() + right.endV;
-		result.matches   = left.matches + right.matches;
-
+		// Todo Reverse left alignH and alignV
+		result.matched_pair = { left.matched_pair.alignH + right.matched_pair.alignH, left.matched_pair.alignV + right.matched_pair.alignV, left.matched_pair.matches + right.matched_pair.matches };
 		std::cout << "Score	" << left.bestScore << "	" << right.bestScore	<< std::endl;
 		std::cout << "Score	" << left.exitScore << "	" << right.exitScore	<< std::endl;
 		std::cout << "begH	" << seed.getEndH() << "	-	" << left.endH	<< std::endl;
 		std::cout << "begV	" << seed.getEndV() << "	-	" << left.endV	<< std::endl;
 		std::cout << "endH	" << seed.getEndH() << "	+	" << right.endH	<< std::endl;
 		std::cout << "endV	" << seed.getEndV() << "	+	" << right.endV	<< std::endl;
-		
+
 		return result;
 	}
 
@@ -90,7 +90,7 @@ namespace xavier
 		result.begV = seed.getEndV() - left.endV;
 		result.endH = seed.getEndH();
 		result.endV = seed.getEndV();
-		result.matches   = left.matches;
+		result.matched_pair   = left.matched_pair;
 
 		return result;
 	}
@@ -120,7 +120,7 @@ namespace xavier
 		result.begV = seed.getBegV();
 		result.endH = seed.getBegH() + right.endH;
 		result.endV = seed.getBegV() + right.endV;
-		result.matches   = right.matches;
+		result.matched_pair = right.matched_pair;
 
 		return result;
 	}

@@ -50,6 +50,7 @@
 #ifndef XAVIER_TYPES_TRACE_H
 #define XAVIER_TYPES_TRACE_H
 
+#include <list>
 #include <vector>
 #include "vectors.h"
 #include "score.h"
@@ -72,12 +73,14 @@ namespace xavier
 		{}
 
 		/**
-		 * Only Constructor
+		 * Constructors
 		 */
 		TraceEntry ( const VectorRegister& _ad1, const VectorRegister& _ad2,
 		             const VectorRegister& _ad3, const VectorRegister& _vqh,
 		             const VectorRegister& _vqv, const int64_t offset,
 		             const int _lastMove );
+
+		TraceEntry ( const TraceEntry& copy );
 
 		VectorRegister antiDiag1;
 		VectorRegister antiDiag2;
@@ -116,12 +119,14 @@ namespace xavier
 
 		AlignmentPair getAlignment();
 
-		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix );
+		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv );
 
 	private:
 		std::vector<TraceEntry> trace;
 		ScoringScheme scoringScheme;
 		std::vector< std::vector<int> > DPMatrix;
+		int8_t* queryh;
+		int8_t* queryv;
 	};
 }
 

@@ -38,7 +38,7 @@ namespace xavier
 		scoreDropOff = _scoreDropOff;
 	}
 
-	void Aligner::initAntiDiags()
+	std::vector< std::vector<int> > Aligner::initAntiDiags()
 	{
         // we need one more space for the off-grid values
         // and one more space for antiDiag2
@@ -76,7 +76,7 @@ namespace xavier
                 // Heuristic to keep track of the max in initial stage of the computation
                 if (DPmatrix[i][j] > DPmax)
                     DPmax = DPmatrix[i][j];
-				else 
+				else
 					xdropCondition();
             }
         }
@@ -116,10 +116,11 @@ namespace xavier
 
         bestScore = DPmax;
         currScore = antiDiagMax;
-        lastMove  = RIGHT;
+        lastMove  = DOWN;
 
         // Hand off DPMatrix to trace
-        trace.saveOpeningPhaseDPMatrix( DPmatrix );
+        trace.saveOpeningPhaseDPMatrix( DPmatrix, queryh, queryv );
+        return DPmatrix;
 	}
 
 	AlignmentResult Aligner::produceResults()
@@ -131,7 +132,7 @@ namespace xavier
 		r.begV = 0;
 		r.endH = hoffset;
 		r.endV = voffset;
-		r.matches = 0;
+		r.matched_pair = trace.getAlignment();
 		return r;
 	}
 
@@ -155,13 +156,13 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Track new currScore
-			int8_t norm = updateCurrScore(); // currScore contains scoreOffset 
+			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
 
 			// Ensure anti-diagonals stay in int8_t range
 	    	normalizeVectors(norm);
 
 	    	// Trace state
-	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if ( currScore > bestScore ) bestScore = currScore;
@@ -193,7 +194,7 @@ namespace xavier
 	    	normalizeVectors(norm);
 
 	    	// Trace state
-	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if ( currScore > bestScore ) bestScore = currScore;

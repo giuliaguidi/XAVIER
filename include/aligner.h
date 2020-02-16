@@ -69,7 +69,7 @@ namespace xavier
 		size_t endH;   // Ending position of alignment on horizontal read
 		size_t endV;   // Ending position of alignment on vertical read
 
-		size_t matches;
+		Trace::AlignmentPair matched_pair;
 	};
 
 	struct AlignmentConfig
@@ -170,7 +170,7 @@ namespace xavier
 		 * State Transitions and Helper Functions
 		 */
 		AlignmentResult produceResults();
-		void initAntiDiags();
+		std::vector< std::vector<int> > initAntiDiags();
 		void calcAntiDiag3();
 		void moveRight();
 		void moveDown();
