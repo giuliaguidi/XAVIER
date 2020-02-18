@@ -55,9 +55,9 @@ int seqanAlign(int mat, int mis, int gap, int k, int xdrop,
 {
 
 	seqan::Score<int, seqan::Simple> scoringSchemeSeqAn(mat, mis, gap);
-	seqan::Seed<seqan::Simple> seed(0, 0, k);
+	seqan::Seed<seqan::Simple> seed(0, 0, 0);
 
-	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, seqan::GappedXDrop(), k);
+	int score = seqan::extendSeed(seed, targetSeg, querySeg, seqan::EXTEND_RIGHT, scoringSchemeSeqAn, xdrop, seqan::GappedXDrop(), 0);
 
     return score;
 }
@@ -68,7 +68,7 @@ int xavireAlign(int mat, int mis, int gap, int k, int xdrop,
 	// init scoring scheme
 	xavier::ScoringScheme penalties (mat, mis, gap);
 	// seed starting position on seq1, seed starting position on seq2, k-mer length
-	xavier::Seed seed(0, 0, k);
+	xavier::Seed seed(0, 0, 0);
 
 	xavier::AlignmentResult result = xavier::seed_and_extend_right(targetSeg, querySeg, penalties, xdrop, seed);
 
