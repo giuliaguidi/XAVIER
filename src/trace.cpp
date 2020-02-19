@@ -41,14 +41,19 @@ namespace xavier
 		trace.emplace_back( _ad1, _ad2, _ad3, _vqh, _vqv, offset, _lastMove );
 	}
 
+	// GG: back trace
 	Trace::AlignmentPair Trace::getAlignment()
 	{
+		// debug
 		std::cout << trace.size() << std::endl;
 
 		// Initialize return struct
+		// GG: match horiz, match verti, matches
 		AlignmentPair alignments = { "", "", 0 };
 
 		// Find antiDiag3's max => This is exit score (need position)
+		// GG: go to the last element of trace, find the max in the last trace
+		// GG: but it might not be the global maximum
 		size_t dp_pos = trace.rbegin()->antiDiag3.argmax();
 
 		// Follow dp_pos back and track alignment
@@ -56,50 +61,63 @@ namespace xavier
 		size_t sq_above_pos = 0;
 		size_t sq_diag_pos  = 0;
 
+		// GG: get antidiag index of antiDiag3 (32 elements-wide)
+		// GG: keep track of the max 
+		// GG: find elements that created that max and so on and so for
+		// GG: it's hard bc we have antidiags and not an actual DP matrix 
+		// GG: much work in converting indexes
 		for ( auto it = trace.rbegin(); std::next(it) != trace.rend(); ++it )
 		{
+			// it  = antidiag1, antidiag2, and antidiag3 
+			// max = max( antidiag3 )
+			// nit = antidiag1, antidiag2, and antidiag3
+
 			// Calculate necessary position in antiDiag1 and antiDiag2
 			auto nit = std::next(it);
 
-			if ( it->lastMove == 0 )
-			{
-				sq_left_pos  = dp_pos;
-				sq_above_pos = dp_pos + 1;
+			// GG: if last move is rigth
+			// if ( it->lastMove == 0 )
+			// {
 
-				if ( nit == trace.rend() )
-				{
-					sq_diag_pos = dp_pos;
-				}
-				else if ( nit->lastMove == 0 )
-				{
-					sq_diag_pos = dp_pos + 1;
-				}
-				else if ( nit->lastMove == 1 )
-				{
-					sq_diag_pos = dp_pos;
-				}
-			}
-			else if ( it->lastMove == 1 )
-			{
-				sq_left_pos  = dp_pos - 1;
-				sq_above_pos = dp_pos;
+			sq_left_pos  = dp_pos;
+			sq_above_pos = dp_pos + 1;
+			sq_diag_pos  = dp_pos;
 
-				if ( nit == trace.rend() )
-				{
-					// std::cout << "here1" << std::endl;
-					sq_diag_pos = dp_pos;
-				}
-				else if ( nit->lastMove == 0 )
-				{
-					// std::cout << "here2" << std::endl;
-					sq_diag_pos = dp_pos;
-				}
-				else if ( nit->lastMove == 1 )
-				{
-					// std::cout << "here3" << std::endl;
-					sq_diag_pos = dp_pos + 1;
-				}
-			}
+			// if ( nit == trace.rend() )
+			// {
+			// 	sq_diag_pos = dp_pos;
+			// }
+			// else if ( nit->lastMove == 0 )
+			// {
+			// 	sq_diag_pos = dp_pos + 1;
+			// }
+			// else if ( nit->lastMove == 1 )
+			// {
+			// 	sq_diag_pos = dp_pos;
+			// }
+			// }
+			// else if ( it->lastMove == 1 )
+			// {
+			// 	sq_left_pos  = dp_pos - 1;
+			// 	sq_above_pos = dp_pos;
+			// 	sq_diag_pos = dp_pos + 1;
+
+			// 	// if ( nit == trace.rend() )
+			// 	// {
+			// 	// 	// std::cout << "here1" << std::endl;
+			// 	// 	sq_diag_pos = dp_pos;
+			// 	// }
+			// 	// else if ( nit->lastMove == 0 )
+			// 	// {
+			// 	// 	// std::cout << "here2" << std::endl;
+			// 	// 	sq_diag_pos = dp_pos;
+			// 	// }
+			// 	// else if ( nit->lastMove == 1 )
+			// 	// {
+			// 	// 	// std::cout << "here3" << std::endl;
+			// 	// 	sq_diag_pos = dp_pos + 1;
+			// 	// }
+			// }
 
 			// Calculate where the max value came from
 			char queryHChar = it->vqueryh[dp_pos];
