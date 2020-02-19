@@ -41,6 +41,11 @@ namespace xavier
 		trace.emplace_back( _ad1, _ad2, _ad3, _vqh, _vqv, offset, _lastMove );
 	}
 
+	void Trace::recordGlobalMaxPos()
+	{
+		maxPos = trace.size(); // possibly -1
+	}
+
 	// GG: back trace
 	Trace::AlignmentPair Trace::getAlignment()
 	{

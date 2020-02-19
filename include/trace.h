@@ -109,6 +109,8 @@ namespace xavier
 		Trace( const ScoringScheme& score ):
 		scoringScheme( score ) {}
 
+		void recordGlobalMaxPos();
+
 		/**
 		 * Store another trace entry corresponding to the current state.
 		 */
@@ -127,6 +129,7 @@ namespace xavier
 		std::vector< std::vector<int> > DPMatrix;
 		int8_t* queryh;
 		int8_t* queryv;
+		size_t  maxPos;
 	};
 }
 
