@@ -100,15 +100,10 @@ namespace xavier
             int value1 = DPmatrix[i][VectorRegister::LOGICALWIDTH - i + 1];
             int value2 = DPmatrix[i + 1][VectorRegister::LOGICALWIDTH - i + 1];
 
-            // EY: I am pretty sure we are loading these values into
-            // the vector registers incorrectly.
-            // I think we are doing this upside down (the vectors are in
-            // reverse order)
-			// TODO: flipped (confirmed)
-            antiDiag1[i - 1] = value1;
-            antiDiag2[i] = value2;
+            antiDiag1[VectorRegister::LOGICALWIDTH - i] = value1;
+            antiDiag2[VectorRegister::LOGICALWIDTH - i + 1] = value2;
 
-            if ( value1 > antiDiagMax )
+            if ( value2 > antiDiagMax )
                 antiDiagMax = value1;
         }
 
