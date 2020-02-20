@@ -71,7 +71,15 @@ namespace xavier
 		// GG: find elements that created that max and so on and so for
 		// GG: it's hard bc we have antidiags and not an actual DP matrix 
 		// GG: much work in converting indexes
-		for ( auto it = trace.rbegin(); std::next(it) != trace.rend(); ++it )
+		int iteri = 0;
+		for ( auto it = trace.begin(); std::next(it) != trace.begin() + 40; ++it)
+		{
+			std::cout << "Trace Element: " << iteri << std::endl;
+			std::cout << it->vqueryh << std::endl;
+			std::cout << it->vqueryv << std::endl << std::endl;
+			++iteri;
+		}
+	/*	for ( auto it = trace.rbegin(); std::next(it) != trace.rend(); ++it )
 		{
 			// it  = antidiag1, antidiag2, and antidiag3 
 			// max = max( antidiag3 )
@@ -158,6 +166,8 @@ namespace xavier
 				alignments.alignH.push_back( queryHChar );
 				alignments.alignV.push_back( '-' );
 				std::cout << "dp, slp, sl, st, sd: " << dp_pos << " " << sq_left_pos << " " << sl << " " << st << " " << sd << std::endl;
+				std::cout << it->vqueryh << std::endl;
+				std::cout << it->vqueryv << std::endl;
 				dp_pos = sq_left_pos;
 			std::cout << it->antiDiag1 << std::endl;
 			std::cout << it->antiDiag2 << std::endl;
@@ -174,7 +184,7 @@ namespace xavier
 				std::cout << "ERROR1" << std::endl;
 			}
 			// std::cout << std::endl << std::endl;
-		}
+		}*/
 
 		// Handle Opening Phase Specially
 
@@ -185,7 +195,7 @@ namespace xavier
 
 		while ( i > 0 && j > 0 )
 		{
-			std::cout << i << " " << j << std::endl;
+			// std::cout << i << " " << j << std::endl;
 			char queryHChar = queryh[i-1];
 			char queryVChar = queryv[j-1];
 
