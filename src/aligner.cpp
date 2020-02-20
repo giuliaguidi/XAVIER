@@ -119,7 +119,7 @@ namespace xavier
 
         bestScore = DPmax;
         currScore = antiDiagMax;
-        lastMove  = DOWN;
+        lastMove  = RIGHT;
 
         // Hand off DPMatrix to trace
         trace.saveOpeningPhaseDPMatrix( DPmatrix, queryh, queryv );
