@@ -64,6 +64,18 @@ namespace xavier
 		size_t sq_above_pos = 0;
 		size_t sq_diag_pos  = 0;
 
+		// int iteri = 0;
+		// for ( auto it = trace.rbegin(); it != trace.rbegin() + 34; ++it )
+		// {
+		// 	std::cout << iteri << " " << it->scoreOffset << std::endl;
+		// 	std::cout << it->antiDiag1 << std::endl;
+		// 	std::cout << it->antiDiag2 << std::endl;
+		// 	std::cout << it->antiDiag3 << std::endl;
+		// 	std::cout << it->vqueryh << std::endl;
+		// 	std::cout << it->vqueryv << std::endl;
+		// 	iteri++;
+		// }
+
 		// GG: get antidiag index of antiDiag3 (32 elements-wide)
 		// GG: keep track of the max
 		// GG: find elements that created that max and so on and so for
@@ -184,47 +196,47 @@ namespace xavier
 
 		// Find position in matrix
 		// dp_pos is pos in antiDiag2 now, need to convert to DPMatrix coord
-		// int i = VectorRegister::LOGICALWIDTH + 2 - dp_pos;
-		// int j = dp_pos + 2;
+		int i = VectorRegister::LOGICALWIDTH + 2 - dp_pos;
+		int j = dp_pos + 2;
 
-		// while ( i > 0 && j > 0 )
-		// {
-		// 	std::cout << i << " " << j << std::endl;
-		// 	char queryHChar = queryh[i-1];
-		// 	char queryVChar = queryv[j-1];
+		while ( i > 0 && j > 0 )
+		{
+			std::cout << i << " " << j << std::endl;
+			char queryHChar = queryh[j-1];
+			char queryVChar = queryv[i-1];
 
-		// 	int st = DPMatrix[i][j];
-		// 	int sa = DPMatrix[i-1][j]   + scoringScheme.getGapScore();
-		// 	int sl = DPMatrix[i][j-1]   + scoringScheme.getGapScore();
-		// 	int sd = DPMatrix[i-1][j-1] + scoringScheme.score( queryHChar, queryVChar );
+			int st = DPMatrix[i][j];
+			int sa = DPMatrix[i-1][j]   + scoringScheme.getGapScore();
+			int sl = DPMatrix[i][j-1]   + scoringScheme.getGapScore();
+			int sd = DPMatrix[i-1][j-1] + scoringScheme.score( queryHChar, queryVChar );
 
-		// 	if ( sd == st )
-		// 	{
-		// 		if ( queryHChar == queryVChar )
-		// 			alignments.matches++;
+			if ( sd == st )
+			{
+				if ( queryHChar == queryVChar )
+					alignments.matches++;
 
-		// 		alignments.alignH.push_back( queryHChar );
-		// 		alignments.alignV.push_back( queryVChar );
-		// 		--i;
-		// 		--j;
-		// 	}
-		// 	else if ( sl == st )
-		// 	{
-		// 		alignments.alignH.push_back( queryHChar );
-		// 		alignments.alignV.push_back( '-' );
-		// 		--j;
-		// 	}
-		// 	else if ( sa != VectorRegister::NINF && sa == st )
-		// 	{
-		// 		alignments.alignH.push_back( '-' );
-		// 		alignments.alignV.push_back( queryVChar );
-		// 		--i;
-		// 	}
-		// 	else
-		// 	{
-		// 		std::cout << "ERROR2" << std::endl;
-		// 	}
-		// }
+				alignments.alignH.push_back( queryHChar );
+				alignments.alignV.push_back( queryVChar );
+				--i;
+				--j;
+			}
+			else if ( sl == st )
+			{
+				alignments.alignH.push_back( queryHChar );
+				alignments.alignV.push_back( '-' );
+				--j;
+			}
+			else if ( sa != VectorRegister::NINF && sa == st )
+			{
+				alignments.alignH.push_back( '-' );
+				alignments.alignV.push_back( queryVChar );
+				--i;
+			}
+			else
+			{
+				std::cout << "ERROR2" << std::endl;
+			}
+		}
 
 		std::reverse( alignments.alignH.begin(), alignments.alignH.end() );
 		std::reverse( alignments.alignV.begin(), alignments.alignV.end() );

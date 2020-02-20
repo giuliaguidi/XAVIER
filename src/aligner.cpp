@@ -101,15 +101,15 @@ namespace xavier
             int value2 = DPmatrix[i + 1][VectorRegister::LOGICALWIDTH - i + 1];
 
             antiDiag1[VectorRegister::LOGICALWIDTH - i] = value1;
-            antiDiag2[VectorRegister::LOGICALWIDTH - i + 1] = value2;
+            antiDiag2[VectorRegister::LOGICALWIDTH - i] = value2;
 
             if ( value2 > antiDiagMax )
-                antiDiagMax = value1;
+                antiDiagMax = value2;
         }
 
 		// TODO: Check below for correctness
         antiDiag1[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
-        antiDiag2[0] = VectorRegister::NINF;
+        antiDiag2[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
         antiDiag3 = VectorRegister( VectorRegister::NINF );
 
         bestScore = DPmax;
@@ -184,7 +184,7 @@ namespace xavier
 		/**
 		 * Closing stage
 		 */
-		for ( int i = 0; i < VectorRegister::VECTORWIDTH + 1; ++i )
+		for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
 		{
 			// Solve for next anti-diagonal
 			calcAntiDiag3();
@@ -207,7 +207,6 @@ namespace xavier
 			// If xdrop condition satisfied; terminate
 			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
 			else if ( xdropCondition() ) return produceResults();
-			else currScore = bestScore;	// Only in closing stage
 
 			// Update anti-diagonals
 			if ( lastMove == DOWN ) moveRight();
