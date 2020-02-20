@@ -168,7 +168,11 @@ namespace xavier
 	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
-			if ( currScore > bestScore ) bestScore = currScore;
+			if ( currScore > bestScore )
+			{
+				trace.recordGlobalMaxPos();
+				bestScore = currScore;
+			}
 			// If xdrop condition satisfied; terminate
 			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
 			else if ( xdropCondition() ) return produceResults();

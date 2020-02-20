@@ -43,15 +43,12 @@ namespace xavier
 
 	void Trace::recordGlobalMaxPos()
 	{
-		maxPos = trace.size(); // possibly -1
+		maxPos = trace.size() - 1;
 	}
 
 	// GG: back trace
 	Trace::AlignmentPair Trace::getAlignment()
 	{
-		// debug
-		std::cout << trace.size() << std::endl;
-
 		// Initialize return struct
 		// GG: match horiz, match verti, matches
 		AlignmentPair alignments = { "", "", 0 };
@@ -59,7 +56,8 @@ namespace xavier
 		// Find antiDiag3's max => This is exit score (need position)
 		// GG: go to the last element of trace, find the max in the last trace
 		// GG: but it might not be the global maximum
-		size_t dp_pos = trace.rbegin()->antiDiag3.argmax();
+		auto itAtMax = trace.rbegin() + (trace.size() - 1 - maxPos);
+		size_t dp_pos = itAtMax->antiDiag3.argmax();
 
 		// Follow dp_pos back and track alignment
 		size_t sq_left_pos  = 0;
@@ -67,21 +65,13 @@ namespace xavier
 		size_t sq_diag_pos  = 0;
 
 		// GG: get antidiag index of antiDiag3 (32 elements-wide)
-		// GG: keep track of the max 
+		// GG: keep track of the max
 		// GG: find elements that created that max and so on and so for
-		// GG: it's hard bc we have antidiags and not an actual DP matrix 
+		// GG: it's hard bc we have antidiags and not an actual DP matrix
 		// GG: much work in converting indexes
-		int iteri = 0;
-		for ( auto it = trace.begin(); std::next(it) != trace.begin() + 40; ++it)
+		for ( auto it = itAtMax; std::next(it) != trace.rend(); ++it )
 		{
-			std::cout << "Trace Element: " << iteri << std::endl;
-			std::cout << it->vqueryh << std::endl;
-			std::cout << it->vqueryv << std::endl << std::endl;
-			++iteri;
-		}
-	/*	for ( auto it = trace.rbegin(); std::next(it) != trace.rend(); ++it )
-		{
-			// it  = antidiag1, antidiag2, and antidiag3 
+			// it  = antidiag1, antidiag2, and antidiag3
 			// max = max( antidiag3 )
 			// nit = antidiag1, antidiag2, and antidiag3
 
@@ -158,7 +148,9 @@ namespace xavier
 
 				alignments.alignH.push_back( queryHChar );
 				alignments.alignV.push_back( queryVChar );
-				dp_pos = sq_diag_pos;
+
+				dp_pos = sq_diag_pos + (it->lastMove == nit->lastMove ? (-2 * it->lastMove) + 1 : 0);
+				// std::cout << (it->lastMove == nit->lastMove ? (-2 * it->lastMove) + 1 : 0) << std::endl;
 				++it;
 			}
 			else if ( sl != VectorRegister::NINF && sl == st )
@@ -166,36 +158,38 @@ namespace xavier
 				alignments.alignH.push_back( queryHChar );
 				alignments.alignV.push_back( '-' );
 				std::cout << "dp, slp, sl, st, sd: " << dp_pos << " " << sq_left_pos << " " << sl << " " << st << " " << sd << std::endl;
-				std::cout << it->vqueryh << std::endl;
+				std::cout << queryHChar << queryVChar << std::endl;
 				std::cout << it->vqueryv << std::endl;
-				dp_pos = sq_left_pos;
-			std::cout << it->antiDiag1 << std::endl;
-			std::cout << it->antiDiag2 << std::endl;
-			std::cout << it->antiDiag3 << std::endl;
+				std::cout << it->vqueryh << std::endl;
+				// std::cout << (scoringScheme.score( queryHChar, queryVChar ) + offset) << std::endl;
+				dp_pos = sq_left_pos - it->lastMove;
+			// std::cout << it->antiDiag1 << std::endl;
+			// std::cout << it->antiDiag2 << std::endl;
+			// std::cout << it->antiDiag3 << std::endl;
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
 				alignments.alignH.push_back( '-' );
 				alignments.alignV.push_back( queryVChar );
-				dp_pos = sq_above_pos;
+				dp_pos = sq_above_pos - it->lastMove;
 			}
 			else
 			{
 				std::cout << "ERROR1" << std::endl;
 			}
 			// std::cout << std::endl << std::endl;
-		}*/
+		}
 
 		// Handle Opening Phase Specially
 
 		// Find position in matrix
 		// dp_pos is pos in antiDiag2 now, need to convert to DPMatrix coord
-		int i = dp_pos;
-		int j = VectorRegister::LOGICALWIDTH - dp_pos + 1;
+		int i = VectorRegister::LOGICALWIDTH + 2 - dp_pos;
+		int j = dp_pos + 2;
 
 		while ( i > 0 && j > 0 )
 		{
-			// std::cout << i << " " << j << std::endl;
+			std::cout << i << " " << j << std::endl;
 			char queryHChar = queryh[i-1];
 			char queryVChar = queryv[j-1];
 

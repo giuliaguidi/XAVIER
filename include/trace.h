@@ -109,8 +109,6 @@ namespace xavier
 		Trace( const ScoringScheme& score ):
 		scoringScheme( score ) {}
 
-		void recordGlobalMaxPos();
-
 		/**
 		 * Store another trace entry corresponding to the current state.
 		 */
@@ -119,8 +117,15 @@ namespace xavier
 		                     const VectorRegister& _vqv, const int64_t offset,
 		                     const int _lastMove );
 
+		/**
+		 * Backtrace Algorithm
+		 */
 		AlignmentPair getAlignment();
 
+		/**
+		 * Record Keeping Functions
+		 */
+		void recordGlobalMaxPos();
 		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv );
 
 	private:
