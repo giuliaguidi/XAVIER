@@ -48,8 +48,8 @@ namespace xavier
         DPmatrix[0][0] = 0;
         for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++)
         {
-            DPmatrix[0][i] = -i;
-            DPmatrix[i][0] = -i;
+            DPmatrix[0][i] = i*scoringScheme.getGapScore();
+            DPmatrix[i][0] = i*scoringScheme.getGapScore();
         }
 
         // DPmax tracks maximum value in DPmatrix for x-drop condition
@@ -63,10 +63,11 @@ namespace xavier
                 int oneF = DPmatrix[i-1][j-1];
 
                 // Comparing bases
-                if (queryh[i-1] == queryv[j-1])
-                    oneF += scoringScheme.getMatchScore();
-                else
-                    oneF += scoringScheme.getMismatchScore();
+                // if (queryh[j-1] == queryv[i-1])
+                //     oneF += scoringScheme.getMatchScore();
+                // else
+                //     oneF += scoringScheme.getMismatchScore();
+				oneF += scoringScheme.score( queryh[j-1], queryv[i-1] );
 
                 int twoF = std::max (DPmatrix[i-1][j], DPmatrix[i][j-1]);
                 twoF += scoringScheme.getGapScore();
@@ -76,13 +77,12 @@ namespace xavier
                 // Heuristic to keep track of the max in initial stage of the computation
                 if (DPmatrix[i][j] > DPmax)
                     DPmax = DPmatrix[i][j];
-				else
-					xdropCondition();
-            }
+			}
         }
 
         for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
         {
+			// TODO: NINF at the end of vqueryv needs to be questioned
         	vqueryh[i] = queryh[i + 1];
         	vqueryv[i] = queryv[VectorRegister::LOGICALWIDTH - i];
         }
@@ -103,6 +103,7 @@ namespace xavier
             // the vector registers incorrectly.
             // I think we are doing this upside down (the vectors are in
             // reverse order)
+			// TODO: flipped (confirmed)
             antiDiag1[i - 1] = value1;
             antiDiag2[i] = value2;
 
@@ -110,6 +111,7 @@ namespace xavier
                 antiDiagMax = value1;
         }
 
+		// TODO: Check below for correctness
         antiDiag1[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
         antiDiag2[0] = VectorRegister::NINF;
         antiDiag3 = VectorRegister( VectorRegister::NINF );
@@ -197,7 +199,11 @@ namespace xavier
 	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
-			if ( currScore > bestScore ) bestScore = currScore;
+			if ( currScore > bestScore )
+			{
+				trace.recordGlobalMaxPos();
+				bestScore = currScore;
+			}
 			// If xdrop condition satisfied; terminate
 			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
 			else if ( xdropCondition() ) return produceResults();
@@ -224,14 +230,14 @@ namespace xavier
 	{
 		VectorRegister match = vqueryh.compeq( vqueryv );
 		match = getVmismatchScore().blendv( getVmatchScore(), match );
-		VectorRegister antiDiag1F = match + antiDiag1;
+		VectorRegister antiDiag1F = match + antiDiag1; // 7
 
-		VectorRegister antiDiag2S = antiDiag2.lshift();
-		VectorRegister antiDiag2M = antiDiag2S.max( antiDiag2 );
+		VectorRegister antiDiag2S = antiDiag2.lshift(); // 8
+		VectorRegister antiDiag2M = antiDiag2S.max( antiDiag2 ); // 7
 		VectorRegister antiDiag2F = antiDiag2M + getVgapScore();
 
 		// Compute antiDiag3 and left-align
-		antiDiag3 = antiDiag1F.max( antiDiag2F );
+		antiDiag3 = antiDiag1F.max( antiDiag2F ); // 7
 		antiDiag3[ VectorRegister::LOGICALWIDTH ] = VectorRegister::NINF;
 	}
 
