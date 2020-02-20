@@ -83,6 +83,7 @@ namespace xavier
         for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
         {
 			// TODO: NINF at the end of vqueryv needs to be questioned
+			// I think this is ok
         	vqueryh[i] = queryh[i + 1];
         	vqueryv[i] = queryv[VectorRegister::LOGICALWIDTH - i];
         }
@@ -247,7 +248,8 @@ namespace xavier
 		vqueryh = vqueryh.lshift();
 		// vqueryh[VectorRegister::LOGICALWIDTH - 1] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
 		// GG: shouldn't we load the next one in pos LOGICALWIDTH?
-		vqueryh[VectorRegister::LOGICALWIDTH] = hoffset > hlength ? VectorRegister::NINF : queryh[hoffset++];
+		// vqueryh[VectorRegister::LOGICALWIDTH] = hoffset > hlength ? VectorRegister::NINF : queryh[hoffset++];
+		vqueryh[VectorRegister::LOGICALWIDTH] = queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1 = antiDiag2;
@@ -261,7 +263,9 @@ namespace xavier
 	{
 		/* (a) shift to the right on query vertical */
 		vqueryv = vqueryv.rshift();
-		vqueryv[0] = voffset > vlength ? VectorRegister::NINF : queryv[voffset++];
+		// we don not need this
+		// vqueryv[0] = voffset > vlength ? VectorRegister::NINF : queryv[voffset++];
+		vqueryv[0] = queryv[voffset++];
 
 		/* (b) shift to the right on updated vector 2: this places the left-aligned vector 3 as a right-aligned vector 2 */
 		antiDiag1 = antiDiag2;
