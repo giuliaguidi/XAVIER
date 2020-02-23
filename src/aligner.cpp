@@ -117,7 +117,7 @@ namespace xavier
         lastMove  = RIGHT;
 
         // Hand off DPMatrix to trace
-        trace.saveOpeningPhaseDPMatrix( DPmatrix, queryh, queryv );
+        // trace.saveOpeningPhaseDPMatrix( DPmatrix, queryh, queryv );
         return DPmatrix;
 	}
 
@@ -130,7 +130,7 @@ namespace xavier
 		r.begV = 0;
 		r.endH = hoffset;
 		r.endV = voffset;
-		r.matched_pair = trace.getAlignment();
+		// r.matched_pair = trace.getAlignment();
 		return r;
 	}
 
@@ -160,12 +160,12 @@ namespace xavier
 	    	normalizeVectors(norm);
 
 	    	// Trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if ( currScore > bestScore )
 			{
-				trace.recordGlobalMaxPos();
+				// trace.recordGlobalMaxPos();
 				bestScore = currScore;
 			}
 			// If xdrop condition satisfied; terminate
@@ -196,12 +196,12 @@ namespace xavier
 	    	normalizeVectors(norm);
 
 	    	// Trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if ( currScore > bestScore )
 			{
-				trace.recordGlobalMaxPos();
+				// trace.recordGlobalMaxPos();
 				bestScore = currScore;
 			}
 			// If xdrop condition satisfied; terminate

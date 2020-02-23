@@ -30,73 +30,39 @@
 #define MAT ( 1)
 #define MIS (-1)
 #define GAP (-1)
-#define BWD (64)
+#define BWD (128)
 #define KML (15)
+#define PMIS (0.05)
+#define PGAP (0.10)
 
 int main(int argc, const char *argv[])
 {
 	// Command line input
 	int x = std::stoi(argv[1]);
+	std::vector<std::tuple<int, double, double, double, double>> runtime;
 
-	std::ifstream seqs1(argv[2]);
-	std::ifstream seqs2(argv[3]);
+	std::cout << "length\tseqan\txavier\tlibgaba\tksw2" << std::endl;
 
-	// Set up OMP thread
-	int maxt = 1;
-	#pragma omp parallel 
-	{
-		maxt = omp_get_num_threads();
-	}
-
-    int n = std::count(std::istreambuf_iterator<char>(seqs1), std::istreambuf_iterator<char>(), '\n');
-    seqs1.seekg(0, std::ios_base::beg);
-
-    std::vector<std::pair<std::string, std::string>> entries;
-    std::vector<std::stringstream> local(maxt);  
-
-	// Read seqs1 and seqs2
-    if(seqs1 && seqs2)
-        for (int i = 0; i < n; ++i)
-        {
-            std::string seq1, seq2;
-            std::getline(seqs1, seq1);
-			std::getline(seqs2, seq2);
-            entries.push_back(std::make_pair(seq1, seq2));
-        }
-    seqs1.close(); 
-	seqs2.close(); 
-
-	std::vector<std::tuple<int, double, double, double, double>> runtime(n);
-	std::vector<std::vector<std::tuple<int, double, double, double, double>>> vruntime(maxt);
-
-#pragma omp parallel for
-	for(int i = 0; i < n; i++)
+	int init  = 2500;
+	for(int i = init; i < (init*20+1); i+init)
 	{
 		int tid = omp_get_thread_num();
 
-		std::string seq1 = entries[i].first;
-		std::string seq2 = entries[i].second;
+		std::string seq1;
+		std::string seq2;
+
+		generate_random_sequence(seq1, i);
+		seq2 = generate_mutated_sequence(seq1, i, PMIS, PGAP, BWD);
 
 		double stime = seqanAlign (MAT, MIS, GAP, KML, x, seq1, seq2);
 		double xtime = xavireAlign(MAT, MIS, GAP, KML, x, seq1, seq2);
 		double gtime = gabaAlign  (MAT, MIS, GAP, KML, x, seq1, seq2);
 		double ktime = ksw2Align  (MAT, MIS, GAP, KML, x, seq1, seq2, BWD);
 
-		vruntime[tid].push_back(std::make_tuple(seq1.length(), stime, xtime, gtime, ktime));
-	}
+		std::cout << seq1.length() << "\t" << stime << "\t" << xtime
+			<< "\t" << gtime << "\t" << ktime << std::endl;
 
-	unsigned int sofar = 0;
-
-	for(int t = 0; t < maxt; ++t)
-	{
-		std::copy(vruntime[t].begin(), vruntime[t].end(), runtime.begin() + sofar);
-		sofar += vruntime[t].size();
-	}
-	std::cout << "length\tseqan\txavier\tlibgaba\tksw2" << std::endl;
-	for(int i = 0; i < n; i++)
-	{
-		std::cout << std::get<0>(runtime[i]) << "\t" << std::get<1>(runtime[i]) << "\t" << std::get<2>(runtime[i]) 
-			<< "\t" << std::get<3>(runtime[i]) << "\t" << std::get<4>(runtime[i]) << std::endl;
+		i = i+init;
 	}
 
 	return 0;
