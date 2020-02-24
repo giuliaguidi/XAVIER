@@ -338,8 +338,3 @@ TEST(VectorRegisterTest, compeq)
 	for ( int i = 2; i < xavier::VectorRegister::VECTORWIDTH; ++i )
 		ASSERT_EQ( x3[i], 0 );
 }
-
-int main(int argc, char **argv) {
-	::testing::InitGoogleTest( &argc, argv );
-	return RUN_ALL_TESTS();
-}
