@@ -33,9 +33,12 @@ meson build .
 ninja -C build
 ```
 
-## Usage
+## API Examples
+You can find a demo on how to run/call XAVIER in `/examples/demo.cpp`:
 ```
-TBD
+cd examples
+make
+./demo
 ```
 ## Copyright Notice
 
