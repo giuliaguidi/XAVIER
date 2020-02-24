@@ -1,3 +1,6 @@
 *.o
 xavier.out
 test/run_tests
+build/
+/subprojects/*
+!/subprojects/*.wrap

@@ -1,0 +1,9 @@
+# tests
+option('tests',
+    type : 'boolean',
+    value : true,
+    description : 'Enable dependencies required for testing')
+
+# simd
+option('sse42', type : 'boolean', value : false, description : 'Enable SSE42 codepaths')
+option('avx2', type : 'boolean', value : true, description : 'Enable AVX2 codepaths')
