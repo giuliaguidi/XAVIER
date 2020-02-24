@@ -4,10 +4,31 @@
 Xavier computes high-performance x-drop adaptive banded pairwise alignment exploiting  instruction level parallelism via Single-Instruction-Multiple-Data (SIMD) operations. Our implementation uses a narrow bandwidth that appreciably improves performance reducing the search space for the optimal alignment. The adaptive mechanism enables Xavier to find the optimal alignment between related sequences even when the error rate is as high as 50%.
 </p>
 
+## Build
+
+```
+make
+```
+
+## Build for Integration into Larger Projects
+
+You need to install [meson]() and [ninja]().
+Once installed:
+
+```
+mkdir build && cd build
+meson && ninja
+```
+or
+```
+meson build .
+ninja -C build
+```
+
 ## Usage
-
+```
 TBD
-
+```
 ## Copyright Notice
 
 <p align="justify">
