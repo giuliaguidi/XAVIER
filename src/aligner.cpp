@@ -6,6 +6,8 @@
 
 #include "aligner.h"
 
+// #define DROPOFF (80)
+
 namespace xavier
 {
 	Aligner::Aligner(
@@ -38,11 +40,11 @@ namespace xavier
 		scoreDropOff = _scoreDropOff;
 	}
 
-	std::vector< std::vector<int> > Aligner::initAntiDiags()
+	std::vector<std::vector<int>> Aligner::initAntiDiags()
 	{
-        // we need one more space for the off-grid values
+        // One more space for the off-grid values
         // and one more space for antiDiag2
-        std::vector< std::vector<int> > DPmatrix( VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2) );
+        std::vector<std::vector<int>> DPmatrix(VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2));
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
@@ -89,7 +91,7 @@ namespace xavier
 
         // Load DPmatrix into antiDiag1 and antiDiag2 vector and
         // find max elem at the end of the initial stage in antiDiag1
-        for ( int i = 1; i < VectorRegister::LOGICALWIDTH + 1; ++i )
+        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 1; ++i)
         {
             int value1 = DPmatrix[i][VectorRegister::LOGICALWIDTH - i + 1];
             int value2 = DPmatrix[i + 1][VectorRegister::LOGICALWIDTH - i + 1];
@@ -97,8 +99,7 @@ namespace xavier
             antiDiag1[VectorRegister::LOGICALWIDTH - i] = value1;
             antiDiag2[VectorRegister::LOGICALWIDTH - i] = value2;
 
-            if ( value2 > antiDiagMax )
-                antiDiagMax = value2;
+			antiDiagMax = value2 > antiDiagMax ? value2 : antiDiagMax;
         }
 
         antiDiag1[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
@@ -139,25 +140,23 @@ namespace xavier
 		/**
 		 * Core stage
 		 */
-		while( !closingCondition() )
+		while(!closingCondition())
 		{
-			// Solve for next anti-diagonal
+			// Compute next anti-diagonal
 			calcAntiDiag3();
 
-			// Track new currScore
+			// Update currScore
 			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
 
 			// Ensure anti-diagonals stay in int8_t range
 	    	normalizeVectors(norm);
 
 			// Update bestScore
-			if ( currScore > bestScore ) bestScore = currScore;
-			// If xdrop condition satisfied; terminate
-			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
+			if(currScore > bestScore) bestScore = currScore;
 			else if (xdropCondition()) return produceResults();
 
 			// Update anti-diagonals
-			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 ) moveRight();
+			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2) moveRight();
 			else moveDown();
 		}
 
@@ -170,19 +169,17 @@ namespace xavier
 		 */
 		for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
 		{
-			// Solve for next anti-diagonal
+			// Compute next anti-diagonal
 			calcAntiDiag3();
 
-			// Track new currScore
+			// Update currScore
 			int8_t norm = updateCurrScore();
 
-			// Ensure anti-iagonals stay in int8_t range
+			// Ensure anti-diagonals stay in int8_t range
 	    	normalizeVectors(norm);
-			
+
 			// Update bestScore
-			if ( currScore > bestScore ) bestScore = currScore;
-			// If xdrop condition satisfied; terminate
-			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
+			if(currScore > bestScore) bestScore = currScore;
 			else if (xdropCondition()) return produceResults();
 
 			// Update anti-diagonals
@@ -192,7 +189,6 @@ namespace xavier
 
 		// Function to check offset (and so extension) are valid values
 		checkOffsetValidity(hit);
-
 		return produceResults();
 	}
 
@@ -206,14 +202,14 @@ namespace xavier
 	{
 		VectorRegister match = vqueryh.compeq( vqueryv );
 		match = getVmismatchScore().blendv( getVmatchScore(), match );
-		VectorRegister antiDiag1F = match + antiDiag1; // 7
+		VectorRegister antiDiag1F = match + antiDiag1; 
 
-		VectorRegister antiDiag2S = antiDiag2.lshift(); // 8
-		VectorRegister antiDiag2M = antiDiag2S.max( antiDiag2 ); // 7
+		VectorRegister antiDiag2S = antiDiag2.lshift(); 
+		VectorRegister antiDiag2M = antiDiag2S.max( antiDiag2 );
 		VectorRegister antiDiag2F = antiDiag2M + getVgapScore();
 
 		// Compute antiDiag3 and left-align
-		antiDiag3 = antiDiag1F.max( antiDiag2F ); // 7
+		antiDiag3 = antiDiag1F.max( antiDiag2F );
 		antiDiag3[ VectorRegister::LOGICALWIDTH ] = VectorRegister::NINF;
 	}
 
