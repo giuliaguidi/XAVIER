@@ -35,7 +35,7 @@
 
 #include "utils.h"
 
-#define BWD (64)
+#define BWD (256)
 
 int main(int argc, char const *argv[])
 {
@@ -51,22 +51,11 @@ int main(int argc, char const *argv[])
     int mean = std::stoi(argv[6]);
     int sd   = std::stoi(argv[7]);
 
-	// int maxt = 1;
-
-	// #pragma omp parallel 
-	// {
-	// 	maxt = omp_get_num_threads();
-	// }
-
 	std::default_random_engine generator;
 	std::vector<std::pair<std::string, std::string>> seqs;
-	// std::vector<std::vector<std::pair<std::string, std::string>>> vseqs(maxt);
 
-	// #pragma omp parallel for
 	for(int i = 0; i < n; i++)
 	{
-		// int tid = omp_get_thread_num();
-
 		std::normal_distribution<double> distribution(mean, sd);
 	
 		int len1 = (int)distribution(generator);
@@ -109,13 +98,6 @@ int main(int argc, char const *argv[])
         
 		seqs.push_back(std::make_pair(querySeg, targetSeg));
 	}
-
-	// unsigned int sofar = 0;
-	// for(int t = 0; t < maxt; ++t)
-	// {
-	// 	std::copy(vseqs[t].begin(), vseqs[t].end(), seqs.begin() + sofar);
-	// 	sofar += vseqs[t].size();
-	// }
 
     std::string name1 = "S1BWD" + std::to_string(BWD) + "N" + std::to_string(n) + "PMIS" 
 							+ std::to_string(pmis) + "PGAP" + std::to_string(pgap) + "R" + std::to_string(random) 
