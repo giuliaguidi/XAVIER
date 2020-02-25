@@ -113,8 +113,8 @@ namespace xavier
 		Trace         getTrace        () const { return trace;         }
 		ScoringScheme getScoringScheme() const { return scoringScheme; }
 
-		int8_t* getQueryH() const { return queryh; }
-		int8_t* getQueryV() const { return queryv; }
+		int16_t* getQueryH() const { return queryh; }
+		int16_t* getQueryV() const { return queryv; }
 
 		uint64_t getHlength() const { return hlength; }
 		uint64_t getVlength() const { return vlength; }
@@ -146,16 +146,16 @@ namespace xavier
 		void setCurrScore   ( int64_t score  ) { currScore = score;    }
 		void setScoreOffset ( int64_t offset ) { scoreOffset = offset; }
 
-		void updateQueryH ( const uint8_t idx, const int8_t value ) { vqueryh[idx] = value; }
-		void updateQueryV ( const uint8_t idx, const int8_t value ) { vqueryv[idx] = value; }
+		void updateQueryH ( const uint16_t idx, const int16_t value ) { vqueryh[idx] = value; }
+		void updateQueryV ( const uint16_t idx, const int16_t value ) { vqueryv[idx] = value; }
 
-		void updateAntiDiag1 ( const uint8_t idx, const int8_t value ) { antiDiag1[idx] = value; }
-		void updateAntiDiag2 ( const uint8_t idx, const int8_t value ) { antiDiag2[idx] = value; }
-		void updateAntiDiag3 ( const uint8_t idx, const int8_t value ) { antiDiag3[idx] = value; }
+		void updateAntiDiag1 ( const uint16_t idx, const int16_t value ) { antiDiag1[idx] = value; }
+		void updateAntiDiag2 ( const uint16_t idx, const int16_t value ) { antiDiag2[idx] = value; }
+		void updateAntiDiag3 ( const uint16_t idx, const int16_t value ) { antiDiag3[idx] = value; }
 
-		void broadcastAntiDiag1 ( const int8_t value ) { antiDiag1.set( value ); }
-		void broadcastAntiDiag2 ( const int8_t value ) { antiDiag2.set( value ); }
-		void broadcastAntiDiag3 ( const int8_t value ) { antiDiag3.set( value ); }
+		void broadcastAntiDiag1 ( const int16_t value ) { antiDiag1.set( value ); }
+		void broadcastAntiDiag2 ( const int16_t value ) { antiDiag2.set( value ); }
+		void broadcastAntiDiag3 ( const int16_t value ) { antiDiag3.set( value ); }
 
 		void setAntiDiag1 ( const VectorRegister& vec ) { antiDiag1 = vec; }
 		void setAntiDiag2 ( const VectorRegister& vec ) { antiDiag2 = vec; }
@@ -176,11 +176,11 @@ namespace xavier
 		void moveDown();
 		bool xdropCondition();
 		bool closingCondition();
-		void normalizeVectors(int8_t& normfactor);
+		void normalizeVectors(int16_t& normfactor);
 		void checkOffsetValidity(const uint64_t& max);
 		void move();
 		void step();
-		int8_t updateCurrScore();
+		int16_t updateCurrScore();
 
 	private:
 		/* The scoring scheme contains the scoring information. */
@@ -190,8 +190,8 @@ namespace xavier
 		Trace trace;
 
 		/* Sequences */
-		int8_t* queryh;
-		int8_t* queryv;
+		int16_t* queryh;
+		int16_t* queryv;
 
 		/* Length of Sequences */
 		uint64_t hlength;

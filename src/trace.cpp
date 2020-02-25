@@ -243,7 +243,7 @@ namespace xavier
 		return alignments;
 	}
 
-	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv )
+	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int16_t* _queryh, int16_t* _queryv )
 	{
 		DPMatrix = _DPMatrix;
 		queryh = _queryh;
