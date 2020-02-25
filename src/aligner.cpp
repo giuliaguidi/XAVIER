@@ -42,7 +42,7 @@ namespace xavier
 	{
         // we need one more space for the off-grid values
         // and one more space for antiDiag2
-        std::vector< std::vector<int> > DPmatrix( VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2) );
+        std::vector< std::vector<int> > DPmatrix(VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2));
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
@@ -58,7 +58,7 @@ namespace xavier
         // DPmatrix population
         for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++) {
             // GG: we only need the upper-left triangular matrix
-            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 2 - i; j++) {
+            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 2 + 2 - i; j++) {
 
                 int oneF = DPmatrix[i-1][j-1];
 
