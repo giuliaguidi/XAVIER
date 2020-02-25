@@ -17,8 +17,8 @@ namespace xavier
 	trace( _scoringScheme )
 	{
 
-		hlength = hseq.length(); // + 1;
-		vlength = vseq.length(); // + 1;
+		hlength = hseq.length();
+		vlength = vseq.length();
 
 		queryh = new int8_t[hlength	+ VectorRegister::VECTORWIDTH];
 		queryv = new int8_t[vlength	+ VectorRegister::VECTORWIDTH];
@@ -63,10 +63,6 @@ namespace xavier
                 int oneF = DPmatrix[i-1][j-1];
 
                 // Comparing bases
-                // if (queryh[j-1] == queryv[i-1])
-                //     oneF += scoringScheme.getMatchScore();
-                // else
-                //     oneF += scoringScheme.getMismatchScore();
 				oneF += scoringScheme.score( queryh[j-1], queryv[i-1] );
 
                 int twoF = std::max (DPmatrix[i-1][j], DPmatrix[i][j-1]);
@@ -82,8 +78,6 @@ namespace xavier
 
         for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
         {
-			// TODO: NINF at the end of vqueryv needs to be questioned
-			// I think this is ok
         	vqueryh[i] = queryh[i + 1];
         	vqueryv[i] = queryv[VectorRegister::LOGICALWIDTH - i];
         }
@@ -107,7 +101,6 @@ namespace xavier
                 antiDiagMax = value2;
         }
 
-		// TODO: Check below for correctness
         antiDiag1[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
         antiDiag2[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
         antiDiag3 = VectorRegister( VectorRegister::NINF );
@@ -117,7 +110,7 @@ namespace xavier
         lastMove  = RIGHT;
 
         // Hand off DPMatrix to trace
-        // trace.saveOpeningPhaseDPMatrix( DPmatrix, queryh, queryv );
+        trace.saveOpeningPhaseDPMatrix(DPmatrix, queryh, queryv);
         return DPmatrix;
 	}
 
@@ -130,7 +123,7 @@ namespace xavier
 		r.begV = 0;
 		r.endH = hoffset;
 		r.endV = voffset;
-		// r.matched_pair = trace.getAlignment();
+		r.matched_pair = trace.getAlignment();
 		return r;
 	}
 
@@ -150,27 +143,28 @@ namespace xavier
 		 */
 		while( !closingCondition() )
 		{
-			// Solve for next anti-diagonal
+			// Compute next anti-diagonal
 			calcAntiDiag3();
 
-			// Track new currScore
+			// Update currScore
 			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
 
 			// Ensure anti-diagonals stay in int8_t range
 	    	normalizeVectors(norm);
 
-	    	// Trace state
-	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	// Push back trace state
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
-			if ( currScore > bestScore )
+			if (currScore > bestScore)
 			{
-				// trace.recordGlobalMaxPos();
+				trace.recordGlobalMaxPos();
 				bestScore = currScore;
 			}
-			// If xdrop condition satisfied; terminate
-			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
-			else if ( xdropCondition() ) return produceResults();
+			else if (xdropCondition()) 
+			{
+				return produceResults();
+			}
 
 			// Update anti-diagonals
 			if ( antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2 ) moveRight();
@@ -186,36 +180,36 @@ namespace xavier
 		 */
 		for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
 		{
-			// Solve for next anti-diagonal
+			// Compute next anti-diagonal
 			calcAntiDiag3();
 
-			// Track new currScore
+			// Update currScore
 			int8_t norm = updateCurrScore();
 
 			// Ensure anti-iagonals stay in int8_t range
 	    	normalizeVectors(norm);
 
 	    	// Trace state
-	    	// trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
-			if ( currScore > bestScore )
+			if (currScore > bestScore)
 			{
-				// trace.recordGlobalMaxPos();
+				trace.recordGlobalMaxPos();
 				bestScore = currScore;
 			}
-			// If xdrop condition satisfied; terminate
-			// If we just updated bestScore, we do not need to check the xdrop termination and we can avoid one if statement
-			else if ( xdropCondition() ) return produceResults();
+			else if (xdropCondition()) 
+			{
+				return produceResults();
+			}
 
 			// Update anti-diagonals
-			if ( lastMove == DOWN ) moveRight();
+			if (lastMove == DOWN) moveRight();
 			else moveDown();
 		}
 
 		// Function to check offset (and so extension) are valid values
 		checkOffsetValidity(hit);
-
 		return produceResults();
 	}
 
@@ -244,10 +238,7 @@ namespace xavier
 	{
 		/* (a) shift to the left on query horizontal */
 		vqueryh = vqueryh.lshift();
-		// vqueryh[VectorRegister::LOGICALWIDTH - 1] = hoffset >= hlength ? VectorRegister::NINF : queryh[hoffset++];
-		// GG: shouldn't we load the next one in pos LOGICALWIDTH?
 		vqueryh[VectorRegister::LOGICALWIDTH - 1] = hoffset > hlength ? VectorRegister::NINF : queryh[hoffset++];
-		// vqueryh[VectorRegister::LOGICALWIDTH] = queryh[hoffset++];
 
 		/* (b) shift left on updated vector 1: this places the right-aligned vector 2 as a left-aligned vector 1 */
 		antiDiag1 = antiDiag2;
@@ -263,7 +254,6 @@ namespace xavier
 		vqueryv = vqueryv.rshift();
 		vqueryv[0] = voffset > vlength ? VectorRegister::NINF : queryv[voffset++];
 		vqueryv[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
-		// vqueryv[0] = queryv[voffset++];
 
 		/* (b) shift to the right on updated vector 2: this places the left-aligned vector 3 as a right-aligned vector 2 */
 		antiDiag1 = antiDiag2;
