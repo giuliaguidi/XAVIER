@@ -126,7 +126,7 @@ namespace xavier
 		 * Record Keeping Functions
 		 */
 		void recordGlobalMaxPos();
-		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv );
+		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int16_t* _queryh, int16_t* _queryv );
 
 		std::string compression(const std::string& str);
 
@@ -134,8 +134,8 @@ namespace xavier
 		std::vector<TraceEntry> trace;
 		ScoringScheme scoringScheme;
 		std::vector< std::vector<int> > DPMatrix;
-		int8_t* queryh;
-		int8_t* queryv;
+		int16_t* queryh;
+		int16_t* queryv;
 		size_t  maxPos;
 	};
 }

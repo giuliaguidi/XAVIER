@@ -70,16 +70,16 @@ namespace xavier
 		 */
 		#ifdef  __AVX2__
 			typedef __m256i vectorType;
-			static const int VECTORWIDTH = 32;
+			static const int VECTORWIDTH = 16;
 		#elif __SSE4_2__
 			typedef __m128i vectorType;
-			static const int VECTORWIDTH = 16;
+			static const int VECTORWIDTH = 8;
 		#endif
 
-		typedef int8_t elementType;
-		static const int LOGICALWIDTH = VECTORWIDTH - 1;
-		static const elementType CUTOFF = std::numeric_limits<int8_t>::max() - 25;
-		static const elementType NINF = std::numeric_limits<elementType>::min();
+		typedef int16_t elementType;
+		static const int LOGICALWIDTH   = VECTORWIDTH - 1;
+		static const elementType CUTOFF = std::numeric_limits<int16_t>::max() - 100;
+		static const elementType NINF   = std::numeric_limits<elementType>::min();
 
 		union
 		{
