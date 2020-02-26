@@ -57,7 +57,7 @@ int main(int argc, const char *argv[])
 		double stime = seqanAlign (MAT, MIS, GAP, KML, x, seq1, seq2);
 		double xtime = xavireAlign(MAT, MIS, GAP, KML, x, seq1, seq2);
 		double gtime = gabaAlign  (MAT, MIS, GAP, KML, x, seq1, seq2);
-		double ktime = ksw2Align  (MAT, MIS, GAP, KML, x, seq1, seq2, BWD);
+		double ktime = ksw2Align  (MAT, MIS, GAP, KML, x, seq1, seq2, std::stoi(argv[2]));
 
 		std::cout << seq1.length() << "\t" << stime << "\t" << xtime
 			<< "\t" << gtime << "\t" << ktime << std::endl;
