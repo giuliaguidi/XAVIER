@@ -1,7 +1,7 @@
 //===========================================================================
 // Title:  Xavier: High-Performance X-Drop Adaptive Banded Pairwise Alignment
 // Author: G. Guidi, E. Younis
-// Date:   29 April 2019
+// Update:   24 February 2020
 //===========================================================================
 
 #include <vector>
