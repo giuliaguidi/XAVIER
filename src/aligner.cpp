@@ -42,7 +42,7 @@ namespace xavier
 	{
         // we need one more space for the off-grid values
         // and one more space for antiDiag2
-        std::vector< std::vector<int> > DPmatrix(VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2));
+        std::vector< std::vector<int> > DPmatrix(VectorRegister::LOGICALWIDTH + 3, std::vector<int>(VectorRegister::LOGICALWIDTH + 3));
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
@@ -56,9 +56,9 @@ namespace xavier
         int DPmax = 0;
 
         // DPmatrix population
-        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++) {
+        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 3; i++) {
             // GG: we only need the upper-left triangular matrix
-            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 2 + 2 - i; j++) {
+            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 3 - i; j++) {
 
                 int oneF = DPmatrix[i-1][j-1];
 
@@ -161,7 +161,7 @@ namespace xavier
 				trace.recordGlobalMaxPos();
 				bestScore = currScore;
 			}
-			else if (xdropCondition()) 
+			else if (xdropCondition())
 			{
 				return produceResults();
 			}
@@ -198,7 +198,7 @@ namespace xavier
 				trace.recordGlobalMaxPos();
 				bestScore = currScore;
 			}
-			else if (xdropCondition()) 
+			else if (xdropCondition())
 			{
 				return produceResults();
 			}

@@ -114,19 +114,21 @@ namespace xavier
 
 				dp_pos = sq_above_pos - it->lastMove;
 			}
+			else
+			{
+				std::cout << "ERROR: Failure to find backpath in part 1 of traceback" << std::endl;
+			}
 		}
 
 		// Traceback in Opening phase
 
 		// Find position in matrix
 		// dp_pos is pos in antiDiag2 now, need to convert to DPMatrix coord
-		int i = VectorRegister::LOGICALWIDTH + 2 - dp_pos;
+		int i = VectorRegister::LOGICALWIDTH + 1 - dp_pos;
 		int j = dp_pos + 2;
 
 		while (i > 0 && j > 0)
 		{
-			std::cout << i << " " << j << std::endl;
-
 			char queryHChar = queryh[j-1];
 			char queryVChar = queryv[i-1];
 
@@ -135,16 +137,9 @@ namespace xavier
 			int sl = DPMatrix[i][j-1]   + scoringScheme.getGapScore();
 			int sd = DPMatrix[i-1][j-1] + scoringScheme.score( queryHChar, queryVChar );
 
-			std::cout << "st	" << st << std::endl;
-			std::cout << "sa	" << sa << std::endl;
-			std::cout << "sl	" << sl << std::endl;
-			std::cout << "sd	" << sd << std::endl;
-			
 			// GG: none of these is satified at the first iteration than it seems just fine
 			if (sd == st)
 			{
-				std::cout << "sd == st" << std::endl;
-
 				if (queryHChar == queryVChar)
 					alignments.matches++;
 
@@ -167,9 +162,7 @@ namespace xavier
 			}
 			else
 			{
-				std::cout << "err" << std::endl;
-				--i;
-				--j;
+				std::cout << "ERROR: Failure to find backpath in part 2 of traceback" << std::endl;
 			}
 		}
 
