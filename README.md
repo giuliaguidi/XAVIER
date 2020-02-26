@@ -1,13 +1,45 @@
 ![](xavier.png)
 
 <p align="justify">
-Xavier computes high-performance x-drop adaptive banded pairwise alignment exploiting  instruction level parallelism via Single-Instruction-Multiple-Data (SIMD) operations. Our implementation uses a narrow bandwidth that appreciably improves performance reducing the search space for the optimal alignment. The adaptive mechanism enables Xavier to find the optimal alignment between related sequences even when the error rate is as high as 50%.
+XAVIER computes high-performance x-drop adaptive banded pairwise alignment exploiting  instruction level parallelism via Single-Instruction-Multiple-Data (SIMD) operations. Our implementation uses a narrow bandwidth that appreciably improves performance reducing the search space for the optimal alignment. The adaptive mechanism enables Xavier to find the optimal alignment between related sequences even when the error rate is as high as 50%.
 </p>
 
-## Usage
+## Requirement
 
-TBD
+XAVIER requires **[C++17](https://en.cppreference.com/w/cpp/17)**.
 
+## Build
+
+```
+git clone https://github.com/giuliaguidi/xavier
+cd xavier
+git submodule init
+git submodule update
+make
+```
+
+## Build and Install for Integration into Larger Projects
+
+You need to install [meson](https://mesonbuild.com/) and [ninja](https://ninja-build.org/).
+Once installed:
+
+```
+mkdir build && cd build
+meson && ninja
+```
+or
+```
+meson build .
+ninja -C build
+```
+
+## API
+You can find a demo on how to run/call XAVIER in `/examples/demo.cpp`:
+```
+cd examples
+make
+./demo
+```
 ## Copyright Notice
 
 <p align="justify">
