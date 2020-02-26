@@ -127,7 +127,6 @@ namespace xavier
 		 */
 		void recordGlobalMaxPos();
 		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int16_t* _queryh, int16_t* _queryv );
-
 		std::string compression(const std::string& str);
 
 	private:
