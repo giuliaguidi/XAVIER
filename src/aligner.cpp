@@ -210,11 +210,11 @@ namespace xavier
 			// Update currScore
 			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
 
-			// Ensure anti-diagonals stay in int16_t range
-	    	normalizeVectors(norm);
+			// Ensure anti-diagonals stay in proper range
+	    normalizeVectors(norm);
 
-	    	// Push back trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    // Push back trace state
+	    trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if (currScore > bestScore)
@@ -230,7 +230,7 @@ namespace xavier
 			// std::cout << bestScore << std::endl;
 
 			// Update anti-diagonals
-			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH/2) moveRight();
+			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2) moveRight();
 			else moveDown();
 		}
 
@@ -249,11 +249,12 @@ namespace xavier
 			// Update currScore
 			int16_t norm = updateCurrScore();
 
-			// Ensure anti-diagonals stay in int16_t range
-	    	normalizeVectors(norm);
 
-	    	// Trace state
-	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+			// Ensure anti-diagonals stay in proper range
+	    normalizeVectors(norm);
+
+      // Trace state
+      trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if (currScore > bestScore)
