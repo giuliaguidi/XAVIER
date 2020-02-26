@@ -20,8 +20,8 @@ namespace xavier
 		hlength = hseq.length();
 		vlength = vseq.length();
 
-		queryh = new int16_t[hlength	+ VectorRegister::VECTORWIDTH];
-		queryv = new int16_t[vlength	+ VectorRegister::VECTORWIDTH];
+		queryh = new int8_t[hlength	+ VectorRegister::VECTORWIDTH];
+		queryv = new int8_t[vlength	+ VectorRegister::VECTORWIDTH];
 
 		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
 		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
@@ -86,7 +86,7 @@ namespace xavier
     	vqueryh[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
     	vqueryv[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
 
-        int antiDiagMax = std::numeric_limits<int16_t>::min();
+        int antiDiagMax = std::numeric_limits<int8_t>::min();
 
         // Load DPmatrix into antiDiag1 and antiDiag2 vector and
         // find max elem at the end of the initial stage in antiDiag1
@@ -222,7 +222,7 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
-			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
+			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
 
 			// Ensure anti-diagonals stay in proper range
 	    	normalizeVectors(norm);
@@ -261,7 +261,7 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
-			int16_t norm = updateCurrScore();
+			int8_t norm = updateCurrScore();
 
 
 			// Ensure anti-diagonals stay in proper range
@@ -341,9 +341,9 @@ namespace xavier
 		lastMove = DOWN;
 	}
 
-	int16_t Aligner::updateCurrScore()
+	int8_t Aligner::updateCurrScore()
 	{
-		int16_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
+		int8_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
 		                                         antiDiag3.internal.elems
 		                                          + VectorRegister::VECTORWIDTH );
 		currScore = antiDiagBest + scoreOffset;
@@ -362,7 +362,7 @@ namespace xavier
 		return hoffset > hlength || voffset > vlength;
 	}
 
-	void Aligner::normalizeVectors(int16_t& normfactor)
+	void Aligner::normalizeVectors(int8_t& normfactor)
 	{
 		int64_t antiDiagBest = currScore - scoreOffset;
 

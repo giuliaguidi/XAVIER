@@ -21,7 +21,7 @@ namespace xavier
     {
     	VectorRegister vec;
         #ifdef __AVX2__
-     	   vec.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 2);
+     	   vec.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 1);
         #elif __SSE4_2__
         	vec.internal.simd = _mm256_alignr_epi8(_mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(2, 0, 0, 1)), internal.simd, 2);
         #endif
@@ -33,7 +33,7 @@ namespace xavier
     {
     	VectorRegister vec;
         #ifdef __AVX2__
-     	   vec.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
+     	   vec.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 1);
         #elif __SSE4_2__
         	vec.internal.simd = _mm256_alignr_epi8(internal.simd, _mm256_permute2x128_si256(internal.simd, internal.simd, _MM_SHUFFLE(0, 0, 2, 0)), 16 - 2);
         #endif
@@ -46,9 +46,9 @@ namespace xavier
     {
         VectorRegister vec;
 	    #ifdef __AVX2__
-		    vec = _mm256_adds_epi16 (internal.simd, rhs.internal.simd);
+		    vec = _mm256_adds_epi8 (internal.simd, rhs.internal.simd);
 	    #elif  __SSE4_2__
-		    vec = _mm_adds_epi16 (internal.simd, rhs.internal.simd);
+		    vec = _mm_adds_epi8 (internal.simd, rhs.internal.simd);
 	    #endif
         return vec;
     }
@@ -58,9 +58,9 @@ namespace xavier
     {
         VectorRegister vec;
 	    #ifdef __AVX2__
-		    vec = _mm256_subs_epi16 (internal.simd, rhs.internal.simd);
+		    vec = _mm256_subs_epi8 (internal.simd, rhs.internal.simd);
 	    #elif  __SSE4_2__
-		    vec = _mm_subs_epi16 (internal.simd, rhs.internal.simd);
+		    vec = _mm_subs_epi8 (internal.simd, rhs.internal.simd);
 	    #endif
         return vec;
     }
@@ -85,9 +85,9 @@ namespace xavier
     {
         VectorRegister vec;
     #ifdef __AVX2__
-	    vec = _mm256_max_epi16 (internal.simd, other.internal.simd);
+	    vec = _mm256_max_epi8 (internal.simd, other.internal.simd);
     #elif  __SSE4_2__
-	    vec = _mm_max_epi16 (internal.simd, other.internal.simd);
+	    vec = _mm_max_epi8 (internal.simd, other.internal.simd);
     #endif
         return vec;
     }
@@ -95,9 +95,9 @@ namespace xavier
     void VectorRegister::set (elementType a)
     {
     #ifdef __AVX2__
-	    internal.simd = _mm256_set1_epi16 (a);
+	    internal.simd = _mm256_set1_epi8 (a);
     #elif  __SSE4_2__
-	    internal.simd = _mm_set1_epi16 (a);
+	    internal.simd = _mm_set1_epi8 (a);
     #endif
     }
 
@@ -116,9 +116,9 @@ namespace xavier
     {
         VectorRegister vec;
     #ifdef __AVX2__
-	    vec = _mm256_cmpeq_epi16 (internal.simd, other.internal.simd);
+	    vec = _mm256_cmpeq_epi8 (internal.simd, other.internal.simd);
     #elif  __SSE4_2__
-	    vec = _mm_cmpeq_epi16 (internal.simd, other.internal.simd);
+	    vec = _mm_cmpeq_epi8 (internal.simd, other.internal.simd);
     #endif
         return vec;
 	}
