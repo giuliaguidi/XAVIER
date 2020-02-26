@@ -273,7 +273,6 @@ namespace xavier
 		return antiDiagBest;
 	}
 
-
 	bool Aligner::xdropCondition()
 	{
 		int scoreThreshold = bestScore - scoreDropOff;
