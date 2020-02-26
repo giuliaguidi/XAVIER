@@ -98,8 +98,8 @@ namespace xavier
 
 		struct AlignmentPair
 		{
-			std::string alignH;
-			std::string alignV;
+			// std::string alignH;
+			std::string cigar;
 			size_t matches;
 		};
 
@@ -127,6 +127,8 @@ namespace xavier
 		 */
 		void recordGlobalMaxPos();
 		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv );
+
+		std::string compression(const std::string& str);
 
 	private:
 		std::vector<TraceEntry> trace;
