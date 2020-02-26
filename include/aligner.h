@@ -164,7 +164,8 @@ namespace xavier
 		/**
 		 * Main Function
 		 */
-		AlignmentResult align();
+		AlignmentResult alignx();
+		AlignmentResult aligne();
 
 		/**
 		 * State Transitions and Helper Functions

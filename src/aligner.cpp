@@ -6,8 +6,6 @@
 
 #include "aligner.h"
 
-// #define DROPOFF (80)
-
 namespace xavier
 {
 	Aligner::Aligner(
@@ -129,7 +127,68 @@ namespace xavier
 		return r;
 	}
 
-	AlignmentResult Aligner::align()
+	// GG: x-drop termination disabled
+	AlignmentResult Aligner::aligne()
+	{
+		/**
+		 * Opening stage
+		 */
+		initAntiDiags();
+
+		/**
+		 * Core stage
+		 */
+		while(!closingCondition())
+		{
+			// Compute next anti-diagonal
+			calcAntiDiag3();
+
+			// Update currScore
+			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
+
+			// Ensure anti-diagonals stay in int16_t range
+	    	normalizeVectors(norm);
+
+			// Update bestScore
+			if(currScore > bestScore) bestScore = currScore;
+
+			// Update anti-diagonals
+			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH/2) moveRight();
+			else moveDown();
+		}
+
+		// The extension on both sequences cannot be greater than
+		// the length of the sequence that hit the edge first
+		uint64_t hit = hoffset > hlength ? hlength : vlength;
+
+		/**
+		 * Closing stage
+		 */
+		for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
+		{
+			// Compute next anti-diagonal
+			calcAntiDiag3();
+
+			// Update currScore
+			int16_t norm = updateCurrScore();
+
+			// Ensure anti-diagonals stay in int16_t range
+	    	normalizeVectors(norm);
+
+			// Update bestScore
+			if(currScore > bestScore) bestScore = currScore;
+
+			// Update anti-diagonals
+			if (lastMove == DOWN) moveRight();
+			else moveDown();
+		}
+
+		// Function to check offset (and so extension) are valid values
+		checkOffsetValidity(hit);
+		return produceResults();
+	}
+
+	AlignmentResult Aligner::alignx()
 	{
 		/**
 		 * Opening stage
