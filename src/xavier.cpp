@@ -16,8 +16,16 @@ namespace xavier
 	    const int scoreDropOff
 	)
 	{
-		Aligner aligner( query1, query2, scoringScheme, scoreDropOff );
-		return  aligner.align();
+		if(scoreDropOff == -1) // GG: x-drop termination disabled
+		{
+			Aligner aligner( query1, query2, scoringScheme, scoreDropOff );
+			return  aligner.aligne();
+		}
+		else
+		{
+			Aligner aligner( query1, query2, scoringScheme, scoreDropOff );
+			return  aligner.alignx();
+		}
 	}
 
 	AlignmentResult seed_and_extend
