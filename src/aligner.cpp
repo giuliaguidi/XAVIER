@@ -6,8 +6,6 @@
 
 #include "aligner.h"
 
-// #define DROPOFF (80)
-
 namespace xavier
 {
 	Aligner::Aligner(
@@ -22,8 +20,8 @@ namespace xavier
 		hlength = hseq.length();
 		vlength = vseq.length();
 
-		queryh = new int8_t[hlength	+ VectorRegister::VECTORWIDTH];
-		queryv = new int8_t[vlength	+ VectorRegister::VECTORWIDTH];
+		queryh = new int16_t[hlength	+ VectorRegister::VECTORWIDTH];
+		queryv = new int16_t[vlength	+ VectorRegister::VECTORWIDTH];
 
 		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
 		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
@@ -44,6 +42,7 @@ namespace xavier
 	{
         // One more space for the off-grid values
         // and one more space for antiDiag2
+
         std::vector< std::vector<int> > DPmatrix(VectorRegister::LOGICALWIDTH + 3, std::vector<int>(VectorRegister::LOGICALWIDTH + 3));
 
         // DPmatrix initialization
@@ -87,7 +86,7 @@ namespace xavier
     	vqueryh[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
     	vqueryv[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
 
-        int antiDiagMax = std::numeric_limits<int8_t>::min();
+        int antiDiagMax = std::numeric_limits<int16_t>::min();
 
         // Load DPmatrix into antiDiag1 and antiDiag2 vector and
         // find max elem at the end of the initial stage in antiDiag1
@@ -128,7 +127,68 @@ namespace xavier
 		return r;
 	}
 
-	AlignmentResult Aligner::align()
+	// GG: x-drop termination disabled
+	AlignmentResult Aligner::aligne()
+	{
+		/**
+		 * Opening stage
+		 */
+		initAntiDiags();
+
+		/**
+		 * Core stage
+		 */
+		while(!closingCondition())
+		{
+			// Compute next anti-diagonal
+			calcAntiDiag3();
+
+			// Update currScore
+			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
+
+			// Ensure anti-diagonals stay in int16_t range
+	    	normalizeVectors(norm);
+
+			// Update bestScore
+			if(currScore > bestScore) bestScore = currScore;
+
+			// Update anti-diagonals
+			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH/2) moveRight();
+			else moveDown();
+		}
+
+		// The extension on both sequences cannot be greater than
+		// the length of the sequence that hit the edge first
+		uint64_t hit = hoffset > hlength ? hlength : vlength;
+
+		/**
+		 * Closing stage
+		 */
+		for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
+		{
+			// Compute next anti-diagonal
+			calcAntiDiag3();
+
+			// Update currScore
+			int16_t norm = updateCurrScore();
+
+			// Ensure anti-diagonals stay in int16_t range
+	    	normalizeVectors(norm);
+
+			// Update bestScore
+			if(currScore > bestScore) bestScore = currScore;
+
+			// Update anti-diagonals
+			if (lastMove == DOWN) moveRight();
+			else moveDown();
+		}
+
+		// Function to check offset (and so extension) are valid values
+		checkOffsetValidity(hit);
+		return produceResults();
+	}
+
+	AlignmentResult Aligner::alignx()
 	{
 		/**
 		 * Opening stage
@@ -148,9 +208,9 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
-			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
+			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
 
-			// Ensure anti-diagonals stay in int8_t range
+			// Ensure anti-diagonals stay in proper range
 	    normalizeVectors(norm);
 
 	    // Push back trace state
@@ -166,6 +226,8 @@ namespace xavier
 			{
 				return produceResults();
 			}
+
+			// std::cout << bestScore << std::endl;
 
 			// Update anti-diagonals
 			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2) moveRight();
@@ -185,10 +247,11 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
-			int8_t norm = updateCurrScore();
+			int16_t norm = updateCurrScore();
 
-			// Ensure anti-diagonals stay in int8_t range
-	    	normalizeVectors(norm);
+
+			// Ensure anti-diagonals stay in proper range
+	    normalizeVectors(norm);
 
       // Trace state
       trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
@@ -264,9 +327,9 @@ namespace xavier
 		lastMove = DOWN;
 	}
 
-	int8_t Aligner::updateCurrScore()
+	int16_t Aligner::updateCurrScore()
 	{
-		int8_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
+		int16_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
 		                                         antiDiag3.internal.elems
 		                                          + VectorRegister::VECTORWIDTH );
 		currScore = antiDiagBest + scoreOffset;
@@ -285,7 +348,7 @@ namespace xavier
 		return hoffset > hlength || voffset > vlength;
 	}
 
-	void Aligner::normalizeVectors(int8_t& normfactor)
+	void Aligner::normalizeVectors(int16_t& normfactor)
 	{
 		int64_t antiDiagBest = currScore - scoreOffset;
 
