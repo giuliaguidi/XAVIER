@@ -54,18 +54,31 @@ namespace xavier
 	 * X : Alignment column containing a mismatch, i.e. two different letters. USEARCH can read CIGAR strings using this operation, but does not generate them.
 	 */ 
 
-	// GG: back trace
+	std::string Trace::compression(const std::string& str)
+	{
+	    int i = str.size();
+	    std::string cigar;
+	
+	    for (int j = 0; j < i; ++j)
+		{
+	        int count = 1;
+	        while (str[j] == str[j+1])
+			{
+	            count++;
+	            j++;
+	        }
+	        cigar += std::to_string(count);
+	        cigar.push_back(str[j]);
+	    }
+	    return cigar;
+	}
+
 	Trace::AlignmentPair Trace::getAlignment()
 	{
-		// GG: horizontal sequence, vertical sequence, matches
-		// AlignmentPair alignments = { "", "", 0 };
-
 		// GG: cigar, matches
 		AlignmentPair traceback = {"", 0};
 
 		// Find antiDiag3's max => This is exit score (need position)
-		// GG: go to the last element of trace, find the max in the last trace
-		// GG: but it might not be the global maximum
 		auto itAtMax = trace.rbegin() + (trace.size() - 1 - maxPos);
 		size_t dp_pos = itAtMax->antiDiag3.argmax();
 
@@ -74,11 +87,6 @@ namespace xavier
 		size_t sq_above_pos = 0;
 		size_t sq_diag_pos  = 0;
 
-		// GG: get antidiag index of antiDiag3 (32 elements-wide)
-		// GG: keep track of the max
-		// GG: find elements that created that max and so on and so for
-		// GG: it's hard bc we have antidiags and not an actual DP matrix
-		// GG: much work in converting indexes
 		for (auto it = itAtMax; std::next(it) != trace.rend(); ++it)
 		{
 			// Calculate necessary position in antiDiag1 and antiDiag2
@@ -113,26 +121,17 @@ namespace xavier
 					traceback.cigar.push_back('X');	
 				}
 				
-				// alignments.alignH.push_back( queryHChar );
-				// alignments.alignV.push_back( queryVChar );
-
 				dp_pos = sq_diag_pos + (it->lastMove == nit->lastMove ? (-2 * it->lastMove) + 1 : 0);
 				++it;
 			}
 			else if ( sl != VectorRegister::NINF && sl == st )
 			{
-				// alignments.alignH.push_back( queryHChar );
-				// alignments.alignV.push_back( '-' );
-
 				// GG: gap in the query 
 				traceback.cigar.push_back('I');
 				dp_pos = sq_left_pos - it->lastMove;		
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
-				// alignments.alignH.push_back( '-' );
-				// alignments.alignV.push_back( queryVChar );
-
 				// GG: gap in the target
 				traceback.cigar.push_back('D');
 				dp_pos = sq_left_pos - it->lastMove;
@@ -191,9 +190,14 @@ namespace xavier
 				std::cout << "ERROR: Failure to find backpath in part 2 of traceback" << std::endl;
 			}
 		}
-
+		
+		// TODO: double check how we handle this when extending both left and right
+		// (no need to reverse if we are extending left)
 		std::reverse(traceback.cigar.begin(), traceback.cigar.end());
-		// TODO: compression algorithm
+
+		// GG: cigar compression
+		traceback.cigar = compression(traceback.cigar);
+
 		return traceback;
 	}
 
@@ -205,4 +209,3 @@ namespace xavier
 	}
 
 }
-

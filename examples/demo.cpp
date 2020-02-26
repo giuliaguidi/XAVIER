@@ -166,8 +166,7 @@ int main(int argc, char const *argv[])
 	std::cout << "result.begV	" << result.begV << std::endl;
 	std::cout << "result.endV	" << result.endV << std::endl;
 	std::cout << "result.matches " << result.matched_pair.matches << std::endl;
-	std::cout << "result.alignH " << result.matched_pair.alignH << std::endl;
-	std::cout << "result.alignV " << result.matched_pair.alignV << std::endl;
+	std::cout << "result.cigar "   << result.matched_pair.cigar   << std::endl;
 
 	return 0;
 }
