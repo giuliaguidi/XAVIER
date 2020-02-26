@@ -46,12 +46,22 @@ namespace xavier
 		maxPos = trace.size() - 1;
 	}
 
+	/**
+	 * CIGAR Standard Format
+	 * D : Deletion (gap in the target sequence).
+	 * I : Insertion (gap in the query sequence).
+	 * = : Alignment column containing two identical letters. USEARCH can read CIGAR strings using this operation, but does not generate them.
+	 * X : Alignment column containing a mismatch, i.e. two different letters. USEARCH can read CIGAR strings using this operation, but does not generate them.
+	 */ 
+
 	// GG: back trace
 	Trace::AlignmentPair Trace::getAlignment()
 	{
-		// Initialize return struct
-		// GG: match horiz, match verti, matches
-		AlignmentPair alignments = { "", "", 0 };
+		// GG: horizontal sequence, vertical sequence, matches
+		// AlignmentPair alignments = { "", "", 0 };
+
+		// GG: cigar, matches
+		AlignmentPair traceback = {"", 0};
 
 		// Find antiDiag3's max => This is exit score (need position)
 		// GG: go to the last element of trace, find the max in the last trace
@@ -69,7 +79,7 @@ namespace xavier
 		// GG: find elements that created that max and so on and so for
 		// GG: it's hard bc we have antidiags and not an actual DP matrix
 		// GG: much work in converting indexes
-		for ( auto it = itAtMax; std::next(it) != trace.rend(); ++it )
+		for (auto it = itAtMax; std::next(it) != trace.rend(); ++it)
 		{
 			// Calculate necessary position in antiDiag1 and antiDiag2
 			auto nit = std::next(it);
@@ -89,30 +99,43 @@ namespace xavier
 			int sl = sq_left_pos  >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_left_pos]  + scoringScheme.getGapScore() + offset;
 			int sd = sq_diag_pos  >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag1[sq_diag_pos]  + scoringScheme.score( queryHChar, queryVChar ) + offset;
 
-			if ( sd != VectorRegister::NINF && sd == st )
+			if (sd != VectorRegister::NINF && sd == st)
 			{
-				if ( queryHChar == queryVChar )
-					alignments.matches++;
-
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( queryVChar );
+				if (queryHChar == queryVChar)
+				{
+					// GG: match
+					traceback.matches++;
+					traceback.cigar.push_back('=');
+				}
+				else
+				{
+					// GG: mismatch
+					traceback.cigar.push_back('X');	
+				}
+				
+				// alignments.alignH.push_back( queryHChar );
+				// alignments.alignV.push_back( queryVChar );
 
 				dp_pos = sq_diag_pos + (it->lastMove == nit->lastMove ? (-2 * it->lastMove) + 1 : 0);
 				++it;
 			}
 			else if ( sl != VectorRegister::NINF && sl == st )
 			{
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( '-' );
+				// alignments.alignH.push_back( queryHChar );
+				// alignments.alignV.push_back( '-' );
 
-				dp_pos = sq_left_pos - it->lastMove;
+				// GG: gap in the query 
+				traceback.cigar.push_back('I');
+				dp_pos = sq_left_pos - it->lastMove;		
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
-				alignments.alignH.push_back( '-' );
-				alignments.alignV.push_back( queryVChar );
+				// alignments.alignH.push_back( '-' );
+				// alignments.alignV.push_back( queryVChar );
 
-				dp_pos = sq_above_pos - it->lastMove;
+				// GG: gap in the target
+				traceback.cigar.push_back('D');
+				dp_pos = sq_left_pos - it->lastMove;
 			}
 			else
 			{
@@ -137,27 +160,30 @@ namespace xavier
 			int sl = DPMatrix[i][j-1]   + scoringScheme.getGapScore();
 			int sd = DPMatrix[i-1][j-1] + scoringScheme.score( queryHChar, queryVChar );
 
-			// GG: none of these is satified at the first iteration than it seems just fine
 			if (sd == st)
 			{
 				if (queryHChar == queryVChar)
-					alignments.matches++;
-
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( queryVChar );
+				{
+					// GG: match
+					traceback.matches++;
+					traceback.cigar.push_back('=');
+				}
+				else
+				{
+					// GG: mismatch
+					traceback.cigar.push_back('X');	
+				}
 				--i;
 				--j;
 			}
 			else if ( sl == st )
 			{
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( '-' );
+				traceback.cigar.push_back('I');
 				--j;
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
-				alignments.alignH.push_back( '-' );
-				alignments.alignV.push_back( queryVChar );
+				traceback.cigar.push_back('D');
 				--i;
 			}
 			else
@@ -166,9 +192,9 @@ namespace xavier
 			}
 		}
 
-		std::reverse( alignments.alignH.begin(), alignments.alignH.end() );
-		std::reverse( alignments.alignV.begin(), alignments.alignV.end() );
-		return alignments;
+		std::reverse(traceback.cigar.begin(), traceback.cigar.end());
+		// TODO: compression algorithm
+		return traceback;
 	}
 
 	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv )
@@ -179,3 +205,4 @@ namespace xavier
 	}
 
 }
+

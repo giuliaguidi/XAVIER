@@ -98,8 +98,8 @@ namespace xavier
 
 		struct AlignmentPair
 		{
-			std::string alignH;
-			std::string alignV;
+			// std::string alignH;
+			std::string cigar;
 			size_t matches;
 		};
 
