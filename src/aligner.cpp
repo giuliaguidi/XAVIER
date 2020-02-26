@@ -6,8 +6,6 @@
 
 #include "aligner.h"
 
-// #define DROPOFF (80)
-
 namespace xavier
 {
 	Aligner::Aligner(
@@ -19,11 +17,11 @@ namespace xavier
 	trace( _scoringScheme )
 	{
 
-		hlength = hseq.length(); // + 1;
-		vlength = vseq.length(); // + 1;
+		hlength = hseq.length();
+		vlength = vseq.length();
 
-		queryh = new int8_t[hlength	+ VectorRegister::VECTORWIDTH];
-		queryv = new int8_t[vlength	+ VectorRegister::VECTORWIDTH];
+		queryh = new int16_t[hlength	+ VectorRegister::VECTORWIDTH];
+		queryv = new int16_t[vlength	+ VectorRegister::VECTORWIDTH];
 
 		std::copy(hseq.begin(), hseq.begin() + hlength, queryh);
 		std::copy(vseq.begin(), vseq.begin() + vlength, queryv);
@@ -44,7 +42,8 @@ namespace xavier
 	{
         // One more space for the off-grid values
         // and one more space for antiDiag2
-        std::vector<std::vector<int>> DPmatrix(VectorRegister::LOGICALWIDTH + 2, std::vector<int>(VectorRegister::LOGICALWIDTH + 2));
+
+        std::vector< std::vector<int> > DPmatrix(VectorRegister::LOGICALWIDTH + 3, std::vector<int>(VectorRegister::LOGICALWIDTH + 3));
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
@@ -58,9 +57,9 @@ namespace xavier
         int DPmax = 0;
 
         // DPmatrix population
-        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++) {
+        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 3; i++) {
             // GG: we only need the upper-left triangular matrix
-            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 2 - i; j++) {
+            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 3 - i; j++) {
 
                 int oneF = DPmatrix[i-1][j-1];
 
@@ -87,7 +86,7 @@ namespace xavier
     	vqueryh[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
     	vqueryv[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
 
-        int antiDiagMax = std::numeric_limits<int8_t>::min();
+        int antiDiagMax = std::numeric_limits<int16_t>::min();
 
         // Load DPmatrix into antiDiag1 and antiDiag2 vector and
         // find max elem at the end of the initial stage in antiDiag1
@@ -110,6 +109,8 @@ namespace xavier
         currScore = antiDiagMax;
         lastMove  = RIGHT;
 
+        // Hand off DPMatrix to trace
+        trace.saveOpeningPhaseDPMatrix(DPmatrix, queryh, queryv);
         return DPmatrix;
 	}
 
@@ -122,11 +123,10 @@ namespace xavier
 		r.begV = 0;
 		r.endH = hoffset;
 		r.endV = voffset;
-		// r.matched_pair = trace.getAlignment();
+		r.matched_pair = trace.getAlignment();
 		return r;
 	}
-
-		// GG: x-drop termination disabled
+	
 	AlignmentResult Aligner::aligne()
 	{
 		/**
@@ -143,6 +143,7 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
+
 			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
 
 			// Ensure anti-diagonals stay in int8_t range
@@ -221,14 +222,26 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
-			int8_t norm = updateCurrScore(); // currScore contains scoreOffset
+			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
 
-			// Ensure anti-diagonals stay in int8_t range
+			// Ensure anti-diagonals stay in proper range
 	    	normalizeVectors(norm);
 
+	    	// Push back trace state
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+
 			// Update bestScore
-			if(currScore > bestScore) bestScore = currScore;
-			else if (xdropCondition()) return produceResults();
+			if (currScore > bestScore)
+			{
+				trace.recordGlobalMaxPos();
+				bestScore = currScore;
+			}
+			else if (xdropCondition())
+			{
+				return produceResults();
+			}
+
+			// std::cout << bestScore << std::endl;
 
 			// Update anti-diagonals
 			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2) moveRight();
@@ -248,14 +261,25 @@ namespace xavier
 			calcAntiDiag3();
 
 			// Update currScore
-			int8_t norm = updateCurrScore();
+			int16_t norm = updateCurrScore();
 
-			// Ensure anti-diagonals stay in int8_t range
+
+			// Ensure anti-diagonals stay in proper range
 	    	normalizeVectors(norm);
 
+      		// Trace state
+      		trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+
 			// Update bestScore
-			if(currScore > bestScore) bestScore = currScore;
-			else if (xdropCondition()) return produceResults();
+			if (currScore > bestScore)
+			{
+				trace.recordGlobalMaxPos();
+				bestScore = currScore;
+			}
+			else if (xdropCondition())
+			{
+				return produceResults();
+			}
 
 			// Update anti-diagonals
 			if (lastMove == DOWN) moveRight();
@@ -317,9 +341,9 @@ namespace xavier
 		lastMove = DOWN;
 	}
 
-	int8_t Aligner::updateCurrScore()
+	int16_t Aligner::updateCurrScore()
 	{
-		int8_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
+		int16_t antiDiagBest = *std::max_element( antiDiag3.internal.elems,
 		                                         antiDiag3.internal.elems
 		                                          + VectorRegister::VECTORWIDTH );
 		currScore = antiDiagBest + scoreOffset;
@@ -338,7 +362,7 @@ namespace xavier
 		return hoffset > hlength || voffset > vlength;
 	}
 
-	void Aligner::normalizeVectors(int8_t& normfactor)
+	void Aligner::normalizeVectors(int16_t& normfactor)
 	{
 		int64_t antiDiagBest = currScore - scoreOffset;
 

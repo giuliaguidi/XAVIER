@@ -54,9 +54,12 @@ int main(int argc, char const *argv[])
 
 	/* Generate pair of sequences */
 	generate_random_sequence(seq1, slen);
-	seq1 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
-	seq2 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
+	// seq1 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
+	// seq2 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
 
+	seq1 = "GGGGGCGCAATTTTTCAGTTCCTGCCGGCAGTAGGGGACTCCGTTCTGATGAAGCTAACGTCCGTATCAGCAGCCCCCCAATGTTTGACACTTCTGCCAGGAGGCGGCGCTGGTTAAGTGCGCGTCATTCGATGCGTGAGAGGCAAGAAA";
+	seq2 = seq1;
+	
 	/* Seed starting position on seq1, seed starting position on seq2, k-mer length */
 	xavier::Seed seed(0, 0, k);
 
@@ -67,13 +70,18 @@ int main(int argc, char const *argv[])
 	std::cout << "seq1	" 	<< seq1 << std::endl;
 	std::cout << "seq2	" 	<< seq2 << std::endl;
 
-	xavier::AlignmentResult result = xavier::seed_and_extend_right(seq1, seq2, scoringScheme, x, seed);
+	xavier::AlignmentResult result = xavier::seed_and_extend_right( seq1, seq2, scoringScheme, x, seed );
 
 	std::cout << "result.bestScore	" 	<< result.bestScore << std::endl;
-	std::cout << "result.begH	" 		<< result.begH 		<< std::endl;
-	std::cout << "result.endH	" 		<< result.endH 		<< std::endl;
-	std::cout << "result.begV	" 		<< result.begV 		<< std::endl;
-	std::cout << "result.endV	" 		<< result.endV 		<< std::endl;
+	std::cout << "result.exitScore	" 	<< result.exitScore << std::endl;
+
+	std::cout << "result.begH	" 		<< result.begH << std::endl;
+	std::cout << "result.endH	" 		<< result.endH << std::endl;
+	std::cout << "result.begV	" 		<< result.begV << std::endl;
+	std::cout << "result.endV	" 		<< result.endV << std::endl;
+	
+	std::cout << "result.matches " 		<< result.matched_pair.matches << std::endl;
+	std::cout << "result.cigar "   		<< result.matched_pair.cigar   << std::endl;
 
 	return 0;
 }

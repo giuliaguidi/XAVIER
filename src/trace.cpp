@@ -46,16 +46,39 @@ namespace xavier
 		maxPos = trace.size() - 1;
 	}
 
-	// GG: back trace
+	/**
+	 * CIGAR Standard Format
+	 * D : Deletion (gap in the target sequence).
+	 * I : Insertion (gap in the query sequence).
+	 * = : Alignment column containing two identical letters. USEARCH can read CIGAR strings using this operation, but does not generate them.
+	 * X : Alignment column containing a mismatch, i.e. two different letters. USEARCH can read CIGAR strings using this operation, but does not generate them.
+	 */ 
+
+	std::string Trace::compression(const std::string& str)
+	{
+	    int i = str.size();
+	    std::string cigar;
+	
+	    for (int j = 0; j < i; ++j)
+		{
+	        int count = 1;
+	        while (str[j] == str[j+1])
+			{
+	            count++;
+	            j++;
+	        }
+	        cigar += std::to_string(count);
+	        cigar.push_back(str[j]);
+	    }
+	    return cigar;
+	}
+
 	Trace::AlignmentPair Trace::getAlignment()
 	{
-		// Initialize return struct
-		// GG: match horiz, match verti, matches
-		AlignmentPair alignments = { "", "", 0 };
+		// GG: cigar, matches
+		AlignmentPair traceback = {"", 0};
 
 		// Find antiDiag3's max => This is exit score (need position)
-		// GG: go to the last element of trace, find the max in the last trace
-		// GG: but it might not be the global maximum
 		auto itAtMax = trace.rbegin() + (trace.size() - 1 - maxPos);
 		size_t dp_pos = itAtMax->antiDiag3.argmax();
 
@@ -64,75 +87,14 @@ namespace xavier
 		size_t sq_above_pos = 0;
 		size_t sq_diag_pos  = 0;
 
-		// int iteri = 0;
-		// for ( auto it = trace.rbegin(); it != trace.rbegin() + 34; ++it )
-		// {
-		// 	std::cout << iteri << " " << it->scoreOffset << std::endl;
-		// 	std::cout << it->antiDiag1 << std::endl;
-		// 	std::cout << it->antiDiag2 << std::endl;
-		// 	std::cout << it->antiDiag3 << std::endl;
-		// 	std::cout << it->vqueryh << std::endl;
-		// 	std::cout << it->vqueryv << std::endl;
-		// 	iteri++;
-		// }
-
-		// GG: get antidiag index of antiDiag3 (32 elements-wide)
-		// GG: keep track of the max
-		// GG: find elements that created that max and so on and so for
-		// GG: it's hard bc we have antidiags and not an actual DP matrix
-		// GG: much work in converting indexes
-		for ( auto it = itAtMax; std::next(it) != trace.rend(); ++it )
+		for (auto it = itAtMax; std::next(it) != trace.rend(); ++it)
 		{
-			// it  = antidiag1, antidiag2, and antidiag3
-			// max = max( antidiag3 )
-			// nit = antidiag1, antidiag2, and antidiag3
-
 			// Calculate necessary position in antiDiag1 and antiDiag2
 			auto nit = std::next(it);
-
-			// GG: if last move is rigth
-			// if ( it->lastMove == 0 )
-			// {
 
 			sq_left_pos  = dp_pos;
 			sq_above_pos = dp_pos + 1;
 			sq_diag_pos  = dp_pos;
-
-			// if ( nit == trace.rend() )
-			// {
-			// 	sq_diag_pos = dp_pos;
-			// }
-			// else if ( nit->lastMove == 0 )
-			// {
-			// 	sq_diag_pos = dp_pos + 1;
-			// }
-			// else if ( nit->lastMove == 1 )
-			// {
-			// 	sq_diag_pos = dp_pos;
-			// }
-			// }
-			// else if ( it->lastMove == 1 )
-			// {
-			// 	sq_left_pos  = dp_pos - 1;
-			// 	sq_above_pos = dp_pos;
-			// 	sq_diag_pos = dp_pos + 1;
-
-			// 	// if ( nit == trace.rend() )
-			// 	// {
-			// 	// 	// std::cout << "here1" << std::endl;
-			// 	// 	sq_diag_pos = dp_pos;
-			// 	// }
-			// 	// else if ( nit->lastMove == 0 )
-			// 	// {
-			// 	// 	// std::cout << "here2" << std::endl;
-			// 	// 	sq_diag_pos = dp_pos;
-			// 	// }
-			// 	// else if ( nit->lastMove == 1 )
-			// 	// {
-			// 	// 	// std::cout << "here3" << std::endl;
-			// 	// 	sq_diag_pos = dp_pos + 1;
-			// 	// }
-			// }
 
 			// Calculate where the max value came from
 			char queryHChar = it->vqueryh[dp_pos];
@@ -142,66 +104,53 @@ namespace xavier
 
 			int offset = nit == trace.rend() ? 0 : nit->scoreOffset;
 			int sa = sq_above_pos >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_above_pos] + scoringScheme.getGapScore() + offset;
-			int sl = sq_left_pos >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_left_pos]  + scoringScheme.getGapScore() + offset;
-			int sd = sq_diag_pos >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag1[sq_diag_pos]  + scoringScheme.score( queryHChar, queryVChar ) + offset;
+			int sl = sq_left_pos  >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_left_pos]  + scoringScheme.getGapScore() + offset;
+			int sd = sq_diag_pos  >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag1[sq_diag_pos]  + scoringScheme.score( queryHChar, queryVChar ) + offset;
 
-			// std::cout << dp_pos << std::endl;
-			// std::cout << sq_diag_pos << std::endl;
-			// std::cout << it->antiDiag1 << std::endl;
-			// std::cout << it->antiDiag2 << std::endl;
-			// std::cout << it->antiDiag3 << std::endl;
-			// std::cout << offset << std::endl;
-			// std::cout << st << " " << it->scoreOffset << " " << sd << std::endl;
-			// std::cout << (it->lastMove == 0 ? "RIGHT" : "DOWN" )<< std::endl;
-			if ( sd != VectorRegister::NINF && sd == st )
+			if (sd != VectorRegister::NINF && sd == st)
 			{
-				if ( queryHChar == queryVChar )
-					alignments.matches++;
-
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( queryVChar );
-
+				if (queryHChar == queryVChar)
+				{
+					// GG: match
+					traceback.matches++;
+					traceback.cigar.push_back('=');
+				}
+				else
+				{
+					// GG: mismatch
+					traceback.cigar.push_back('X');	
+				}
+				
 				dp_pos = sq_diag_pos + (it->lastMove == nit->lastMove ? (-2 * it->lastMove) + 1 : 0);
-				// std::cout << (it->lastMove == nit->lastMove ? (-2 * it->lastMove) + 1 : 0) << std::endl;
 				++it;
 			}
 			else if ( sl != VectorRegister::NINF && sl == st )
 			{
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( '-' );
-				std::cout << "dp, slp, sl, st, sd: " << dp_pos << " " << sq_left_pos << " " << sl << " " << st << " " << sd << std::endl;
-				std::cout << queryHChar << queryVChar << std::endl;
-				std::cout << it->vqueryv << std::endl;
-				std::cout << it->vqueryh << std::endl;
-				// std::cout << (scoringScheme.score( queryHChar, queryVChar ) + offset) << std::endl;
-				dp_pos = sq_left_pos - it->lastMove;
-			// std::cout << it->antiDiag1 << std::endl;
-			// std::cout << it->antiDiag2 << std::endl;
-			// std::cout << it->antiDiag3 << std::endl;
+				// GG: gap in the query 
+				traceback.cigar.push_back('I');
+				dp_pos = sq_left_pos - it->lastMove;		
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
-				alignments.alignH.push_back( '-' );
-				alignments.alignV.push_back( queryVChar );
-				dp_pos = sq_above_pos - it->lastMove;
+				// GG: gap in the target
+				traceback.cigar.push_back('D');
+				dp_pos = sq_left_pos - it->lastMove;
 			}
 			else
 			{
-				std::cout << "ERROR1" << std::endl;
+				std::cout << "ERROR: Failure to find backpath in part 1 of traceback" << std::endl;
 			}
-			// std::cout << std::endl << std::endl;
 		}
 
-		// Handle Opening Phase Specially
+		// Traceback in Opening phase
 
 		// Find position in matrix
 		// dp_pos is pos in antiDiag2 now, need to convert to DPMatrix coord
-		int i = VectorRegister::LOGICALWIDTH + 2 - dp_pos;
+		int i = VectorRegister::LOGICALWIDTH + 1 - dp_pos;
 		int j = dp_pos + 2;
 
-		while ( i > 0 && j > 0 )
+		while (i > 0 && j > 0)
 		{
-			std::cout << i << " " << j << std::endl;
 			char queryHChar = queryh[j-1];
 			char queryVChar = queryv[i-1];
 
@@ -210,40 +159,49 @@ namespace xavier
 			int sl = DPMatrix[i][j-1]   + scoringScheme.getGapScore();
 			int sd = DPMatrix[i-1][j-1] + scoringScheme.score( queryHChar, queryVChar );
 
-			if ( sd == st )
+			if (sd == st)
 			{
-				if ( queryHChar == queryVChar )
-					alignments.matches++;
-
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( queryVChar );
+				if (queryHChar == queryVChar)
+				{
+					// GG: match
+					traceback.matches++;
+					traceback.cigar.push_back('=');
+				}
+				else
+				{
+					// GG: mismatch
+					traceback.cigar.push_back('X');	
+				}
 				--i;
 				--j;
 			}
 			else if ( sl == st )
 			{
-				alignments.alignH.push_back( queryHChar );
-				alignments.alignV.push_back( '-' );
+				traceback.cigar.push_back('I');
 				--j;
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
-				alignments.alignH.push_back( '-' );
-				alignments.alignV.push_back( queryVChar );
+				traceback.cigar.push_back('D');
 				--i;
 			}
 			else
 			{
-				std::cout << "ERROR2" << std::endl;
+				std::cout << "ERROR: Failure to find backpath in part 2 of traceback" << std::endl;
 			}
 		}
+		
+		// TODO: double check how we handle this when extending both left and right
+		// (no need to reverse if we are extending left)
+		std::reverse(traceback.cigar.begin(), traceback.cigar.end());
 
-		std::reverse( alignments.alignH.begin(), alignments.alignH.end() );
-		std::reverse( alignments.alignV.begin(), alignments.alignV.end() );
-		return alignments;
+		// GG: cigar compression
+		traceback.cigar = compression(traceback.cigar);
+
+		return traceback;
 	}
 
-	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv )
+	void Trace::saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int16_t* _queryh, int16_t* _queryv )
 	{
 		DPMatrix = _DPMatrix;
 		queryh = _queryh;

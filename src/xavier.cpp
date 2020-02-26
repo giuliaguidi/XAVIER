@@ -60,7 +60,7 @@ namespace xavier
 		result.endH = seed.getEndH() + right.endH;
 		result.endV = seed.getEndV() + right.endV;
 		// Todo Reverse left alignH and alignV
-		result.matched_pair = { left.matched_pair.alignH + right.matched_pair.alignH, left.matched_pair.alignV + right.matched_pair.alignV, left.matched_pair.matches + right.matched_pair.matches };
+		result.matched_pair = { left.matched_pair.cigar + right.matched_pair.cigar, left.matched_pair.matches + right.matched_pair.matches };
 		std::cout << "Score	" << left.bestScore << "	" << right.bestScore	<< std::endl;
 		std::cout << "Score	" << left.exitScore << "	" << right.exitScore	<< std::endl;
 		std::cout << "begH	" << seed.getEndH() << "	-	" << left.endH	<< std::endl;

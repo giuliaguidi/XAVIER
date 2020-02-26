@@ -53,6 +53,7 @@ int main(int argc, const char *argv[])
 
 		generate_random_sequence(seq1, i);
 		seq2 = generate_mutated_sequence(seq1, i, PMIS, PGAP, BWD);
+		seq1 = seq2;
 
 		double stime = seqanAlign (MAT, MIS, GAP, KML, x, seq1, seq2);
 		double xtime = xavireAlign(MAT, MIS, GAP, KML, x, seq1, seq2);
