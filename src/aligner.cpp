@@ -149,8 +149,15 @@ namespace xavier
 			// Ensure anti-diagonals stay in int16_t range
 	    	normalizeVectors(norm);
 
+      		// Trace state
+      		trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+
 			// Update bestScore
-			if(currScore > bestScore) bestScore = currScore;
+			if (currScore > bestScore)
+			{
+				trace.recordGlobalMaxPos();
+				bestScore = currScore;
+			}
 
 			// Update anti-diagonals
 			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH/2) moveRight();
@@ -175,8 +182,15 @@ namespace xavier
 			// Ensure anti-diagonals stay in int16_t range
 	    	normalizeVectors(norm);
 
+      		// Trace state
+      		trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+
 			// Update bestScore
-			if(currScore > bestScore) bestScore = currScore;
+			if (currScore > bestScore)
+			{
+				trace.recordGlobalMaxPos();
+				bestScore = currScore;
+			}
 
 			// Update anti-diagonals
 			if (lastMove == DOWN) moveRight();
@@ -196,7 +210,7 @@ namespace xavier
 		initAntiDiags();
 
 		// For the opening stage, it's okay to check separately the xdrop termination (happens only once)
-		if ( xdropCondition() )
+		if (xdropCondition())
 			return produceResults();
 
 		/**
@@ -211,10 +225,10 @@ namespace xavier
 			int16_t norm = updateCurrScore(); // currScore contains scoreOffset
 
 			// Ensure anti-diagonals stay in proper range
-	    normalizeVectors(norm);
+	    	normalizeVectors(norm);
 
-	    // Push back trace state
-	    trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+	    	// Push back trace state
+	    	trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if (currScore > bestScore)
@@ -226,8 +240,6 @@ namespace xavier
 			{
 				return produceResults();
 			}
-
-			// std::cout << bestScore << std::endl;
 
 			// Update anti-diagonals
 			if (antiDiag3.argmax() > VectorRegister::LOGICALWIDTH / 2) moveRight();
@@ -249,12 +261,11 @@ namespace xavier
 			// Update currScore
 			int16_t norm = updateCurrScore();
 
-
 			// Ensure anti-diagonals stay in proper range
-	    normalizeVectors(norm);
+	    	normalizeVectors(norm);
 
-      // Trace state
-      trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
+      		// Trace state
+      		trace.pushbackState( antiDiag1, antiDiag2, antiDiag3, vqueryh, vqueryv, scoreOffset, lastMove );
 
 			// Update bestScore
 			if (currScore > bestScore)
