@@ -134,7 +134,7 @@ namespace xavier
 			{
 				// GG: gap in the target
 				traceback.cigar.push_back('D');
-				dp_pos = sq_left_pos - it->lastMove;
+				dp_pos = sq_above_pos - it->lastMove;
 			}
 			else
 			{
