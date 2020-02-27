@@ -107,6 +107,12 @@ namespace xavier
 			int sl = sq_left_pos  >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag2[sq_left_pos]  + scoringScheme.getGapScore() + offset;
 			int sd = sq_diag_pos  >= VectorRegister::VECTORWIDTH ? VectorRegister::NINF : it->antiDiag1[sq_diag_pos]  + scoringScheme.score( queryHChar, queryVChar ) + offset;
 
+			std::cout << traceback.cigar << std::endl;
+			std::cout << "st	" << st << std::endl;
+			std::cout << "sa	" << sa << std::endl;
+			std::cout << "sl	" << sl << std::endl;
+			std::cout << "sd	" << sd << std::endl;
+
 			if (sd != VectorRegister::NINF && sd == st)
 			{
 				if (queryHChar == queryVChar)
@@ -134,7 +140,7 @@ namespace xavier
 			{
 				// GG: gap in the target
 				traceback.cigar.push_back('D');
-				dp_pos = sq_left_pos - it->lastMove;
+				dp_pos = sq_above_pos - it->lastMove;
 			}
 			else
 			{

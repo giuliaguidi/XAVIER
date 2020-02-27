@@ -35,10 +35,10 @@ int main(int argc, char const *argv[])
 	unsigned short x = 50;
 
 	/* Seed/k-mer length */
-	unsigned short k = 17;
+	unsigned short k = 0;
 
 	/* Bandwidth (the alignment path of the input sequence and the result does not go out of the band) */
-	short bw = 256;
+	short bw = 64;
 
 	/* Error rate composition */
 	double pgap = 0.10; // indels probability
@@ -54,12 +54,13 @@ int main(int argc, char const *argv[])
 
 	/* Generate pair of sequences */
 	generate_random_sequence(seq1, slen);
+	generate_random_sequence(seq2, slen);
 	// seq1 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
 	// seq2 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
 
-	seq1 = "GGGGGCGCAATTTTTCAGTTCCTGCCGGCAGTAGGGGACTCCGTTCTGATGAAGCTAACGTCCGTATCAGCAGCCCCCCAATGTTTGACACTTCTGCCAGGAGGCGGCGCTGGTTAAGTGCGCGTCATTCGATGCGTGAGAGGCAAGAAA";
-	seq2 = seq1;
-	
+	// seq1 = "GGGGGCGCAATTTTTCAGTTCCTGCCGGCAGTAGGGGACTCCGTTCTGATGAAGCTAACGTCCGTATCAGCAGCCCCCCAATGTTTGACACTTCTGCCAGGAGGCGGCGCTGGTTAAGTGCGCGTCATTCGATGCGTGAGAGGCAAGAAA";
+	// seq2 = seq1;
+
 	/* Seed starting position on seq1, seed starting position on seq2, k-mer length */
 	xavier::Seed seed(0, 0, k);
 
