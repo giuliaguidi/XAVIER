@@ -98,9 +98,10 @@ namespace xavier
 
 		struct AlignmentPair
 		{
-			// std::string alignH;
 			std::string cigar;
 			size_t matches;
+			size_t mismatches;
+			size_t indels;
 		};
 
 		/**

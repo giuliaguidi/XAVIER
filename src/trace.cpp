@@ -76,7 +76,7 @@ namespace xavier
 	Trace::AlignmentPair Trace::getAlignment()
 	{
 		// GG: cigar, matches
-		AlignmentPair traceback = {"", 0};
+		AlignmentPair traceback = {"", 0, 0, 0};
 
 		// Find antiDiag3's max => This is exit score (need position)
 		auto itAtMax = trace.rbegin() + (trace.size() - 1 - maxPos);
@@ -118,6 +118,7 @@ namespace xavier
 				else
 				{
 					// GG: mismatch
+					traceback.mismatches++;
 					traceback.cigar.push_back('X');	
 				}
 				
@@ -127,12 +128,14 @@ namespace xavier
 			else if ( sl != VectorRegister::NINF && sl == st )
 			{
 				// GG: gap in the query 
+				traceback.indels++;
 				traceback.cigar.push_back('I');
 				dp_pos = sq_left_pos - it->lastMove;		
 			}
 			else if ( sa != VectorRegister::NINF && sa == st )
 			{
 				// GG: gap in the target
+				traceback.indels++;
 				traceback.cigar.push_back('D');
 				dp_pos = sq_above_pos - it->lastMove;
 			}
