@@ -8,7 +8,14 @@
 
 namespace xavier
 {
-	extern "C" AlignmentResult semi_global_alignment
+	std::vector<Trace::CigOp> operator+ (std::vector<Trace::CigOp> const &obj1, std::vector<Trace::CigOp> const &obj2)
+	{ 
+        std::vector<Trace::CigOp> res(obj1);
+		std::copy(obj2.begin(), obj2.end(), std::back_inserter(res));
+        return res; 
+    }
+	
+	AlignmentResult semi_global_alignment
 	(
 		const std::string& query1,
 		const std::string& query2,
@@ -28,7 +35,7 @@ namespace xavier
 		}
 	}
 
-	extern "C" AlignmentResult seed_and_extend
+	AlignmentResult seed_and_extend
 	(
 	 	const std::string& query1,
 	 	const std::string& query2,
@@ -59,8 +66,12 @@ namespace xavier
 		result.begV = seed.getEndV() - left.endV;
 		result.endH = seed.getEndH() + right.endH;
 		result.endV = seed.getEndV() + right.endV;
+
 		// Todo Reverse left alignH and alignV
-		result.matched_pair = { left.matched_pair.cigar + right.matched_pair.cigar, left.matched_pair.matches + right.matched_pair.matches };
+		result.matched_pair = { left.matched_pair.cigar + right.matched_pair.cigar, left.matched_pair.matches + right.matched_pair.matches, 
+			left.matched_pair.mismatches + right.matched_pair.mismatches, left.matched_pair.indels + right.matched_pair.indels,
+			left.matched_pair.decodedCigar + right.matched_pair.decodedCigar };
+
 		std::cout << "Score	" << left.bestScore << "	" << right.bestScore	<< std::endl;
 		std::cout << "Score	" << left.exitScore << "	" << right.exitScore	<< std::endl;
 		std::cout << "begH	" << seed.getEndH() << "	-	" << left.endH	<< std::endl;
@@ -71,7 +82,7 @@ namespace xavier
 		return result;
 	}
 
-	extern "C" AlignmentResult seed_and_extend_left
+	AlignmentResult seed_and_extend_left
 	(
 	 	const std::string& query1,
 	 	const std::string& query2,

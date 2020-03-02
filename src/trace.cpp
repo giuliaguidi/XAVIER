@@ -54,7 +54,7 @@ namespace xavier
 	 * X : Alignment column containing a mismatch, i.e. two different letters. USEARCH can read CIGAR strings using this operation, but does not generate them.
 	 */ 
 
-	std::string Trace::compression(const std::string& str)
+	std::string Trace::compression(const std::string& str, std::vector<Trace::CigOp>& decodedCigar)
 	{
 	    int i = str.size();
 	    std::string cigar;
@@ -69,13 +69,16 @@ namespace xavier
 	        }
 	        cigar += std::to_string(count);
 	        cigar.push_back(str[j]);
+			
+			decodedCigar.push_back({str[j], count});
 	    }
 	    return cigar;
 	}
 
 	Trace::AlignmentPair Trace::getAlignment()
 	{
-		// GG: cigar, matches
+		// GG: cigar, matches, mismatch, indels
+		// TODO : warning: missing initializer for member 'xavier::Trace::AlignmentPair::decodedCigar' [-Wmissing-field-initializers]
 		AlignmentPair traceback = {"", 0, 0, 0};
 
 		// Find antiDiag3's max => This is exit score (need position)
@@ -199,7 +202,7 @@ namespace xavier
 		std::reverse(traceback.cigar.begin(), traceback.cigar.end());
 
 		// GG: cigar compression
-		traceback.cigar = compression(traceback.cigar);
+		traceback.cigar = compression(traceback.cigar, traceback.decodedCigar);
 
 		return traceback;
 	}
