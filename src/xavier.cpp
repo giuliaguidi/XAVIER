@@ -8,7 +8,7 @@
 
 namespace xavier
 {
-	AlignmentResult semi_global_alignment
+	extern "C" AlignmentResult semi_global_alignment
 	(
 		const std::string& query1,
 		const std::string& query2,
@@ -28,7 +28,7 @@ namespace xavier
 		}
 	}
 
-	AlignmentResult seed_and_extend
+	extern "C" AlignmentResult seed_and_extend
 	(
 	 	const std::string& query1,
 	 	const std::string& query2,
@@ -71,7 +71,7 @@ namespace xavier
 		return result;
 	}
 
-	AlignmentResult seed_and_extend_left
+	extern "C" AlignmentResult seed_and_extend_left
 	(
 	 	const std::string& query1,
 	 	const std::string& query2,
@@ -103,7 +103,7 @@ namespace xavier
 		return result;
 	}
 
-	AlignmentResult seed_and_extend_right
+	extern "C" AlignmentResult seed_and_extend_right
 	(
 	 	const std::string& query1,
 	 	const std::string& query2,
