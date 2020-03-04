@@ -114,7 +114,7 @@ namespace xavier
 		return result;
 	}
 
-	extern "C" AlignmentResult seed_and_extend_right
+	AlignmentResult seed_and_extend_right
 	(
 	 	const std::string& query1,
 	 	const std::string& query2,

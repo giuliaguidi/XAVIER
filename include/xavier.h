@@ -64,18 +64,18 @@
 namespace xavier
 {
 
-	extern "C" AlignmentResult semi_global_alignment( const std::string& query1, const std::string& query2,
+	AlignmentResult semi_global_alignment( const std::string& query1, const std::string& query2,
 	                           const ScoringScheme& scoringScheme, const int scoreDropOff );
 
-	extern "C" AlignmentResult seed_and_extend( const std::string& query1, const std::string& query2,
+	AlignmentResult seed_and_extend( const std::string& query1, const std::string& query2,
 	                     const ScoringScheme& scoringScheme, const int scoreDropOff,
 	                     const Seed& seed );
 
-	extern "C" AlignmentResult seed_and_extend_left( const std::string& query1, const std::string& query2,
+	AlignmentResult seed_and_extend_left( const std::string& query1, const std::string& query2,
 	                     const ScoringScheme& scoringScheme, const int scoreDropOff,
 	                     const Seed& seed );
 
-	extern "C" AlignmentResult seed_and_extend_right( const std::string& query1, const std::string& query2,
+	AlignmentResult seed_and_extend_right( const std::string& query1, const std::string& query2,
 	                     const ScoringScheme& scoringScheme, const int scoreDropOff,
 	                     const Seed& seed );
 
