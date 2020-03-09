@@ -5,7 +5,7 @@ CFLAGS = -std=c++17 -mavx2 -Wall -Wextra -pedantic -Wno-write-strings -O3
 
 ODIR = obj
 LDIR = lib
-OUT = $(LDIR)/xavierlib.a
+OUT = $(LDIR)/libxavier.a
 SDIR = src
 INC = -Iinclude
 
