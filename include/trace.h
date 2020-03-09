@@ -96,6 +96,12 @@ namespace xavier
 	{
 	public:
 
+		struct CigOp
+		{
+			char op;
+			int len;
+		};
+
 		struct AlignmentPair
 		{
 			// std::string alignH;
@@ -103,6 +109,7 @@ namespace xavier
 			size_t matches;
 			size_t mismatches;
 			size_t indels;
+			std::vector<CigOp> decodedCigar;
 		};
 
 		/**
@@ -129,7 +136,7 @@ namespace xavier
 		 */
 		void recordGlobalMaxPos();
 		void saveOpeningPhaseDPMatrix ( std::vector< std::vector<int> > _DPMatrix, int8_t* _queryh, int8_t* _queryv );
-		std::string compression(const std::string& str);
+		std::string compression(const std::string& str, std::vector<CigOp> decodedCigar);
 
 	private:
 		std::vector<TraceEntry> trace;
