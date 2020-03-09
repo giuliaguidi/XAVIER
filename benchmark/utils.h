@@ -17,7 +17,6 @@
 #include <vector>
 #include <iostream>
 #include <string.h>
-#include <omp.h>
 #include <algorithm>
 #include <chrono>
 #include <string.h>
