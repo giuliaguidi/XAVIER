@@ -9,13 +9,13 @@ TARGET = test-score test-runtime gen-seq
 all: $(TARGET)
 
 gen-seq: generateSeq.cpp 
-	$(CXX) -mavx2 -std=c++14 -fpermissive $(INCLUDE) generateSeq.cpp ../lib/xavierlib.a $(CFLAGS) -o gen-seq-exe
+	$(CXX) -mavx2 -std=c++14 -fpermissive $(INCLUDE) generateSeq.cpp ../lib/libxavier.a $(CFLAGS) -o gen-seq-exe
 
 test-score: testScore.cpp tools/ksw2  
-	$(CXX) -mavx2 -std=c++14 -fpermissive $(INCLUDE) testScore.cpp ../lib/xavierlib.a $(CFLAGS) -o test-score-exe $(LIBS)
+	$(CXX) -mavx2 -std=c++14 -fpermissive $(INCLUDE) testScore.cpp ../lib/libxavier.a $(CFLAGS) -o test-score-exe $(LIBS)
 
 test-runtime: testRuntime.cpp tools/ksw2  
-	$(CXX) -mavx2 -std=c++14 -fpermissive $(INCLUDE) testRuntime.cpp ../lib/xavierlib.a $(CFLAGS) -o test-runtime-exe $(LIBS)
+	$(CXX) -mavx2 -std=c++14 -fpermissive $(INCLUDE) testRuntime.cpp ../lib/libxavier.a $(CFLAGS) -o test-runtime-exe $(LIBS)
 
 clean:
 	rm -rf *.o *-exe

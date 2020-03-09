@@ -66,7 +66,7 @@ namespace xavier
 		result.begV = seed.getEndV() - left.endV;
 		result.endH = seed.getEndH() + right.endH;
 		result.endV = seed.getEndV() + right.endV;
-
+		
 		// Todo Reverse left alignH and alignV
 		result.matched_pair = { left.matched_pair.cigar + right.matched_pair.cigar, left.matched_pair.matches + right.matched_pair.matches, 
 			left.matched_pair.mismatches + right.matched_pair.mismatches, left.matched_pair.indels + right.matched_pair.indels,
