@@ -29,8 +29,10 @@ namespace xavier
 		std::fill(queryh + hlength, queryh + hlength + VectorRegister::VECTORWIDTH, VectorRegister::NINF);
 		std::fill(queryv + vlength, queryv + vlength + VectorRegister::VECTORWIDTH, VectorRegister::NINF);
 
-		hoffset = VectorRegister::LOGICALWIDTH + 1;
-		voffset = VectorRegister::LOGICALWIDTH + 1;
+		DIM = std::min(hlength, vlength);
+		DIM = std::min(DIM, VectorRegister::LOGICALWIDTH + 1);
+		hoffset = DIM;
+		voffset = DIM;
 
 		bestScore    = 0;
 		currScore    = 0;
@@ -40,14 +42,14 @@ namespace xavier
 
 	std::vector<std::vector<int>> Aligner::initAntiDiags()
 	{
-        // One more space for the off-grid values
-        // and one more space for antiDiag2
+        // One more space for the off-grid values and one more space for antiDiag2
+        std::vector< std::vector<int> > DPmatrix(DIM + 2, std::vector<int>(DIM + 2));
 
-        std::vector< std::vector<int> > DPmatrix(VectorRegister::LOGICALWIDTH + 3, std::vector<int>(VectorRegister::LOGICALWIDTH + 3));
+		std::cout << DIM << std::endl;
 
         // DPmatrix initialization
         DPmatrix[0][0] = 0;
-        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 2; i++)
+        for (int i = 1; i < DIM + 1; i++)
         {
             DPmatrix[0][i] = i*scoringScheme.getGapScore();
             DPmatrix[i][0] = i*scoringScheme.getGapScore();
@@ -57,9 +59,9 @@ namespace xavier
         int DPmax = 0;
 
         // DPmatrix population
-        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 3; i++) {
+        for (int i = 1; i < DIM + 2; i++) {
             // GG: we only need the upper-left triangular matrix
-            for (int j = 1; j <= VectorRegister::LOGICALWIDTH + 3 - i; j++) {
+            for (int j = 1; j <= DIM + 2 - i; j++) {
 
                 int oneF = DPmatrix[i-1][j-1];
 
@@ -77,33 +79,33 @@ namespace xavier
 			}
         }
 
-        for ( int i = 0; i < VectorRegister::LOGICALWIDTH; ++i )
+        for ( int i = 0; i < DIM - 1; ++i )
         {
         	vqueryh[i] = queryh[i + 1];
-        	vqueryv[i] = queryv[VectorRegister::LOGICALWIDTH - i];
+        	vqueryv[i] = queryv[DIM - 1 - i];
         }
 
-    	vqueryh[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
-    	vqueryv[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
+    	vqueryh[DIM - 1] = VectorRegister::NINF;
+    	vqueryv[DIM - 1] = VectorRegister::NINF;
 
         int antiDiagMax = std::numeric_limits<int8_t>::min();
 
         // Load DPmatrix into antiDiag1 and antiDiag2 vector and
         // find max elem at the end of the initial stage in antiDiag1
-        for (int i = 1; i < VectorRegister::LOGICALWIDTH + 1; ++i)
+        for (int i = 1; i < DIM; ++i)
         {
-            int value1 = DPmatrix[i][VectorRegister::LOGICALWIDTH - i + 1];
-            int value2 = DPmatrix[i + 1][VectorRegister::LOGICALWIDTH - i + 1];
+            int value1 = DPmatrix[i][DIM - i];
+            int value2 = DPmatrix[i + 1][DIM - i];
 
-            antiDiag1[VectorRegister::LOGICALWIDTH - i] = value1;
-            antiDiag2[VectorRegister::LOGICALWIDTH - i] = value2;
+            antiDiag1[DIM - 1 - i] = value1;
+            antiDiag2[DIM - 1 - i] = value2;
 
 			antiDiagMax = value2 > antiDiagMax ? value2 : antiDiagMax;
         }
 
-        antiDiag1[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
-        antiDiag2[VectorRegister::LOGICALWIDTH] = VectorRegister::NINF;
-        antiDiag3 = VectorRegister( VectorRegister::NINF );
+        antiDiag1[DIM - 1] = VectorRegister::NINF;
+        antiDiag2[DIM - 1] = VectorRegister::NINF;
+        antiDiag3 = VectorRegister(VectorRegister::NINF);
 
         bestScore = DPmax;
         currScore = antiDiagMax;
@@ -133,6 +135,9 @@ namespace xavier
 		 * Opening stage
 		 */
 		initAntiDiags();
+
+		if(DIM != VectorRegister::VECTORWIDTH)
+			return produceResults();
 
 		/**
 		 * Core stage
@@ -210,7 +215,7 @@ namespace xavier
 		initAntiDiags();
 
 		// For the opening stage, it's okay to check separately the xdrop termination (happens only once)
-		if ( xdropCondition() )
+		if (DIM != VectorRegister::VECTORWIDTH || xdropCondition())
 			return produceResults();
 
 		/**
