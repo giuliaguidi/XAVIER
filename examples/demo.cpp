@@ -53,8 +53,9 @@ int main(int argc, char const *argv[])
 	xavier::ScoringScheme scoringScheme(match, mismatch, gap);
 
 	/* Generate pair of sequences */
-	generate_random_sequence(seq1, slen);
-	generate_random_sequence(seq2, slen);
+	generate_random_sequence(seq1, 5);
+	// generate_random_sequence(seq2, slen);
+	seq2 = seq1;
 	// seq1 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
 	// seq2 = generate_mutated_sequence(seq1, slen, pmis, pgap, bw);
 
@@ -70,6 +71,32 @@ int main(int argc, char const *argv[])
 
 	std::cout << "seq1	" 	<< seq1 << std::endl;
 	std::cout << "seq2	" 	<< seq2 << std::endl;
+
+	// xavier::Aligner aligner( seq1, seq2, scoringScheme, x );
+	// std::vector< std::vector<int> > DPMatrix = aligner.initAntiDiags();
+	// printf( "    " );
+	// for ( int x = 0; x < DPMatrix.size(); ++x )
+	// {
+	// 	printf( "%4c", aligner.getQueryH()[x] );
+	// }
+	// std::cout << std::endl;
+	// for ( int x = 0; x < DPMatrix.size(); ++x )
+	// {
+	// 	printf( "%4c", aligner.getQueryV()[x] );
+	// 	for ( int y = 0; y < DPMatrix.size(); ++y )
+	// 	{
+	// 		// std::cout << DPMatrix[x][y] << " ";
+	// 		printf( "%4d", DPMatrix[x][y] );
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+	// std::cout << aligner.getAntiDiag1() << std::endl;
+	// std::cout << aligner.getAntiDiag2() << std::endl;
+	// std::cout << aligner.getAntiDiag3() << std::endl;
+	// std::cout << aligner.getVQueryH() << std::endl;
+	// std::cout << aligner.getVQueryV() << std::endl;
+	// std::cout << aligner.getBestScore() << std::endl;
+	// std::cout << aligner.getCurrScore() << std::endl;
 
 	xavier::AlignmentResult result = xavier::seed_and_extend_right( seq1, seq2, scoringScheme, x, seed );
 

@@ -80,6 +80,9 @@ namespace xavier
 		// TODO : warning: missing initializer for member 'xavier::Trace::AlignmentPair::decodedCigar' [-Wmissing-field-initializers]
 		AlignmentPair traceback = {"", 0, 0, 0};
 
+		if(? != VectorRegister::VECTORWIDTH)
+			goto dp;
+
 		// Find antiDiag3's max => This is exit score (need position)
 		auto itAtMax = trace.rbegin() + (trace.size() - 1 - maxPos);
 		size_t dp_pos = itAtMax->antiDiag3.argmax();
@@ -148,7 +151,7 @@ namespace xavier
 		}
 
 		// Traceback in Opening phase
-
+		dp:
 		// Find position in matrix
 		// dp_pos is pos in antiDiag2 now, need to convert to DPMatrix coord
 		int i = VectorRegister::LOGICALWIDTH + 1 - dp_pos;

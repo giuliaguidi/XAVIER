@@ -61,7 +61,7 @@ namespace xavier
         // DPmatrix population
         for (int i = 1; i < DIM + 2; i++) {
             // GG: we only need the upper-left triangular matrix
-            for (int j = 1; j <= DIM + 2 - i; j++) {
+            for (int j = 1; j <= DIM + 2; j++) {
 
                 int oneF = DPmatrix[i-1][j-1];
 
@@ -107,7 +107,7 @@ namespace xavier
         antiDiag2[DIM - 1] = VectorRegister::NINF;
         antiDiag3 = VectorRegister(VectorRegister::NINF);
 
-        bestScore = DPmax;
+		bestScore = DPmax;
         currScore = antiDiagMax;
         lastMove  = RIGHT;
 
